@@ -20,12 +20,12 @@ The dev server runs at [http://localhost:3020](http://localhost:3020).
 
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| `pnpm run dev` | Start dev server (port 3020) |
-| `pnpm run build` | Production build |
-| `pnpm run lint` | Run ESLint |
-| `pnpm run format` | Format with Prettier |
-| `pnpm run format:check` | Check formatting |
-| `pnpm run test` | Run Jest tests |
-| `npx tsc --noEmit` | TypeScript type checking |
+| Command                 | Description                  |
+| ----------------------- | ---------------------------- |
+| `pnpm run dev`          | Start dev server (port 3020) |
+| `pnpm run build`        | Production build             |
+| `pnpm run lint`         | Run ESLint                   |
+| `pnpm run format`       | Format with Prettier         |
+| `pnpm run format:check` | Check formatting             |
+| `pnpm run test`         | Run Jest tests               |
+| `npx tsc --noEmit`      | TypeScript type checking     |
