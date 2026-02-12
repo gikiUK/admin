@@ -37,3 +37,10 @@ export type Question = {
   hideWhen?: Condition;
   unknowable?: boolean;
 };
+
+export type ConstantValue = string | { label: string; value: string };
+
+export type ConstantGroup = {
+  name: string;
+  values: ConstantValue[];
+};

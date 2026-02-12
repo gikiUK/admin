@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Database, FileQuestion } from "lucide-react";
+import { ChevronRight, Database, FileQuestion, ListChecks } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -18,7 +18,8 @@ import {
 
 const dataItems = [
   { title: "Facts", href: "/data/facts", icon: Database },
-  { title: "Questions", href: "/data/questions", icon: FileQuestion }
+  { title: "Questions", href: "/data/questions", icon: FileQuestion },
+  { title: "Constants", href: "/data/constants", icon: ListChecks }
 ];
 
 export function AppSidebar() {
