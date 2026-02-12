@@ -11,7 +11,7 @@
     "format:check": "pnpm exec biome format .",
     "check": "pnpm exec biome check .",
     "check:fix": "pnpm exec biome check --write .",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "prepare": "husky"
   },
   "dependencies": {

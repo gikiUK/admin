@@ -56,3 +56,7 @@ shadcn/ui semantic color tokens defined in `app/globals.css`:
 - Dark mode via class-based `.dark` variant
 - Font: Outfit (Google Fonts)
 - Icons: Lucide React
+
+## Current Plan
+
+See [docs/plan-facts-questions-ui.md](docs/plan-facts-questions-ui.md) for the Phase 1 implementation plan (Facts & Questions UI with sidebar layout).
