@@ -1,2 +1,2 @@
-pnpm run check
+pnpm biome check --staged --write --no-errors-on-unmatched
 pnpm run test
