@@ -4,7 +4,7 @@ These are instructions for working in this repository for coding agents.
 
 ## Overview
 
-Standalone Next.js 16 admin app for Giki. Uses App Router, React 19, TypeScript, Tailwind CSS 4 with TailAdmin theme system.
+Standalone Next.js 16 admin app for Giki. Uses App Router, React 19, TypeScript, Tailwind CSS 4 with shadcn/ui components.
 
 This is a standalone project (not a monorepo). All commands run from the project root.
 
@@ -22,9 +22,18 @@ This is a standalone project (not a monorepo). All commands run from the project
 ## Project Structure
 
 - `app/` - Next.js App Router pages and layouts
-- `app/globals.css` - TailAdmin theme (colors, typography, shadows, utilities)
-- `components/ui/` - Vendored TailAdmin UI components (Button, Modal, Table, etc.)
+- `app/globals.css` - Theme variables (TailAdmin palette + shadcn/ui tokens)
+- `components/ui/` - shadcn/ui components (vendored, editable)
+- `lib/utils.ts` - Shared utilities (`cn()` class merger)
 - `tests/` - Jest unit tests
+
+## Adding shadcn/ui Components
+
+```bash
+npx shadcn@latest add <component-name>
+```
+
+Components are copied into `components/ui/` as source files you own and can edit.
 
 ## Code Standards
 
@@ -37,13 +46,12 @@ This is a standalone project (not a monorepo). All commands run from the project
 - Max ~100 lines per file; extract components when growing
 - Path alias: `@/*` maps to project root
 
-## TailAdmin Theme
+## Design System
 
-The design system is defined in `app/globals.css`:
+shadcn/ui semantic color tokens defined in `app/globals.css`:
 
-- Color palette: brand, gray, success, error, warning, blue-light, orange
-- Typography: title-2xl through theme-xs
-- Shadows: theme-xs through theme-xl
-- Custom utilities: menu-item, menu-dropdown, scrollbar variants
+- **Primary color**: Purple (`oklch(0.541 0.281 293.009)`)
+- Semantic tokens: primary, secondary, accent, destructive, muted, card, popover, sidebar
 - Dark mode via class-based `.dark` variant
 - Font: Outfit (Google Fonts)
+- Icons: Lucide React
