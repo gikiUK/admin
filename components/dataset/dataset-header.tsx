@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, Save } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useDataset } from "@/lib/blob/use-dataset";
 import { ChangesPanel } from "./changes-panel";
@@ -9,6 +9,14 @@ import { ChangesPanel } from "./changes-panel";
 export function DatasetHeader() {
   const { isDirty, saving, save, changeLog } = useDataset();
   const [panelOpen, setPanelOpen] = useState(false);
+  const wasDirty = useRef(isDirty);
+
+  useEffect(() => {
+    if (wasDirty.current && !isDirty) {
+      setPanelOpen(false);
+    }
+    wasDirty.current = isDirty;
+  }, [isDirty]);
 
   if (!isDirty && !saving) return null;
 
