@@ -10,7 +10,7 @@ export type FactDefinition = {
 
 export type QuestionType = "boolean_state" | "single-select" | "multi-select" | "checkbox-radio-hybrid";
 
-export type SimpleCondition = Record<string, string | boolean>;
+export type SimpleCondition = Record<string, string | boolean | string[]>;
 
 export type AnyCondition = {
   any: SimpleCondition[];
@@ -43,4 +43,28 @@ export type ConstantValue = string | { label: string; value: string };
 export type ConstantGroup = {
   name: string;
   values: ConstantValue[];
+};
+
+export type Rule = {
+  sets: string;
+  value: boolean | string;
+  when: Condition;
+};
+
+export type FactRelationships = {
+  setByQuestion?: { index: number; label: string };
+  derivedFrom?: Rule;
+  constrainedBy: Rule[];
+  actionCount: number;
+};
+
+export type EnrichedFact = FactDefinition & {
+  relationships: FactRelationships;
+  category: string;
+};
+
+export type FactCategory = {
+  key: string;
+  label: string;
+  facts: EnrichedFact[];
 };

@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { AnyCondition, Condition, SimpleCondition } from "@/lib/data/types";
 
 function isAnyCondition(condition: Condition): condition is AnyCondition {
@@ -6,11 +7,30 @@ function isAnyCondition(condition: Condition): condition is AnyCondition {
 }
 
 function renderSimple(condition: SimpleCondition) {
-  return Object.entries(condition).map(([fact, value]) => (
-    <Badge key={fact} variant="outline" className="font-mono text-xs">
-      {fact} = {String(value)}
-    </Badge>
-  ));
+  return Object.entries(condition).map(([fact, value]) => {
+    if (Array.isArray(value)) {
+      return (
+        <TooltipProvider key={fact}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="outline" className="cursor-help font-mono text-xs">
+                {fact} ({value.length} values)
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs">
+              <p className="font-mono text-xs">{value.join(", ")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+
+    return (
+      <Badge key={fact} variant="outline" className="font-mono text-xs">
+        {fact} = {String(value)}
+      </Badge>
+    );
+  });
 }
 
 export function ConditionDisplay({ condition }: { condition?: Condition }) {
