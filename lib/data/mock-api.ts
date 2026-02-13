@@ -3,7 +3,7 @@ import { assignCategory } from "./fact-categories";
 import { loadFacts } from "./facts";
 import { loadQuestions } from "./questions";
 import { loadRules } from "./rules";
-import type { EnrichedFact, FactDefinition, FactRelationships, Question, Rule } from "./types";
+import type { EnrichedFact, FactDefinition, FactQuestionSource, Question, Rule } from "./types";
 
 // ──────────────────────────────────────────────────────────
 // In-memory store, seeded from JSON files on first server access.
@@ -31,12 +31,26 @@ function getStore(): Store {
   return store;
 }
 
-function findSetByQuestion(factId: string, questions: Question[]): FactRelationships["setByQuestion"] {
+function findSetByQuestion(factId: string, questions: Question[]): FactQuestionSource | undefined {
   for (const q of questions) {
-    if (q.fact === factId) return { index: q.index, label: q.label };
+    if (q.fact === factId) {
+      return { index: q.index, label: q.label, type: q.type };
+    }
     if (q.facts) {
       const defaults = q.facts.defaults;
-      if (defaults && factId in defaults) return { index: q.index, label: q.label };
+      if (defaults && factId in defaults) {
+        const mappings = Object.entries(q.facts)
+          .filter(([key]) => key !== "defaults")
+          .filter(([, mapping]) => factId in mapping)
+          .map(([option, mapping]) => ({ option, value: mapping[factId] }));
+        return {
+          index: q.index,
+          label: q.label,
+          type: q.type,
+          defaultValue: defaults[factId],
+          mappings
+        };
+      }
     }
   }
   return undefined;

@@ -45,6 +45,8 @@ function SimpleConditionRow({
       onChange({ [factName]: true });
     } else if (mode === "false") {
       onChange({ [factName]: false });
+    } else if (mode === "not_applicable") {
+      onChange({ [factName]: "not_applicable" });
     }
   }
 
@@ -84,6 +86,7 @@ function SimpleConditionRow({
           <SelectContent>
             <SelectItem value="true">= true</SelectItem>
             <SelectItem value="false">= false</SelectItem>
+            <SelectItem value="not_applicable">= not applicable</SelectItem>
             <SelectItem value="array">contains</SelectItem>
           </SelectContent>
         </Select>

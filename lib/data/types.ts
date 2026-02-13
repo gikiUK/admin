@@ -51,8 +51,23 @@ export type Rule = {
   when: Condition;
 };
 
+export type FactOptionMapping = {
+  option: string;
+  value: string | boolean;
+};
+
+export type FactQuestionSource = {
+  index: number;
+  label: string;
+  type: QuestionType;
+  /** For hybrid questions: how each option sets this fact */
+  mappings?: FactOptionMapping[];
+  /** For hybrid questions: the default value */
+  defaultValue?: string | boolean;
+};
+
 export type FactRelationships = {
-  setByQuestion?: { index: number; label: string };
+  setByQuestion?: FactQuestionSource;
   derivedFrom?: Rule;
   constrainedBy: Rule[];
   actionCount: number;

@@ -1,10 +1,9 @@
 "use client";
 
-import { ArrowLeft, Trash2, Zap } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -21,18 +20,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { EnrichedFact, FactType, Question, Rule } from "@/lib/data/types";
+import type { EnrichedFact, FactType, Rule } from "@/lib/data/types";
+import { FactSourcesCard } from "./fact-sources-card";
 import { RuleEditor } from "./rule-editor";
 
 type FactEditorProps = {
   fact?: EnrichedFact;
   rules: Rule[];
-  question?: Question | null;
   allFactIds: string[];
   isNew?: boolean;
 };
 
-export function FactEditor({ fact, rules: initialRules, question, allFactIds, isNew }: FactEditorProps) {
+export function FactEditor({ fact, rules: initialRules, allFactIds, isNew }: FactEditorProps) {
   const router = useRouter();
 
   const [id, setId] = useState(fact?.id ?? "");
@@ -170,23 +169,8 @@ export function FactEditor({ fact, rules: initialRules, question, allFactIds, is
         </CardContent>
       </Card>
 
-      {/* Question info (read-only) */}
-      {question && (
-        <Card>
-          <CardHeader>
-            <h2 className="text-sm font-semibold">Set by Question</h2>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">
-              <Badge variant="outline" className="mr-2">
-                Q{question.index + 1}
-              </Badge>
-              &ldquo;{question.label}&rdquo;
-            </p>
-            {question.description && <p className="mt-1 text-xs text-muted-foreground">{question.description}</p>}
-          </CardContent>
-        </Card>
-      )}
+      {/* Sources (read-only) */}
+      {!isNew && fact && <FactSourcesCard relationships={fact.relationships} />}
 
       {/* Rules */}
       <Card>
@@ -194,15 +178,6 @@ export function FactEditor({ fact, rules: initialRules, question, allFactIds, is
           <RuleEditor rules={rules} factId={id} factIds={allFactIds} onChange={setRules} />
         </CardContent>
       </Card>
-
-      {/* Action count (read-only) */}
-      {!isNew && fact && fact.relationships.actionCount > 0 && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Zap className="size-4 text-purple-500" />
-          Referenced by {fact.relationships.actionCount} action
-          {fact.relationships.actionCount !== 1 ? "s" : ""} (read-only)
-        </div>
-      )}
 
       {/* Actions */}
       <div className="flex justify-end gap-2">
