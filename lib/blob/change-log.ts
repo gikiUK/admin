@@ -10,9 +10,10 @@ export type FieldChange = {
 export type ChangeEntry = {
   id: string;
   timestamp: number;
-  action: MutationAction;
+  action: MutationAction | null;
   description: string;
   details: FieldChange[];
+  isRevert?: boolean;
 };
 
 function formatValue(v: unknown): string {
@@ -105,5 +106,5 @@ function describeAction(action: MutationAction): string {
 }
 
 export function replayChanges(base: DatasetData, entries: ChangeEntry[]): DatasetData {
-  return entries.reduce((data, entry) => applyAction(data, entry.action), base);
+  return entries.reduce((data, entry) => (entry.action ? applyAction(data, entry.action) : data), base);
 }

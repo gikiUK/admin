@@ -33,7 +33,7 @@ function formatValue(v: unknown): string {
 }
 
 // Word-level diff using longest common subsequence
-function computeSegments(from: string, to: string): DiffSegment[] {
+export function computeSegments(from: string, to: string): DiffSegment[] {
   if (from === to) return [{ text: from, type: "equal" }];
   if (!from) return [{ text: to, type: "added" }];
   if (!to) return [{ text: from, type: "removed" }];

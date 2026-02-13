@@ -3,6 +3,7 @@
 import { useContext } from "react";
 import { saveDataset } from "./api-client";
 import { DatasetContext } from "./dataset-context";
+import type { RevertFieldTarget } from "./dataset-reducer";
 
 export function useDataset() {
   const ctx = useContext(DatasetContext);
@@ -32,6 +33,10 @@ export function useDataset() {
     dispatch({ type: "UNDO_ALL" });
   }
 
+  function revertField(target: RevertFieldTarget) {
+    dispatch({ type: "REVERT_FIELD", target });
+  }
+
   return {
     dataset: state.dataset,
     blob: state.dataset?.data ?? null,
@@ -42,6 +47,7 @@ export function useDataset() {
     changeLog: state.changeLog,
     original: state.original,
     undoChange,
-    undoAll
+    undoAll,
+    revertField
   };
 }

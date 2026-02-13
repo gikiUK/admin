@@ -4,19 +4,16 @@ import { Eye } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useDataset } from "@/lib/blob/use-dataset";
-import { ChangesPanel } from "./changes-panel";
-import { DiffView } from "./diff-view";
+import { ReviewDialog } from "./review-dialog";
 
 export function DatasetHeader() {
   const { isDirty, saving, changeLog } = useDataset();
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [reviewOpen, setReviewOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const wasDirty = useRef(isDirty);
 
   useEffect(() => {
     if (wasDirty.current && !isDirty) {
-      setPanelOpen(false);
-      setReviewOpen(false);
+      setOpen(false);
     }
     wasDirty.current = isDirty;
   }, [isDirty]);
@@ -25,20 +22,12 @@ export function DatasetHeader() {
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        {changeLog.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={() => setPanelOpen(true)}>
-            {changeLog.length} {changeLog.length === 1 ? "change" : "changes"}
-          </Button>
-        )}
-        <Button size="sm" onClick={() => setReviewOpen(true)} disabled={saving}>
-          <Eye className="size-3" />
-          Review
-        </Button>
-      </div>
+      <Button size="sm" onClick={() => setOpen(true)} disabled={saving}>
+        <Eye className="size-3" />
+        {changeLog.length} {changeLog.length === 1 ? "change" : "changes"} · Review
+      </Button>
 
-      <ChangesPanel open={panelOpen} onOpenChange={setPanelOpen} />
-      <DiffView open={reviewOpen} onOpenChange={setReviewOpen} />
+      <ReviewDialog open={open} onOpenChange={setOpen} />
     </>
   );
 }
