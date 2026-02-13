@@ -16,3 +16,7 @@ export function getConstant<T = string[]>(key: string): T {
   const constants = readConstants();
   return constants[key] as T;
 }
+
+export function getConstantGroupNames(): string[] {
+  return Object.keys(readConstants());
+}

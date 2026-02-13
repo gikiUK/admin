@@ -121,7 +121,7 @@ export function deleteRule(factId: string, ruleIndex: number): void {
   if (globalIdx !== -1) s.rules.splice(globalIdx, 1);
 }
 
-// ── Questions (read-only) ────────────────────────────────
+// ── Questions ────────────────────────────────────────────
 
 export function getQuestionForFact(factId: string): Question | null {
   return (
@@ -134,4 +134,32 @@ export function getQuestionForFact(factId: string): Question | null {
       return false;
     }) ?? null
   );
+}
+
+export function getAllQuestions(): Question[] {
+  return getStore().questions;
+}
+
+export function getQuestionByIndex(index: number): Question | null {
+  return getStore().questions.find((q) => q.index === index) ?? null;
+}
+
+export function createQuestion(question: Omit<Question, "index">): Question {
+  const s = getStore();
+  const maxIndex = s.questions.reduce((max, q) => Math.max(max, q.index), -1);
+  const newQuestion: Question = { ...question, index: maxIndex + 1 };
+  s.questions.push(newQuestion);
+  return newQuestion;
+}
+
+export function updateQuestion(index: number, updates: Partial<Omit<Question, "index">>): void {
+  const s = getStore();
+  const idx = s.questions.findIndex((q) => q.index === index);
+  if (idx === -1) return;
+  s.questions[idx] = { ...s.questions[idx], ...updates };
+}
+
+export function deleteQuestion(index: number): void {
+  const s = getStore();
+  s.questions = s.questions.filter((q) => q.index !== index);
 }
