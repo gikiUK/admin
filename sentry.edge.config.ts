@@ -6,7 +6,7 @@
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-  dsn: "TODO", // TODO: Replace with actual Sentry DSN before production deployment
+  dsn: "https://ee753f357061f11027b9bb0ba6bb4bac@o4510766458601472.ingest.de.sentry.io/4510880335396944",
   enabled: process.env.NODE_ENV === "production",
 
   tracesSampleRate: 0.1,
