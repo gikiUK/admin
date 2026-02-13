@@ -35,12 +35,191 @@ type QuestionEditorProps = {
 
 const QUESTION_TYPES: QuestionType[] = ["boolean_state", "single-select", "multi-select", "checkbox-radio-hybrid"];
 
-export function QuestionEditor({ questionIndex, isNew }: QuestionEditorProps) {
+// ── Edit existing question ──────────────────────────────
+
+function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
   const router = useRouter();
   const { blob, dispatch } = useDataset();
   const [constantGroupNames, setConstantGroupNames] = useState<string[]>([]);
 
-  const question = questionIndex !== undefined && blob ? blob.questions[questionIndex] : undefined;
+  const question = blob?.questions[questionIndex];
+  const allFactIds = blob ? Object.keys(blob.facts) : [];
+
+  useEffect(() => {
+    fetchConstantGroupNames().then(setConstantGroupNames);
+  }, []);
+
+  if (!blob || !question) {
+    return <div className="p-6 text-muted-foreground">Question not found.</div>;
+  }
+
+  function dispatchUpdate(patch: Partial<BlobQuestion>) {
+    if (!question) return;
+    dispatch({ type: "SET_QUESTION", index: questionIndex, question: { ...question, ...patch } });
+  }
+
+  function handleTypeChange(newType: QuestionType) {
+    if (!question) return;
+    const patch: Partial<BlobQuestion> = { type: newType };
+    if (newType === "boolean_state") {
+      patch.options_ref = undefined;
+      patch.options = undefined;
+      patch.facts = undefined;
+    } else if (newType === "single-select" || newType === "multi-select") {
+      patch.options = undefined;
+      patch.facts = undefined;
+    } else {
+      patch.fact = undefined;
+      patch.options_ref = undefined;
+    }
+    dispatchUpdate(patch);
+  }
+
+  function handleDiscard() {
+    dispatch({ type: "DISCARD_QUESTION", index: questionIndex });
+    router.push("/data/questions");
+  }
+
+  function handleRestore() {
+    dispatch({ type: "RESTORE_QUESTION", index: questionIndex });
+  }
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div className="flex items-center justify-between">
+        <Link
+          href="/data/questions"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" /> Back to Questions
+        </Link>
+
+        {question.discarded ? (
+          <Button variant="outline" size="sm" onClick={handleRestore}>
+            <RotateCcw className="size-3" /> Restore
+          </Button>
+        ) : (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="size-3" /> Discard
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Discard question</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to discard <span className="font-semibold">Q{questionIndex + 1}</span>?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button variant="destructive" onClick={handleDiscard}>
+                  Discard
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
+
+      <h1 className="text-2xl font-semibold tracking-tight">Edit: Q{questionIndex + 1}</h1>
+
+      {/* Properties */}
+      <Card className={question.discarded ? "opacity-50" : undefined}>
+        <CardHeader>
+          <h2 className="text-sm font-semibold">Properties</h2>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="q-label">Label</Label>
+            <BlurInput
+              id="q-label"
+              value={question.label}
+              onCommit={(v) => dispatchUpdate({ label: v })}
+              placeholder="Question text"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="q-description">Description</Label>
+            <BlurTextarea
+              id="q-description"
+              value={question.description ?? ""}
+              onCommit={(v) => dispatchUpdate({ description: v || undefined })}
+              placeholder="Optional description"
+              rows={2}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="q-type">Type</Label>
+            <Select value={question.type} onValueChange={(v) => handleTypeChange(v as QuestionType)}>
+              <SelectTrigger id="q-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {QUESTION_TYPES.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Type-specific fields */}
+      <Card className={question.discarded ? "opacity-50" : undefined}>
+        <CardHeader>
+          <h2 className="text-sm font-semibold">Type configuration</h2>
+        </CardHeader>
+        <CardContent>
+          <QuestionTypeFields
+            type={question.type}
+            fact={question.fact ?? ""}
+            optionsRef={question.options_ref ?? ""}
+            options={question.options ?? []}
+            factsMapping={question.facts ?? {}}
+            allFactIds={allFactIds}
+            constantGroupNames={constantGroupNames}
+            onFactChange={(fact) => dispatchUpdate({ fact: fact || undefined })}
+            onOptionsRefChange={(ref) => dispatchUpdate({ options_ref: ref || undefined })}
+            onOptionsChange={(options) => dispatchUpdate({ options })}
+            onFactsMappingChange={(facts) => dispatchUpdate({ facts })}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Conditions */}
+      <Card className={question.discarded ? "opacity-50" : undefined}>
+        <CardHeader>
+          <h2 className="text-sm font-semibold">Conditions</h2>
+        </CardHeader>
+        <CardContent>
+          <QuestionConditionsSection
+            showWhen={question.show_when}
+            hideWhen={question.hide_when}
+            unknowable={question.unknowable ?? false}
+            factIds={allFactIds}
+            onShowWhenChange={(c) => dispatchUpdate({ show_when: c })}
+            onHideWhenChange={(c) => dispatchUpdate({ hide_when: c })}
+            onUnknowableChange={(v) => dispatchUpdate({ unknowable: v || undefined })}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ── Create new question ─────────────────────────────────
+
+function NewQuestionEditor() {
+  const router = useRouter();
+  const { blob, dispatch } = useDataset();
+  const [constantGroupNames, setConstantGroupNames] = useState<string[]>([]);
+
   const allFactIds = blob ? Object.keys(blob.facts) : [];
 
   const [label, setLabel] = useState("");
@@ -53,28 +232,6 @@ export function QuestionEditor({ questionIndex, isNew }: QuestionEditorProps) {
   const [showWhen, setShowWhen] = useState<BlobCondition | undefined>(undefined);
   const [hideWhen, setHideWhen] = useState<BlobCondition | undefined>(undefined);
   const [unknowable, setUnknowable] = useState(false);
-  const [initialized, setInitialized] = useState(false);
-
-  // Initialize form state from question when blob loads
-  useEffect(() => {
-    if (initialized) return;
-    if (isNew) {
-      setInitialized(true);
-      return;
-    }
-    if (!question) return;
-    setLabel(question.label);
-    setDescription(question.description ?? "");
-    setType(question.type);
-    setFact(question.fact ?? "");
-    setOptionsRef(question.options_ref ?? "");
-    setOptions(question.options ?? []);
-    setFactsMapping(question.facts ?? {});
-    setShowWhen(question.show_when);
-    setHideWhen(question.hide_when);
-    setUnknowable(question.unknowable ?? false);
-    setInitialized(true);
-  }, [question, isNew, initialized]);
 
   useEffect(() => {
     fetchConstantGroupNames().then(setConstantGroupNames);
@@ -95,7 +252,7 @@ export function QuestionEditor({ questionIndex, isNew }: QuestionEditorProps) {
     }
   }
 
-  function handleSave() {
+  function handleCreate() {
     const payload: BlobQuestion = {
       label,
       type,
@@ -115,82 +272,20 @@ export function QuestionEditor({ questionIndex, isNew }: QuestionEditorProps) {
       payload.facts = factsMapping;
     }
 
-    if (isNew) {
-      dispatch({ type: "ADD_QUESTION", question: payload });
-    } else if (questionIndex !== undefined) {
-      dispatch({ type: "SET_QUESTION", index: questionIndex, question: payload });
-    }
-
+    dispatch({ type: "ADD_QUESTION", question: payload });
     router.push("/data/questions");
-  }
-
-  function handleDiscard() {
-    if (questionIndex !== undefined) {
-      dispatch({ type: "DISCARD_QUESTION", index: questionIndex });
-    }
-    router.push("/data/questions");
-  }
-
-  function handleRestore() {
-    if (questionIndex !== undefined) {
-      dispatch({ type: "RESTORE_QUESTION", index: questionIndex });
-    }
-  }
-
-  if (!blob) return null;
-  if (!isNew && questionIndex !== undefined && !question) {
-    return <div className="p-6 text-muted-foreground">Question not found.</div>;
   }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between">
-        <Link
-          href="/data/questions"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" /> Back to Questions
-        </Link>
+      <Link
+        href="/data/questions"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" /> Back to Questions
+      </Link>
 
-        {!isNew && question && (
-          <div className="flex items-center gap-2">
-            {question.discarded ? (
-              <Button variant="outline" size="sm" onClick={handleRestore}>
-                <RotateCcw className="size-3" /> Restore
-              </Button>
-            ) : (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="destructive" size="sm">
-                    <Trash2 className="size-3" /> Discard
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Discard question</DialogTitle>
-                    <DialogDescription>
-                      Are you sure you want to discard{" "}
-                      <span className="font-semibold">Q{(questionIndex ?? 0) + 1}</span>?
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button variant="destructive" onClick={handleDiscard}>
-                      Discard
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
-        )}
-      </div>
-
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {isNew ? "New Question" : `Edit: Q${(questionIndex ?? 0) + 1}`}
-      </h1>
+      <h1 className="text-2xl font-semibold tracking-tight">New Question</h1>
 
       {/* Properties */}
       <Card>
@@ -275,10 +370,72 @@ export function QuestionEditor({ questionIndex, isNew }: QuestionEditorProps) {
         <Button variant="outline" asChild>
           <Link href="/data/questions">Cancel</Link>
         </Button>
-        <Button onClick={handleSave} disabled={!label.trim()}>
-          Save
+        <Button onClick={handleCreate} disabled={!label.trim()}>
+          Create
         </Button>
       </div>
     </div>
   );
+}
+
+// ── Blur-commit input helpers ───────────────────────────
+
+function BlurInput({
+  value,
+  onCommit,
+  ...props
+}: Omit<React.ComponentProps<typeof Input>, "onChange" | "defaultValue"> & {
+  value: string;
+  onCommit: (value: string) => void;
+}) {
+  const [local, setLocal] = useState(value);
+
+  useEffect(() => {
+    setLocal(value);
+  }, [value]);
+
+  return (
+    <Input
+      {...props}
+      value={local}
+      onChange={(e) => setLocal(e.target.value)}
+      onBlur={() => {
+        if (local !== value) onCommit(local);
+      }}
+    />
+  );
+}
+
+function BlurTextarea({
+  value,
+  onCommit,
+  ...props
+}: Omit<React.ComponentProps<typeof Textarea>, "onChange" | "defaultValue"> & {
+  value: string;
+  onCommit: (value: string) => void;
+}) {
+  const [local, setLocal] = useState(value);
+
+  useEffect(() => {
+    setLocal(value);
+  }, [value]);
+
+  return (
+    <Textarea
+      {...props}
+      value={local}
+      onChange={(e) => setLocal(e.target.value)}
+      onBlur={() => {
+        if (local !== value) onCommit(local);
+      }}
+    />
+  );
+}
+
+// ── Entrypoint ──────────────────────────────────────────
+
+export function QuestionEditor({ questionIndex, isNew }: QuestionEditorProps) {
+  if (isNew) return <NewQuestionEditor />;
+  if (questionIndex !== undefined) return <ExistingQuestionEditor questionIndex={questionIndex} />;
+  return null;
 }

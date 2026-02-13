@@ -24,12 +24,24 @@ export function useDataset() {
     }
   }
 
+  function undoChange(entryId: string) {
+    dispatch({ type: "UNDO_CHANGE", entryId });
+  }
+
+  function undoAll() {
+    dispatch({ type: "UNDO_ALL" });
+  }
+
   return {
     dataset: state.dataset,
     blob: state.dataset?.data ?? null,
     dispatch,
     isDirty: state.isDirty,
     saving: state.saving,
-    save
+    save,
+    changeLog: state.changeLog,
+    original: state.original,
+    undoChange,
+    undoAll
   };
 }

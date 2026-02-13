@@ -1,15 +1,22 @@
-import type { BlobFact, BlobQuestion, BlobRule, Dataset } from "./types";
+import { buildChangeEntry, type ChangeEntry, replayChanges } from "./change-log";
+import type { MutationAction } from "./dataset-mutations";
+import { applyAction } from "./dataset-mutations";
+import type { Dataset, DatasetData } from "./types";
 
 // ── State ────────────────────────────────────────────────
 
 export type DatasetState = {
   dataset: Dataset | null;
+  original: DatasetData | null;
+  changeLog: ChangeEntry[];
   isDirty: boolean;
   saving: boolean;
 };
 
 export const initialState: DatasetState = {
   dataset: null,
+  original: null,
+  changeLog: [],
   isDirty: false,
   saving: false
 };
@@ -18,25 +25,28 @@ export const initialState: DatasetState = {
 
 export type DatasetAction =
   | { type: "LOAD_DATASET"; payload: Dataset }
-  | { type: "SET_FACT"; id: string; fact: BlobFact }
-  | { type: "ADD_FACT"; id: string; fact: BlobFact }
-  | { type: "DISCARD_FACT"; id: string }
-  | { type: "RESTORE_FACT"; id: string }
-  | { type: "SET_RULE"; index: number; rule: BlobRule }
-  | { type: "ADD_RULE"; rule: BlobRule }
-  | { type: "DISCARD_RULE"; index: number }
-  | { type: "SET_QUESTION"; index: number; question: BlobQuestion }
-  | { type: "ADD_QUESTION"; question: BlobQuestion }
-  | { type: "DISCARD_QUESTION"; index: number }
-  | { type: "RESTORE_QUESTION"; index: number }
+  | MutationAction
+  | { type: "UNDO_CHANGE"; entryId: string }
+  | { type: "UNDO_ALL" }
   | { type: "SET_SAVING"; saving: boolean }
   | { type: "MARK_SAVED" };
 
 // ── Helpers ──────────────────────────────────────────────
 
-function withData(state: DatasetState, updater: (ds: Dataset) => Dataset): DatasetState {
-  if (!state.dataset) return state;
-  return { ...state, dataset: updater(state.dataset), isDirty: true };
+function isMutationAction(action: DatasetAction): action is MutationAction {
+  return (
+    action.type === "SET_FACT" ||
+    action.type === "ADD_FACT" ||
+    action.type === "DISCARD_FACT" ||
+    action.type === "RESTORE_FACT" ||
+    action.type === "SET_RULE" ||
+    action.type === "ADD_RULE" ||
+    action.type === "DISCARD_RULE" ||
+    action.type === "SET_QUESTION" ||
+    action.type === "ADD_QUESTION" ||
+    action.type === "DISCARD_QUESTION" ||
+    action.type === "RESTORE_QUESTION"
+  );
 }
 
 // ── Reducer ──────────────────────────────────────────────
@@ -44,112 +54,61 @@ function withData(state: DatasetState, updater: (ds: Dataset) => Dataset): Datas
 export function datasetReducer(state: DatasetState, action: DatasetAction): DatasetState {
   switch (action.type) {
     case "LOAD_DATASET":
-      return { dataset: action.payload, isDirty: false, saving: false };
+      return {
+        dataset: action.payload,
+        original: structuredClone(action.payload.data),
+        changeLog: [],
+        isDirty: false,
+        saving: false
+      };
 
-    case "SET_FACT":
-      return withData(state, (ds) => ({
-        ...ds,
-        data: {
-          ...ds.data,
-          facts: { ...ds.data.facts, [action.id]: action.fact }
-        }
-      }));
-
-    case "ADD_FACT":
-      return withData(state, (ds) => ({
-        ...ds,
-        data: {
-          ...ds.data,
-          facts: { ...ds.data.facts, [action.id]: action.fact }
-        }
-      }));
-
-    case "DISCARD_FACT":
-      return withData(state, (ds) => {
-        const fact = ds.data.facts[action.id];
-        if (!fact) return ds;
-        return {
-          ...ds,
-          data: {
-            ...ds.data,
-            facts: { ...ds.data.facts, [action.id]: { ...fact, discarded: true } }
-          }
-        };
-      });
-
-    case "RESTORE_FACT":
-      return withData(state, (ds) => {
-        const fact = ds.data.facts[action.id];
-        if (!fact) return ds;
-        return {
-          ...ds,
-          data: {
-            ...ds.data,
-            facts: { ...ds.data.facts, [action.id]: { ...fact, discarded: false } }
-          }
-        };
-      });
-
-    case "SET_RULE":
-      return withData(state, (ds) => {
-        const rules = [...ds.data.rules];
-        rules[action.index] = action.rule;
-        return { ...ds, data: { ...ds.data, rules } };
-      });
-
-    case "ADD_RULE":
-      return withData(state, (ds) => ({
-        ...ds,
-        data: { ...ds.data, rules: [...ds.data.rules, action.rule] }
-      }));
-
-    case "DISCARD_RULE":
-      return withData(state, (ds) => {
-        const rules = [...ds.data.rules];
-        const rule = rules[action.index];
-        if (!rule) return ds;
-        rules[action.index] = { ...rule, discarded: true };
-        return { ...ds, data: { ...ds.data, rules } };
-      });
-
-    case "SET_QUESTION":
-      return withData(state, (ds) => {
-        const questions = [...ds.data.questions];
-        questions[action.index] = action.question;
-        return { ...ds, data: { ...ds.data, questions } };
-      });
-
-    case "ADD_QUESTION":
-      return withData(state, (ds) => ({
-        ...ds,
-        data: { ...ds.data, questions: [...ds.data.questions, action.question] }
-      }));
-
-    case "DISCARD_QUESTION":
-      return withData(state, (ds) => {
-        const questions = [...ds.data.questions];
-        const question = questions[action.index];
-        if (!question) return ds;
-        questions[action.index] = { ...question, discarded: true };
-        return { ...ds, data: { ...ds.data, questions } };
-      });
-
-    case "RESTORE_QUESTION":
-      return withData(state, (ds) => {
-        const questions = [...ds.data.questions];
-        const question = questions[action.index];
-        if (!question) return ds;
-        questions[action.index] = { ...question, discarded: false };
-        return { ...ds, data: { ...ds.data, questions } };
-      });
+    case "MARK_SAVED":
+      return {
+        ...state,
+        original: state.dataset ? structuredClone(state.dataset.data) : null,
+        changeLog: [],
+        isDirty: false,
+        saving: false
+      };
 
     case "SET_SAVING":
       return { ...state, saving: action.saving };
 
-    case "MARK_SAVED":
-      return { ...state, isDirty: false, saving: false };
+    case "UNDO_CHANGE": {
+      if (!state.dataset || !state.original) return state;
+      const remaining = state.changeLog.filter((e) => e.id !== action.entryId);
+      const data = replayChanges(structuredClone(state.original), remaining);
+      return {
+        ...state,
+        dataset: { ...state.dataset, data },
+        changeLog: remaining,
+        isDirty: remaining.length > 0
+      };
+    }
 
-    default:
-      return state;
+    case "UNDO_ALL": {
+      if (!state.dataset || !state.original) return state;
+      return {
+        ...state,
+        dataset: { ...state.dataset, data: structuredClone(state.original) },
+        changeLog: [],
+        isDirty: false
+      };
+    }
+
+    default: {
+      if (!isMutationAction(action)) return state;
+      if (!state.dataset) return state;
+
+      const entry = buildChangeEntry(action, state.dataset.data);
+      const data = applyAction(state.dataset.data, action);
+
+      return {
+        ...state,
+        dataset: { ...state.dataset, data },
+        changeLog: [...state.changeLog, entry],
+        isDirty: true
+      };
+    }
   }
 }
