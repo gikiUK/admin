@@ -2,7 +2,7 @@ import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import type { EnrichedFact } from "@/lib/data/types";
+import type { EnrichedFact } from "@/lib/blob/types";
 import { FactRelationshipInfo } from "./fact-relationship-info";
 
 type FactCardProps = {
@@ -17,17 +17,17 @@ function TypeBadge({ type }: { type: string }) {
 export function FactCard({ fact }: FactCardProps) {
   return (
     <Link href={`/data/facts/${fact.id}`} className="block">
-      <Card className="gap-0 py-0 transition-colors hover:border-primary/50">
+      <Card className={`gap-0 py-0 transition-colors hover:border-primary/50${fact.discarded ? " opacity-50" : ""}`}>
         <CardHeader className="gap-1 px-4 py-3">
           <span className="font-mono text-sm font-semibold">{fact.id}</span>
           <div className="flex items-center gap-2">
             <TypeBadge type={fact.type} />
             <Badge variant={fact.core ? "default" : "secondary"}>{fact.core ? "Core" : "Derived"}</Badge>
           </div>
-          {fact.valuesRef && (
+          {fact.values_ref && (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <ExternalLink className="size-3" />
-              {fact.valuesRef}
+              {fact.values_ref}
             </span>
           )}
         </CardHeader>

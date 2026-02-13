@@ -1,11 +1,11 @@
 import { Badge } from "@/components/ui/badge";
-import type { Question } from "@/lib/data/types";
+import type { BlobQuestion } from "@/lib/blob/types";
 
-export function QuestionOptionsDisplay({ question }: { question: Question }) {
-  if (question.optionsRef) {
+export function QuestionOptionsDisplay({ question }: { question: BlobQuestion }) {
+  if (question.options_ref) {
     return (
       <Badge variant="outline" className="font-mono text-xs">
-        {question.optionsRef}
+        {question.options_ref}
       </Badge>
     );
   }

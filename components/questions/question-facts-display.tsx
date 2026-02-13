@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
-import type { Question } from "@/lib/data/types";
+import type { BlobQuestion } from "@/lib/blob/types";
 
-export function QuestionFactsDisplay({ question }: { question: Question }) {
+export function QuestionFactsDisplay({ question }: { question: BlobQuestion }) {
   if (question.fact) {
     return (
       <Badge variant="secondary" className="font-mono text-xs">

@@ -5,7 +5,7 @@ import { ConditionEditor } from "@/components/facts/condition-editor";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import type { Condition } from "@/lib/data/types";
+import type { BlobCondition as Condition } from "@/lib/blob/types";
 
 type QuestionConditionsSectionProps = {
   showWhen: Condition | undefined;

@@ -2,7 +2,7 @@
 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { CheckboxRadioOption, QuestionType } from "@/lib/data/types";
+import type { BlobOption, QuestionType } from "@/lib/blob/types";
 import { FactsMappingEditor } from "./facts-mapping-editor";
 import { OptionsListEditor } from "./options-list-editor";
 
@@ -12,13 +12,13 @@ type QuestionTypeFieldsProps = {
   type: QuestionType;
   fact: string;
   optionsRef: string;
-  options: CheckboxRadioOption[];
+  options: BlobOption[];
   factsMapping: FactsMap;
   allFactIds: string[];
   constantGroupNames: string[];
   onFactChange: (fact: string) => void;
   onOptionsRefChange: (ref: string) => void;
-  onOptionsChange: (options: CheckboxRadioOption[]) => void;
+  onOptionsChange: (options: BlobOption[]) => void;
   onFactsMappingChange: (facts: FactsMap) => void;
 };
 

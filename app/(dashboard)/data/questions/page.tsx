@@ -1,14 +1,20 @@
+"use client";
+
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { QuestionsThread } from "@/components/questions/questions-thread";
 import { Button } from "@/components/ui/button";
-import { getAllQuestions } from "@/lib/data/mock-api";
-import { buildQuestionThread } from "@/lib/data/question-thread";
+import { computeQuestionThread } from "@/lib/blob/derived";
+import { useDataset } from "@/lib/blob/use-dataset";
 
 export default function QuestionsPage() {
-  const questions = getAllQuestions();
-  const thread = buildQuestionThread(questions);
+  const { blob } = useDataset();
+
+  if (!blob) return null;
+
+  const questions = blob.questions;
+  const thread = computeQuestionThread(questions);
   const types = [...new Set(questions.map((q) => q.type))];
 
   return (

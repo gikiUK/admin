@@ -1,13 +1,20 @@
+"use client";
+
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { FactsExplorer } from "@/components/facts/facts-explorer";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { loadEnrichedFacts } from "@/lib/data/enriched-facts";
+import { computeEnrichedFacts } from "@/lib/blob/derived";
+import { useDataset } from "@/lib/blob/use-dataset";
 
 export default function FactsPage() {
-  const categories = loadEnrichedFacts();
+  const { blob } = useDataset();
+
+  const categories = blob ? computeEnrichedFacts(blob) : [];
   const totalCount = categories.reduce((sum, cat) => sum + cat.facts.length, 0);
+
+  if (!blob) return null;
 
   return (
     <div className="space-y-6">

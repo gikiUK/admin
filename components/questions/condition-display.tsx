@@ -1,8 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { AnyCondition, Condition, SimpleCondition } from "@/lib/data/types";
+import type { AnyCondition, BlobCondition, SimpleCondition } from "@/lib/blob/types";
 
-function isAnyCondition(condition: Condition): condition is AnyCondition {
+function isAnyCondition(condition: BlobCondition): condition is AnyCondition {
   return "any" in condition;
 }
 
@@ -33,7 +33,7 @@ function renderSimple(condition: SimpleCondition) {
   });
 }
 
-export function ConditionDisplay({ condition }: { condition?: Condition }) {
+export function ConditionDisplay({ condition }: { condition?: BlobCondition }) {
   if (!condition) return <span className="text-sm text-muted-foreground">-</span>;
 
   if (isAnyCondition(condition)) {

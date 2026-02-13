@@ -1,8 +1,12 @@
+"use client";
+
 import { FactEditor } from "@/components/facts/fact-editor";
-import { getAllFacts } from "@/lib/data/mock-api";
+import { useDataset } from "@/lib/blob/use-dataset";
 
 export default function NewFactPage() {
-  const allFactIds = getAllFacts().map((f) => f.id);
+  const { blob } = useDataset();
 
-  return <FactEditor rules={[]} allFactIds={allFactIds} isNew />;
+  if (!blob) return null;
+
+  return <FactEditor isNew />;
 }

@@ -1,9 +1,9 @@
 "use client";
 
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, RotateCcw, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -20,44 +20,65 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { CheckboxRadioOption, Condition, Question, QuestionType } from "@/lib/data/types";
+import { fetchConstantGroupNames } from "@/lib/blob/actions";
+import type { BlobCondition, BlobOption, BlobQuestion, QuestionType } from "@/lib/blob/types";
+import { useDataset } from "@/lib/blob/use-dataset";
 import { QuestionConditionsSection } from "./question-conditions-section";
 import { QuestionTypeFields } from "./question-type-fields";
 
 type FactsMap = Record<string, Record<string, string | boolean>>;
 
 type QuestionEditorProps = {
-  question?: Question;
-  allFactIds: string[];
-  constantGroupNames: string[];
+  questionIndex?: number;
   isNew?: boolean;
-  onSave: (payload: Partial<Omit<Question, "index">>) => Promise<void>;
-  onDelete?: () => Promise<void>;
 };
 
 const QUESTION_TYPES: QuestionType[] = ["boolean_state", "single-select", "multi-select", "checkbox-radio-hybrid"];
 
-export function QuestionEditor({
-  question,
-  allFactIds,
-  constantGroupNames,
-  isNew,
-  onSave,
-  onDelete
-}: QuestionEditorProps) {
+export function QuestionEditor({ questionIndex, isNew }: QuestionEditorProps) {
   const router = useRouter();
+  const { blob, dispatch } = useDataset();
+  const [constantGroupNames, setConstantGroupNames] = useState<string[]>([]);
 
-  const [label, setLabel] = useState(question?.label ?? "");
-  const [description, setDescription] = useState(question?.description ?? "");
-  const [type, setType] = useState<QuestionType>(question?.type ?? "boolean_state");
-  const [fact, setFact] = useState(question?.fact ?? "");
-  const [optionsRef, setOptionsRef] = useState(question?.optionsRef ?? "");
-  const [options, setOptions] = useState<CheckboxRadioOption[]>(question?.options ?? []);
-  const [factsMapping, setFactsMapping] = useState<FactsMap>(question?.facts ?? {});
-  const [showWhen, setShowWhen] = useState<Condition | undefined>(question?.showWhen);
-  const [hideWhen, setHideWhen] = useState<Condition | undefined>(question?.hideWhen);
-  const [unknowable, setUnknowable] = useState(question?.unknowable ?? false);
-  const [saving, setSaving] = useState(false);
+  const question = questionIndex !== undefined && blob ? blob.questions[questionIndex] : undefined;
+  const allFactIds = blob ? Object.keys(blob.facts) : [];
+
+  const [label, setLabel] = useState("");
+  const [description, setDescription] = useState("");
+  const [type, setType] = useState<QuestionType>("boolean_state");
+  const [fact, setFact] = useState("");
+  const [optionsRef, setOptionsRef] = useState("");
+  const [options, setOptions] = useState<BlobOption[]>([]);
+  const [factsMapping, setFactsMapping] = useState<FactsMap>({});
+  const [showWhen, setShowWhen] = useState<BlobCondition | undefined>(undefined);
+  const [hideWhen, setHideWhen] = useState<BlobCondition | undefined>(undefined);
+  const [unknowable, setUnknowable] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+
+  // Initialize form state from question when blob loads
+  useEffect(() => {
+    if (initialized) return;
+    if (isNew) {
+      setInitialized(true);
+      return;
+    }
+    if (!question) return;
+    setLabel(question.label);
+    setDescription(question.description ?? "");
+    setType(question.type);
+    setFact(question.fact ?? "");
+    setOptionsRef(question.options_ref ?? "");
+    setOptions(question.options ?? []);
+    setFactsMapping(question.facts ?? {});
+    setShowWhen(question.show_when);
+    setHideWhen(question.hide_when);
+    setUnknowable(question.unknowable ?? false);
+    setInitialized(true);
+  }, [question, isNew, initialized]);
+
+  useEffect(() => {
+    fetchConstantGroupNames().then(setConstantGroupNames);
+  }, []);
 
   function handleTypeChange(newType: QuestionType) {
     setType(newType);
@@ -74,32 +95,51 @@ export function QuestionEditor({
     }
   }
 
-  async function handleSave() {
-    setSaving(true);
-    const payload: Partial<Omit<Question, "index">> = { label, type, description: description || undefined };
+  function handleSave() {
+    const payload: BlobQuestion = {
+      label,
+      type,
+      description: description || undefined,
+      show_when: showWhen,
+      hide_when: hideWhen,
+      unknowable: unknowable || undefined
+    };
 
     if (type === "boolean_state") {
       payload.fact = fact || undefined;
     } else if (type === "single-select" || type === "multi-select") {
       payload.fact = fact || undefined;
-      payload.optionsRef = optionsRef || undefined;
+      payload.options_ref = optionsRef || undefined;
     } else {
       payload.options = options;
       payload.facts = factsMapping;
     }
 
-    payload.showWhen = showWhen;
-    payload.hideWhen = hideWhen;
-    payload.unknowable = unknowable || undefined;
+    if (isNew) {
+      dispatch({ type: "ADD_QUESTION", question: payload });
+    } else if (questionIndex !== undefined) {
+      dispatch({ type: "SET_QUESTION", index: questionIndex, question: payload });
+    }
 
-    await onSave(payload);
-    setSaving(false);
     router.push("/data/questions");
   }
 
-  async function handleDelete() {
-    await onDelete?.();
+  function handleDiscard() {
+    if (questionIndex !== undefined) {
+      dispatch({ type: "DISCARD_QUESTION", index: questionIndex });
+    }
     router.push("/data/questions");
+  }
+
+  function handleRestore() {
+    if (questionIndex !== undefined) {
+      dispatch({ type: "RESTORE_QUESTION", index: questionIndex });
+    }
+  }
+
+  if (!blob) return null;
+  if (!isNew && questionIndex !== undefined && !question) {
+    return <div className="p-6 text-muted-foreground">Question not found.</div>;
   }
 
   return (
@@ -112,35 +152,44 @@ export function QuestionEditor({
           <ArrowLeft className="size-4" /> Back to Questions
         </Link>
 
-        {!isNew && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <Trash2 className="size-3" /> Delete
+        {!isNew && question && (
+          <div className="flex items-center gap-2">
+            {question.discarded ? (
+              <Button variant="outline" size="sm" onClick={handleRestore}>
+                <RotateCcw className="size-3" /> Restore
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Delete question</DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to delete <span className="font-semibold">Q{(question?.index ?? 0) + 1}</span>?
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button variant="destructive" onClick={handleDelete}>
-                  Delete
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            ) : (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="size-3" /> Discard
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Discard question</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to discard{" "}
+                      <span className="font-semibold">Q{(questionIndex ?? 0) + 1}</span>?
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button variant="destructive" onClick={handleDiscard}>
+                      Discard
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         )}
       </div>
 
       <h1 className="text-2xl font-semibold tracking-tight">
-        {isNew ? "New Question" : `Edit: Q${(question?.index ?? 0) + 1}`}
+        {isNew ? "New Question" : `Edit: Q${(questionIndex ?? 0) + 1}`}
       </h1>
 
       {/* Properties */}
@@ -226,8 +275,8 @@ export function QuestionEditor({
         <Button variant="outline" asChild>
           <Link href="/data/questions">Cancel</Link>
         </Button>
-        <Button onClick={handleSave} disabled={!label.trim() || saving}>
-          {saving ? "Saving..." : "Save"}
+        <Button onClick={handleSave} disabled={!label.trim()}>
+          Save
         </Button>
       </div>
     </div>

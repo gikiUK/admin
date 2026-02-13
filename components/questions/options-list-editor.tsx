@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { CheckboxRadioOption } from "@/lib/data/types";
+import type { BlobOption } from "@/lib/blob/types";
 
 type OptionsListEditorProps = {
-  options: CheckboxRadioOption[];
-  onChange: (options: CheckboxRadioOption[]) => void;
+  options: BlobOption[];
+  onChange: (options: BlobOption[]) => void;
 };
 
 export function OptionsListEditor({ options, onChange }: OptionsListEditorProps) {
@@ -17,7 +17,7 @@ export function OptionsListEditor({ options, onChange }: OptionsListEditorProps)
     onChange([...options, { label: "", value: "" }]);
   }
 
-  function handleUpdate(index: number, updates: Partial<CheckboxRadioOption>) {
+  function handleUpdate(index: number, updates: Partial<BlobOption>) {
     const next = [...options];
     next[index] = { ...next[index], ...updates };
     onChange(next);

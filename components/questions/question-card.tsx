@@ -1,7 +1,7 @@
 import { Eye, EyeOff, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Question } from "@/lib/data/types";
+import type { BlobQuestion } from "@/lib/blob/types";
 import { cn } from "@/lib/utils";
 import { ConditionDisplay } from "./condition-display";
 import { QuestionFactsDisplay } from "./question-facts-display";
@@ -9,7 +9,7 @@ import { QuestionOptionsDisplay } from "./question-options-display";
 import { QuestionTypeBadge } from "./question-type-badge";
 
 type QuestionCardProps = {
-  question: Question;
+  question: BlobQuestion & { index: number };
   conditionallyHidden: boolean;
 };
 
@@ -19,7 +19,11 @@ export function QuestionCard({ question, conditionallyHidden }: QuestionCardProp
   return (
     <Link href={`/data/questions/${q.index}`} className="block">
       <Card
-        className={cn("transition-colors hover:border-primary/40", conditionallyHidden && "border-dashed opacity-80")}
+        className={cn(
+          "transition-colors hover:border-primary/40",
+          conditionallyHidden && "border-dashed opacity-80",
+          q.discarded && "opacity-50"
+        )}
       >
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
@@ -36,23 +40,23 @@ export function QuestionCard({ question, conditionallyHidden }: QuestionCardProp
           <QuestionFactsDisplay question={q} />
           <QuestionOptionsDisplay question={q} />
 
-          {(q.showWhen || q.hideWhen || q.unknowable) && (
+          {(q.show_when || q.hide_when || q.unknowable) && (
             <div className="space-y-1.5 border-t pt-3">
-              {q.showWhen && (
+              {q.show_when && (
                 <div className="flex items-start gap-1.5 text-xs">
                   <Eye className="mt-0.5 size-3.5 shrink-0 text-blue-500" />
                   <div className="flex flex-wrap items-center gap-1">
                     <span className="text-muted-foreground">Shown when</span>
-                    <ConditionDisplay condition={q.showWhen} />
+                    <ConditionDisplay condition={q.show_when} />
                   </div>
                 </div>
               )}
-              {q.hideWhen && (
+              {q.hide_when && (
                 <div className="flex items-start gap-1.5 text-xs">
                   <EyeOff className="mt-0.5 size-3.5 shrink-0 text-orange-500" />
                   <div className="flex flex-wrap items-center gap-1">
                     <span className="text-muted-foreground">Hidden when</span>
-                    <ConditionDisplay condition={q.hideWhen} />
+                    <ConditionDisplay condition={q.hide_when} />
                   </div>
                 </div>
               )}

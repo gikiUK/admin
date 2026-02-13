@@ -1,19 +1,15 @@
-import { notFound } from "next/navigation";
+"use client";
+
+import { useParams } from "next/navigation";
 import { FactEditor } from "@/components/facts/fact-editor";
-import { getAllFacts, getFactById, getRulesForFact } from "@/lib/data/mock-api";
+import { useDataset } from "@/lib/blob/use-dataset";
 
-type FactDetailPageProps = {
-  params: Promise<{ id: string }>;
-};
+export default function FactDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const { blob } = useDataset();
 
-export default async function FactDetailPage({ params }: FactDetailPageProps) {
-  const { id } = await params;
-  const fact = getFactById(id);
+  if (!blob) return null;
+  if (!blob.facts[id]) return <div className="p-6 text-muted-foreground">Fact not found.</div>;
 
-  if (!fact) notFound();
-
-  const rules = getRulesForFact(id);
-  const allFactIds = getAllFacts().map((f) => f.id);
-
-  return <FactEditor fact={fact} rules={rules} allFactIds={allFactIds} />;
+  return <FactEditor factId={id} />;
 }

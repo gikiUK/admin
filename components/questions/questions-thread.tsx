@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { ThreadNode } from "@/lib/data/question-thread";
-import type { QuestionType } from "@/lib/data/types";
+import type { ThreadNode } from "@/lib/blob/derived";
+import type { QuestionType } from "@/lib/blob/types";
 import { QuestionThreadGroup } from "./question-thread-group";
 
 type QuestionsThreadProps = {
@@ -30,13 +30,13 @@ function filterThread(thread: ThreadNode[], search: string, typeFilter: string):
       (child) => nodeMatchesSearch(child, lowerSearch) && nodeMatchesType(child, typeFilter)
     );
 
-    // Parent matches → show with all children
+    // Parent matches -> show with all children
     if (parentMatches) {
       acc.push({ ...node, children: typeFilter === "all" ? node.children : matchingChildren });
       return acc;
     }
 
-    // Child matches → show parent with only matching children
+    // Child matches -> show parent with only matching children
     if (matchingChildren.length > 0) {
       acc.push({ ...node, children: matchingChildren });
       return acc;

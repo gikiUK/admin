@@ -1,6 +1,6 @@
 import { ArrowUpRight, GitBranch, ShieldAlert, Zap } from "lucide-react";
 import { ConditionDisplay } from "@/components/questions/condition-display";
-import type { FactRelationships } from "@/lib/data/types";
+import type { FactRelationships } from "@/lib/blob/types";
 
 type FactRelationshipInfoProps = {
   relationships: FactRelationships;

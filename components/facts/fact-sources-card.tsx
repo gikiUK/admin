@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ConditionDisplay } from "@/components/questions/condition-display";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import type { FactRelationships } from "@/lib/data/types";
+import type { FactRelationships } from "@/lib/blob/types";
 
 type FactSourcesCardProps = {
   relationships: FactRelationships;

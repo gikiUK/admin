@@ -5,15 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { AnyCondition, Condition, SimpleCondition } from "@/lib/data/types";
+import type { AnyCondition, BlobCondition, SimpleCondition } from "@/lib/blob/types";
 
 type ConditionEditorProps = {
-  condition: Condition;
-  onChange: (condition: Condition) => void;
+  condition: BlobCondition;
+  onChange: (condition: BlobCondition) => void;
   factIds: string[];
 };
 
-function isAnyCondition(c: Condition): c is AnyCondition {
+function isAnyCondition(c: BlobCondition): c is AnyCondition {
   return "any" in c;
 }
 

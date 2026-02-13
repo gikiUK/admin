@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import type { EnrichedFact } from "@/lib/data/types";
+import type { EnrichedFact } from "@/lib/blob/types";
 import { FactCard } from "./fact-card";
 
 type FactCategoryGroupProps = {

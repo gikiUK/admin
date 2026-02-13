@@ -1,4 +1,4 @@
-import type { ThreadNode } from "@/lib/data/question-thread";
+import type { ThreadNode } from "@/lib/blob/derived";
 import { QuestionCard } from "./question-card";
 
 type QuestionThreadGroupProps = {

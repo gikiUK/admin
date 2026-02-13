@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { FactCategory } from "@/lib/data/types";
+import type { FactCategory } from "@/lib/blob/types";
 import { FactCategoryGroup } from "./fact-category-group";
 
 type FactsExplorerProps = {

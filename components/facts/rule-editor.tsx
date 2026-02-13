@@ -1,42 +1,52 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { Rule } from "@/lib/data/types";
+import type { BlobRule } from "@/lib/blob/types";
 import { ConditionEditor } from "./condition-editor";
 
+type IndexedRule = { rule: BlobRule; index: number };
+
 type RuleEditorProps = {
-  rules: Rule[];
+  rules: IndexedRule[];
   factId: string;
   factIds: string[];
-  onChange: (rules: Rule[]) => void;
+  onChange: (globalIndex: number, rule: BlobRule) => void;
+  onAdd: () => void;
+  onDiscard: (globalIndex: number) => void;
 };
 
 function SingleRuleEditor({
-  rule,
-  index,
+  entry,
+  position,
   factIds,
   onChange,
-  onRemove
+  onDiscard
 }: {
-  rule: Rule;
-  index: number;
+  entry: IndexedRule;
+  position: number;
   factIds: string[];
-  onChange: (rule: Rule) => void;
-  onRemove: () => void;
+  onChange: (globalIndex: number, rule: BlobRule) => void;
+  onDiscard: (globalIndex: number) => void;
 }) {
+  const { rule, index: globalIndex } = entry;
+
   return (
     <div className="space-y-3 rounded-md border p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">Rule {index + 1}</span>
+          <span className="text-sm font-medium">Rule {position + 1}</span>
+          <Badge variant={rule.source === "hotspot" ? "default" : "secondary"} className="text-xs">
+            {rule.source}
+          </Badge>
           <span className="text-xs text-muted-foreground">Sets to:</span>
           <Select
             value={String(rule.value)}
             onValueChange={(v) => {
               const value = v === "true" ? true : v === "false" ? false : v;
-              onChange({ ...rule, value });
+              onChange(globalIndex, { ...rule, value });
             }}
           >
             <SelectTrigger className="h-7 w-[160px] text-xs">
@@ -49,51 +59,42 @@ function SingleRuleEditor({
             </SelectContent>
           </Select>
         </div>
-        <Button variant="ghost" size="icon-xs" onClick={onRemove}>
+        <Button variant="ghost" size="icon-xs" onClick={() => onDiscard(globalIndex)}>
           <Trash2 className="size-3" />
         </Button>
       </div>
 
-      <ConditionEditor condition={rule.when} onChange={(when) => onChange({ ...rule, when })} factIds={factIds} />
+      <ConditionEditor
+        condition={rule.when}
+        onChange={(when) => onChange(globalIndex, { ...rule, when })}
+        factIds={factIds}
+      />
     </div>
   );
 }
 
-export function RuleEditor({ rules, factId, factIds, onChange }: RuleEditorProps) {
+export function RuleEditor({ rules, factId, factIds, onChange, onAdd, onDiscard }: RuleEditorProps) {
   const availableFactIds = factIds.filter((id) => id !== factId);
-
-  function handleAddRule() {
-    const newRule: Rule = {
-      sets: factId,
-      value: false,
-      when: { "": true }
-    };
-    onChange([...rules, newRule]);
-  }
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">Rules</h3>
-        <Button variant="outline" size="sm" onClick={handleAddRule}>
+        <Button variant="outline" size="sm" onClick={onAdd}>
           <Plus className="size-3" /> Add Rule
         </Button>
       </div>
 
       {rules.length === 0 && <p className="text-sm text-muted-foreground">No rules defined for this fact.</p>}
 
-      {rules.map((rule, i) => (
+      {rules.map((entry, i) => (
         <SingleRuleEditor
-          key={`rule-${rule.sets}-${String(rule.value)}-${i}`}
-          rule={rule}
-          index={i}
+          key={`rule-${entry.index}`}
+          entry={entry}
+          position={i}
           factIds={availableFactIds}
-          onChange={(updated) => {
-            const next = [...rules];
-            next[i] = updated;
-            onChange(next);
-          }}
-          onRemove={() => onChange(rules.filter((_, j) => j !== i))}
+          onChange={onChange}
+          onDiscard={onDiscard}
         />
       ))}
     </div>

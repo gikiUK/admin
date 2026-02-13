@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import type { QuestionType } from "@/lib/data/types";
+import type { QuestionType } from "@/lib/blob/types";
 
 const typeConfig: Record<QuestionType, { label: string; className: string }> = {
   boolean_state: { label: "Yes / No", className: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" },
