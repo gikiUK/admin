@@ -79,9 +79,10 @@ function MatchValue({ value, matchType, query }: { value: string; matchType: "ke
 type SearchResultsListProps = {
   result: SearchResult;
   query: string;
+  onNavigate?: (path: string[]) => void;
 };
 
-export function SearchResultsList({ result, query }: SearchResultsListProps) {
+export function SearchResultsList({ result, query, onNavigate }: SearchResultsListProps) {
   return (
     <div className="space-y-1">
       {result.truncated && (
@@ -98,7 +99,17 @@ export function SearchResultsList({ result, query }: SearchResultsListProps) {
               // biome-ignore lint/suspicious/noArrayIndexKey: stable path segments
               <span key={j} className="flex items-center gap-0.5">
                 {j > 0 && <ChevronRight className="inline size-2.5 shrink-0" />}
-                <span className="text-[11px]">{segment}</span>
+                {onNavigate ? (
+                  <button
+                    type="button"
+                    onClick={() => onNavigate(match.path.slice(0, j + 1))}
+                    className="text-[11px] hover:text-foreground hover:underline"
+                  >
+                    {segment}
+                  </button>
+                ) : (
+                  <span className="text-[11px]">{segment}</span>
+                )}
               </span>
             ))}
           </span>
