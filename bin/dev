@@ -2,4 +2,5 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+pnpm install --frozen-lockfile
 exec pnpm run dev

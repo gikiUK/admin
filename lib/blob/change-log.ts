@@ -83,23 +83,23 @@ function describeAction(action: MutationAction): string {
     case "ADD_FACT":
       return `Added fact "${action.id}"`;
     case "DISCARD_FACT":
-      return `Discarded fact "${action.id}"`;
+      return `Disabled fact "${action.id}"`;
     case "RESTORE_FACT":
-      return `Restored fact "${action.id}"`;
+      return `Enabled fact "${action.id}"`;
     case "SET_RULE":
       return `Edited rule #${action.index + 1}`;
     case "ADD_RULE":
       return `Added rule "${action.rule.sets}"`;
     case "DISCARD_RULE":
-      return `Discarded rule #${action.index + 1}`;
+      return `Disabled rule #${action.index + 1}`;
     case "SET_QUESTION":
       return `Edited question #${action.index + 1}`;
     case "ADD_QUESTION":
       return `Added question "${action.question.label}"`;
     case "DISCARD_QUESTION":
-      return `Discarded question #${action.index + 1}`;
+      return `Disabled question #${action.index + 1}`;
     case "RESTORE_QUESTION":
-      return `Restored question #${action.index + 1}`;
+      return `Enabled question #${action.index + 1}`;
     default:
       return "Unknown change";
   }

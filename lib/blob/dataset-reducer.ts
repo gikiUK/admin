@@ -6,19 +6,28 @@ import type { Dataset, DatasetData } from "./types";
 // ── State ────────────────────────────────────────────────
 
 export type DatasetState = {
+  live: Dataset | null;
+  draft: Dataset | null;
+  /** The active dataset: draft if editing, otherwise live. */
   dataset: Dataset | null;
   original: DatasetData | null;
   changeLog: ChangeEntry[];
   isDirty: boolean;
   saving: boolean;
+  loading: boolean;
+  isEditing: boolean;
 };
 
 export const initialState: DatasetState = {
+  live: null,
+  draft: null,
   dataset: null,
   original: null,
   changeLog: [],
   isDirty: false,
-  saving: false
+  saving: false,
+  loading: true,
+  isEditing: false
 };
 
 // ── Actions ──────────────────────────────────────────────
@@ -29,13 +38,17 @@ export type RevertFieldTarget =
   | { entity: "rule"; index: number; field: string };
 
 export type DatasetAction =
-  | { type: "LOAD_DATASET"; payload: Dataset }
+  | { type: "LOAD_LIVE"; payload: Dataset }
+  | { type: "LOAD_DRAFT"; payload: Dataset }
+  | { type: "DRAFT_CREATED"; payload: Dataset }
+  | { type: "DRAFT_DELETED" }
+  | { type: "DRAFT_PUBLISHED"; payload: Dataset }
   | MutationAction
   | { type: "UNDO_CHANGE"; entryId: string }
   | { type: "UNDO_ALL" }
   | { type: "REVERT_FIELD"; target: RevertFieldTarget }
   | { type: "SET_SAVING"; saving: boolean }
-  | { type: "MARK_SAVED" };
+  | { type: "MARK_SAVED"; payload: Dataset };
 
 // ── Helpers ──────────────────────────────────────────────
 
@@ -66,19 +79,68 @@ function isMutationAction(action: DatasetAction): action is MutationAction {
 
 export function datasetReducer(state: DatasetState, action: DatasetAction): DatasetState {
   switch (action.type) {
-    case "LOAD_DATASET":
+    case "LOAD_LIVE":
       return {
+        ...state,
+        live: action.payload,
+        dataset: state.draft ?? action.payload,
+        original: state.draft ? state.original : structuredClone(action.payload.data),
+        loading: false,
+        isEditing: !!state.draft
+      };
+
+    case "LOAD_DRAFT":
+      return {
+        ...state,
+        draft: action.payload,
         dataset: action.payload,
         original: structuredClone(action.payload.data),
         changeLog: [],
         isDirty: false,
-        saving: false
+        isEditing: true
+      };
+
+    case "DRAFT_CREATED":
+      return {
+        ...state,
+        draft: action.payload,
+        dataset: action.payload,
+        original: structuredClone(action.payload.data),
+        changeLog: [],
+        isDirty: false,
+        isEditing: true
+      };
+
+    case "DRAFT_DELETED":
+      return {
+        ...state,
+        draft: null,
+        dataset: state.live,
+        original: state.live ? structuredClone(state.live.data) : null,
+        changeLog: [],
+        isDirty: false,
+        isEditing: false
+      };
+
+    case "DRAFT_PUBLISHED":
+      return {
+        ...state,
+        live: action.payload,
+        draft: null,
+        dataset: action.payload,
+        original: structuredClone(action.payload.data),
+        changeLog: [],
+        isDirty: false,
+        saving: false,
+        isEditing: false
       };
 
     case "MARK_SAVED":
       return {
         ...state,
-        original: state.dataset ? structuredClone(state.dataset.data) : null,
+        draft: action.payload,
+        dataset: action.payload,
+        original: structuredClone(action.payload.data),
         changeLog: [],
         isDirty: false,
         saving: false

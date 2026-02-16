@@ -17,7 +17,7 @@ function TypeBadge({ type }: { type: string }) {
 export function FactCard({ fact }: FactCardProps) {
   return (
     <Link href={`/data/facts/${fact.id}`} className="block">
-      <Card className={`gap-0 py-0 transition-colors hover:border-primary/50${fact.discarded ? " opacity-50" : ""}`}>
+      <Card className={`gap-0 py-0 transition-colors hover:border-primary/50${!fact.enabled ? " opacity-50" : ""}`}>
         <CardHeader className="gap-1 px-4 py-3">
           <span className="font-mono text-sm font-semibold">{fact.id}</span>
           <div className="flex items-center gap-2">

@@ -1,7 +1,13 @@
 "use client";
 
 import { useContext } from "react";
-import { saveDataset } from "./api-client";
+import {
+  ApiError,
+  createDraft as apiCreateDraft,
+  deleteDraft as apiDeleteDraft,
+  publishDraft as apiPublishDraft,
+  saveDraft
+} from "./api-client";
 import { DatasetContext } from "./dataset-context";
 import type { RevertFieldTarget } from "./dataset-reducer";
 
@@ -15,13 +21,40 @@ export function useDataset() {
     if (!state.dataset) return;
     dispatch({ type: "SET_SAVING", saving: true });
     try {
-      await saveDataset(state.dataset.id, {
+      const updated = await saveDraft({
         data: state.dataset.data,
         test_cases: state.dataset.test_cases
       });
-      dispatch({ type: "MARK_SAVED" });
-    } catch {
+      dispatch({ type: "MARK_SAVED", payload: updated });
+    } catch (err) {
       dispatch({ type: "SET_SAVING", saving: false });
+      throw err;
+    }
+  }
+
+  async function createDraft() {
+    try {
+      const draft = await apiCreateDraft();
+      dispatch({ type: "DRAFT_CREATED", payload: draft });
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw err;
+    }
+  }
+
+  async function deleteDraftAction() {
+    await apiDeleteDraft();
+    dispatch({ type: "DRAFT_DELETED" });
+  }
+
+  async function publish() {
+    dispatch({ type: "SET_SAVING", saving: true });
+    try {
+      const live = await apiPublishDraft();
+      dispatch({ type: "DRAFT_PUBLISHED", payload: live });
+    } catch (err) {
+      dispatch({ type: "SET_SAVING", saving: false });
+      throw err;
     }
   }
 
@@ -43,11 +76,19 @@ export function useDataset() {
     dispatch,
     isDirty: state.isDirty,
     saving: state.saving,
+    loading: state.loading,
     save,
     changeLog: state.changeLog,
     original: state.original,
     undoChange,
     undoAll,
-    revertField
+    revertField,
+    // Draft/live workflow
+    live: state.live,
+    draft: state.draft,
+    isEditing: state.isEditing,
+    createDraft,
+    deleteDraft: deleteDraftAction,
+    publish
   };
 }

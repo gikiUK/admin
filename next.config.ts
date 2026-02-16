@@ -1,9 +1,19 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
+const API_URL = process.env.API_URL ?? "http://localhost:3000";
+
 const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
-  reactCompiler: true
+  reactCompiler: true,
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${API_URL}/:path*`
+      }
+    ];
+  }
 };
 
 // Only use Sentry build wrapper in production to avoid build overhead in dev/test

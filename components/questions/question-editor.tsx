@@ -20,7 +20,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { fetchConstantGroupNames } from "@/lib/blob/actions";
 import type { BlobCondition, BlobOption, BlobQuestion, QuestionType } from "@/lib/blob/types";
 import { useDataset } from "@/lib/blob/use-dataset";
 import { QuestionConditionsSection } from "./question-conditions-section";
@@ -40,14 +39,10 @@ const QUESTION_TYPES: QuestionType[] = ["boolean_state", "single-select", "multi
 function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
   const router = useRouter();
   const { blob, dispatch } = useDataset();
-  const [constantGroupNames, setConstantGroupNames] = useState<string[]>([]);
 
   const question = blob?.questions[questionIndex];
   const allFactIds = blob ? Object.keys(blob.facts) : [];
-
-  useEffect(() => {
-    fetchConstantGroupNames().then(setConstantGroupNames);
-  }, []);
+  const constantGroupNames = blob ? Object.keys(blob.constants) : [];
 
   if (!blob || !question) {
     return <div className="p-6 text-muted-foreground">Question not found.</div>;
@@ -94,7 +89,7 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
           <ArrowLeft className="size-4" /> Back to Questions
         </Link>
 
-        {question.discarded ? (
+        {!question.enabled ? (
           <Button variant="outline" size="sm" onClick={handleRestore}>
             <RotateCcw className="size-3" /> Restore
           </Button>
@@ -128,7 +123,7 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
       <h1 className="text-2xl font-semibold tracking-tight">Edit: Q{questionIndex + 1}</h1>
 
       {/* Properties */}
-      <Card className={question.discarded ? "opacity-50" : undefined}>
+      <Card className={!question.enabled ? "opacity-50" : undefined}>
         <CardHeader>
           <h2 className="text-sm font-semibold">Properties</h2>
         </CardHeader>
@@ -171,7 +166,7 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
       </Card>
 
       {/* Type-specific fields */}
-      <Card className={question.discarded ? "opacity-50" : undefined}>
+      <Card className={!question.enabled ? "opacity-50" : undefined}>
         <CardHeader>
           <h2 className="text-sm font-semibold">Type configuration</h2>
         </CardHeader>
@@ -193,7 +188,7 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
       </Card>
 
       {/* Conditions */}
-      <Card className={question.discarded ? "opacity-50" : undefined}>
+      <Card className={!question.enabled ? "opacity-50" : undefined}>
         <CardHeader>
           <h2 className="text-sm font-semibold">Conditions</h2>
         </CardHeader>
@@ -218,9 +213,9 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
 function NewQuestionEditor() {
   const router = useRouter();
   const { blob, dispatch } = useDataset();
-  const [constantGroupNames, setConstantGroupNames] = useState<string[]>([]);
 
   const allFactIds = blob ? Object.keys(blob.facts) : [];
+  const constantGroupNames = blob ? Object.keys(blob.constants) : [];
 
   const [label, setLabel] = useState("");
   const [description, setDescription] = useState("");
@@ -232,10 +227,6 @@ function NewQuestionEditor() {
   const [showWhen, setShowWhen] = useState<BlobCondition | undefined>(undefined);
   const [hideWhen, setHideWhen] = useState<BlobCondition | undefined>(undefined);
   const [unknowable, setUnknowable] = useState(false);
-
-  useEffect(() => {
-    fetchConstantGroupNames().then(setConstantGroupNames);
-  }, []);
 
   function handleTypeChange(newType: QuestionType) {
     setType(newType);
@@ -256,6 +247,7 @@ function NewQuestionEditor() {
     const payload: BlobQuestion = {
       label,
       type,
+      enabled: true,
       description: description || undefined,
       show_when: showWhen,
       hide_when: hideWhen,

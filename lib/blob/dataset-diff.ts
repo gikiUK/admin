@@ -1,6 +1,6 @@
 import type { DatasetData } from "./types";
 
-export type DiffKind = "added" | "modified" | "discarded" | "restored";
+export type DiffKind = "added" | "modified" | "disabled" | "restored";
 
 export type DiffSegment = { text: string; type: "equal" | "removed" | "added" };
 
@@ -112,10 +112,10 @@ function compareEntity(
   }
   if (!orig || !curr) return null;
 
-  if (!orig.discarded && curr.discarded) {
-    return { kind: "discarded", entity, key, label, href, fields: [] };
+  if (orig.enabled !== false && curr.enabled === false) {
+    return { kind: "disabled", entity, key, label, href, fields: [] };
   }
-  if (orig.discarded && !curr.discarded) {
+  if (orig.enabled === false && curr.enabled !== false) {
     return { kind: "restored", entity, key, label, href, fields: [] };
   }
 

@@ -1,4 +1,4 @@
-import { getCategoryLabel, getCategoryOrder } from "@/lib/data/fact-categories";
+import { assignCategory, getCategoryLabel, getCategoryOrder } from "@/lib/data/fact-categories";
 import type {
   AnyCondition,
   BlobCondition,
@@ -56,7 +56,7 @@ function countActionRefs(data: DatasetData): Record<string, number> {
     }
   }
   for (const ac of Object.values(data.action_conditions)) {
-    if (ac.discarded) continue;
+    if (!ac.enabled) continue;
     countCondition(ac.include_when);
     countCondition(ac.exclude_when);
   }
@@ -70,14 +70,14 @@ export function computeEnrichedFacts(data: DatasetData): FactCategory[] {
     id,
     type: fact.type,
     core: fact.core,
-    category: fact.category,
+    category: fact.category ?? assignCategory(id),
     values_ref: fact.values_ref,
-    discarded: fact.discarded,
+    enabled: fact.enabled,
     relationships: {
       setByQuestion: fact.core ? findSetByQuestion(id, data.questions) : undefined,
-      derivedFrom: !fact.core ? data.rules.find((r) => r.sets === id && r.value === true && !r.discarded) : undefined,
+      derivedFrom: !fact.core ? data.rules.find((r) => r.sets === id && r.value === true && r.enabled) : undefined,
       constrainedBy: data.rules.filter(
-        (r) => r.sets === id && (r.value === false || r.value === "not_applicable") && !r.discarded
+        (r) => r.sets === id && (r.value === false || r.value === "not_applicable") && r.enabled
       ),
       actionCount: actionCounts[id] ?? 0
     }

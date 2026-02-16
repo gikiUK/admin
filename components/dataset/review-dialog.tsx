@@ -42,8 +42,8 @@ const kindConfig: Record<DiffKind, { label: string; icon: typeof Plus; color: st
     icon: SquarePen,
     color: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300"
   },
-  discarded: {
-    label: "Discarded",
+  disabled: {
+    label: "Disabled",
     icon: Trash2,
     color: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
   },
@@ -320,14 +320,19 @@ function ActivityTab() {
 // ── Main dialog ─────────────────────────────────────────
 
 export function ReviewDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const { isDirty, saving, save, blob, original } = useDataset();
+  const { isDirty, saving, save, publish, blob, original } = useDataset();
   const [tab, setTab] = useState<Tab>("review");
 
   const diff = original && blob ? computeDatasetDiff(original, blob) : null;
   const changeCount = diff?.totalChanges ?? 0;
 
-  function handlePublish() {
-    save();
+  async function handleSave() {
+    await save();
+  }
+
+  async function handlePublish() {
+    await save();
+    await publish();
     onOpenChange(false);
   }
 
@@ -379,6 +384,10 @@ export function ReviewDialog({ open, onOpenChange }: { open: boolean; onOpenChan
           <DialogFooter className="shrink-0 border-t px-6 py-4">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Keep editing
+            </Button>
+            <Button variant="secondary" onClick={handleSave} disabled={saving}>
+              {saving ? <Loader2 className="size-4 animate-spin" /> : null}
+              Save draft
             </Button>
             <Button onClick={handlePublish} disabled={saving}>
               {saving ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}

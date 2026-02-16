@@ -24,13 +24,13 @@ export function applyAction(data: DatasetData, action: MutationAction): DatasetD
     case "DISCARD_FACT": {
       const fact = data.facts[action.id];
       if (!fact) return data;
-      return { ...data, facts: { ...data.facts, [action.id]: { ...fact, discarded: true } } };
+      return { ...data, facts: { ...data.facts, [action.id]: { ...fact, enabled: false } } };
     }
 
     case "RESTORE_FACT": {
       const fact = data.facts[action.id];
       if (!fact) return data;
-      return { ...data, facts: { ...data.facts, [action.id]: { ...fact, discarded: false } } };
+      return { ...data, facts: { ...data.facts, [action.id]: { ...fact, enabled: true } } };
     }
 
     case "SET_RULE": {
@@ -46,7 +46,7 @@ export function applyAction(data: DatasetData, action: MutationAction): DatasetD
       const rules = [...data.rules];
       const rule = rules[action.index];
       if (!rule) return data;
-      rules[action.index] = { ...rule, discarded: true };
+      rules[action.index] = { ...rule, enabled: false };
       return { ...data, rules };
     }
 
@@ -63,7 +63,7 @@ export function applyAction(data: DatasetData, action: MutationAction): DatasetD
       const questions = [...data.questions];
       const question = questions[action.index];
       if (!question) return data;
-      questions[action.index] = { ...question, discarded: true };
+      questions[action.index] = { ...question, enabled: false };
       return { ...data, questions };
     }
 
@@ -71,7 +71,7 @@ export function applyAction(data: DatasetData, action: MutationAction): DatasetD
       const questions = [...data.questions];
       const question = questions[action.index];
       if (!question) return data;
-      questions[action.index] = { ...question, discarded: false };
+      questions[action.index] = { ...question, enabled: true };
       return { ...data, questions };
     }
 
