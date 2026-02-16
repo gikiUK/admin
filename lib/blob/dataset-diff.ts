@@ -13,7 +13,7 @@ export type FieldDiff = {
 
 export type DiffEntry = {
   kind: DiffKind;
-  entity: "fact" | "question" | "rule";
+  entity: "fact" | "question" | "rule" | "constant";
   key: string;
   label: string;
   href: string | null;
@@ -173,6 +173,28 @@ export function computeDatasetDiff(original: DatasetData, current: DatasetData):
       curr as unknown as Record<string, unknown> | undefined
     );
     if (entry) entries.push(entry);
+  }
+
+  // Constants
+  const allConstantKeys = new Set([...Object.keys(original.constants), ...Object.keys(current.constants)]);
+  for (const groupKey of allConstantKeys) {
+    const origValues = original.constants[groupKey] ?? [];
+    const currValues = current.constants[groupKey] ?? [];
+    const allIds = new Set([...origValues.map((v) => v.id), ...currValues.map((v) => v.id)]);
+    for (const id of allIds) {
+      const orig = origValues.find((v) => v.id === id);
+      const curr = currValues.find((v) => v.id === id);
+      const label = `${groupKey} / ${curr?.name ?? orig?.name ?? `#${id}`}`;
+      const entry = compareEntity(
+        "constant",
+        `const-${groupKey}-${id}`,
+        label,
+        null,
+        orig as unknown as Record<string, unknown> | undefined,
+        curr as unknown as Record<string, unknown> | undefined
+      );
+      if (entry) entries.push(entry);
+    }
   }
 
   return { entries, totalChanges: entries.length };

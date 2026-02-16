@@ -5,6 +5,8 @@ import type { Dataset, DatasetData } from "./types";
 
 // ── State ────────────────────────────────────────────────
 
+export type SaveStatus = "idle" | "saving" | "saved" | "error";
+
 export type DatasetState = {
   live: Dataset | null;
   draft: Dataset | null;
@@ -16,6 +18,12 @@ export type DatasetState = {
   saving: boolean;
   loading: boolean;
   isEditing: boolean;
+  pendingMutations: MutationAction[];
+  draftCreating: boolean;
+  saveStatus: SaveStatus;
+  lastSavedAt: number | null;
+  /** Increments on each mutation, used by auto-save to debounce. */
+  mutationVersion: number;
 };
 
 export const initialState: DatasetState = {
@@ -27,7 +35,12 @@ export const initialState: DatasetState = {
   isDirty: false,
   saving: false,
   loading: true,
-  isEditing: false
+  isEditing: false,
+  pendingMutations: [],
+  draftCreating: false,
+  saveStatus: "idle",
+  lastSavedAt: null,
+  mutationVersion: 0
 };
 
 // ── Actions ──────────────────────────────────────────────
@@ -41,14 +54,19 @@ export type DatasetAction =
   | { type: "LOAD_LIVE"; payload: Dataset }
   | { type: "LOAD_DRAFT"; payload: Dataset }
   | { type: "DRAFT_CREATED"; payload: Dataset }
+  | { type: "DRAFT_CREATING" }
+  | { type: "DRAFT_CREATE_FAILED" }
   | { type: "DRAFT_DELETED" }
   | { type: "DRAFT_PUBLISHED"; payload: Dataset }
   | MutationAction
+  | { type: "QUEUE_MUTATION"; mutation: MutationAction }
   | { type: "UNDO_CHANGE"; entryId: string }
   | { type: "UNDO_ALL" }
   | { type: "REVERT_FIELD"; target: RevertFieldTarget }
   | { type: "SET_SAVING"; saving: boolean }
-  | { type: "MARK_SAVED"; payload: Dataset };
+  | { type: "MARK_SAVED"; payload: Dataset }
+  | { type: "SET_SAVE_STATUS"; status: SaveStatus }
+  | { type: "AUTO_SAVED"; payload: Dataset };
 
 // ── Helpers ──────────────────────────────────────────────
 
@@ -59,7 +77,7 @@ function formatUnknown(v: unknown): string {
   return JSON.stringify(v);
 }
 
-function isMutationAction(action: DatasetAction): action is MutationAction {
+export function isMutationAction(action: DatasetAction): action is MutationAction {
   return (
     action.type === "SET_FACT" ||
     action.type === "ADD_FACT" ||
@@ -71,7 +89,10 @@ function isMutationAction(action: DatasetAction): action is MutationAction {
     action.type === "SET_QUESTION" ||
     action.type === "ADD_QUESTION" ||
     action.type === "DISCARD_QUESTION" ||
-    action.type === "RESTORE_QUESTION"
+    action.type === "RESTORE_QUESTION" ||
+    action.type === "SET_CONSTANT_VALUE" ||
+    action.type === "ADD_CONSTANT_VALUE" ||
+    action.type === "TOGGLE_CONSTANT_VALUE"
   );
 }
 
@@ -100,16 +121,33 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         isEditing: true
       };
 
-    case "DRAFT_CREATED":
+    case "DRAFT_CREATING":
+      return { ...state, draftCreating: true };
+
+    case "DRAFT_CREATE_FAILED":
+      return { ...state, draftCreating: false, pendingMutations: [] };
+
+    case "DRAFT_CREATED": {
+      // Replay any mutations that were queued while draft was being created
+      let data = action.payload.data;
+      const entries: ChangeEntry[] = [];
+      for (const mutation of state.pendingMutations) {
+        entries.push(buildChangeEntry(mutation, data));
+        data = applyAction(data, mutation);
+      }
+      const hasPending = state.pendingMutations.length > 0;
       return {
         ...state,
-        draft: action.payload,
-        dataset: action.payload,
+        draft: { ...action.payload, data },
+        dataset: { ...action.payload, data },
         original: structuredClone(action.payload.data),
-        changeLog: [],
-        isDirty: false,
-        isEditing: true
+        changeLog: entries,
+        isDirty: hasPending,
+        isEditing: true,
+        draftCreating: false,
+        pendingMutations: []
       };
+    }
 
     case "DRAFT_DELETED":
       return {
@@ -135,6 +173,9 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         isEditing: false
       };
 
+    case "QUEUE_MUTATION":
+      return { ...state, pendingMutations: [...state.pendingMutations, action.mutation] };
+
     case "MARK_SAVED":
       return {
         ...state,
@@ -144,6 +185,20 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         changeLog: [],
         isDirty: false,
         saving: false
+      };
+
+    case "SET_SAVE_STATUS":
+      return { ...state, saveStatus: action.status };
+
+    case "AUTO_SAVED":
+      return {
+        ...state,
+        draft: action.payload,
+        original: structuredClone(action.payload.data),
+        changeLog: [],
+        isDirty: false,
+        saveStatus: "saved",
+        lastSavedAt: Date.now()
       };
 
     case "SET_SAVING":
@@ -237,7 +292,8 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         ...state,
         dataset: { ...state.dataset, data },
         changeLog: [...state.changeLog, entry],
-        isDirty: true
+        isDirty: true,
+        mutationVersion: state.mutationVersion + 1
       };
     }
   }

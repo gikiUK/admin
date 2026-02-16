@@ -57,7 +57,8 @@ const kindConfig: Record<DiffKind, { label: string; icon: typeof Plus; color: st
 const entityLabels: Record<DiffEntry["entity"], string> = {
   fact: "Facts",
   question: "Questions",
-  rule: "Rules"
+  rule: "Rules",
+  constant: "Constants"
 };
 
 // ── Inline word diff ────────────────────────────────────
@@ -195,9 +196,9 @@ function DiffCard({
 }
 
 function ReviewTab({ onNavigate }: { onNavigate: () => void }) {
-  const { blob, original, revertField } = useDataset();
+  const { blob, live, revertField } = useDataset();
 
-  const diff = original && blob ? computeDatasetDiff(original, blob) : null;
+  const diff = live && blob ? computeDatasetDiff(live.data, blob) : null;
   if (!diff || diff.totalChanges === 0) {
     return <p className="text-muted-foreground py-8 text-center text-sm">No changes to review.</p>;
   }
@@ -205,12 +206,13 @@ function ReviewTab({ onNavigate }: { onNavigate: () => void }) {
   const grouped = {
     fact: diff.entries.filter((e) => e.entity === "fact"),
     question: diff.entries.filter((e) => e.entity === "question"),
-    rule: diff.entries.filter((e) => e.entity === "rule")
+    rule: diff.entries.filter((e) => e.entity === "rule"),
+    constant: diff.entries.filter((e) => e.entity === "constant")
   };
 
   return (
     <div className="space-y-6">
-      {(["fact", "question", "rule"] as const).map((entity) => {
+      {(["fact", "question", "rule", "constant"] as const).map((entity) => {
         const entries = grouped[entity];
         if (entries.length === 0) return null;
         return (
@@ -320,18 +322,13 @@ function ActivityTab() {
 // ── Main dialog ─────────────────────────────────────────
 
 export function ReviewDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const { isDirty, saving, save, publish, blob, original } = useDataset();
+  const { saving, publish, blob, live } = useDataset();
   const [tab, setTab] = useState<Tab>("review");
 
-  const diff = original && blob ? computeDatasetDiff(original, blob) : null;
+  const diff = live && blob ? computeDatasetDiff(live.data, blob) : null;
   const changeCount = diff?.totalChanges ?? 0;
 
-  async function handleSave() {
-    await save();
-  }
-
   async function handlePublish() {
-    await save();
     await publish();
     onOpenChange(false);
   }
@@ -380,21 +377,15 @@ export function ReviewDialog({ open, onOpenChange }: { open: boolean; onOpenChan
           {tab === "review" ? <ReviewTab onNavigate={() => onOpenChange(false)} /> : <ActivityTab />}
         </div>
 
-        {isDirty && (
-          <DialogFooter className="shrink-0 border-t px-6 py-4">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Keep editing
-            </Button>
-            <Button variant="secondary" onClick={handleSave} disabled={saving}>
-              {saving ? <Loader2 className="size-4 animate-spin" /> : null}
-              Save draft
-            </Button>
-            <Button onClick={handlePublish} disabled={saving}>
-              {saving ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-              Publish
-            </Button>
-          </DialogFooter>
-        )}
+        <DialogFooter className="shrink-0 border-t px-6 py-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Keep editing
+          </Button>
+          <Button onClick={handlePublish} disabled={saving}>
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+            Publish
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
