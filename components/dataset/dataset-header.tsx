@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, FilePenLine, Loader2, Trash2 } from "lucide-react";
+import { Check, Eye, FilePenLine, Loader2, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,14 +13,42 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
+import type { SaveStatus } from "@/lib/blob/dataset-reducer";
 import { useDataset } from "@/lib/blob/use-dataset";
 import { ReviewDialog } from "./review-dialog";
 
+function SaveStatusIndicator({ status }: { status: SaveStatus }) {
+  if (status === "saving") {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Loader2 className="size-3 animate-spin" />
+        Saving...
+      </span>
+    );
+  }
+  if (status === "saved") {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+        <Check className="size-3" />
+        Saved
+      </span>
+    );
+  }
+  if (status === "error") {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-destructive">
+        <X className="size-3" />
+        Save failed
+      </span>
+    );
+  }
+  return null;
+}
+
 export function DatasetHeader() {
-  const { isEditing, isDirty, saving, changeLog, createDraft, deleteDraft, loading } = useDataset();
+  const { isEditing, saving, saveStatus, deleteDraft, loading } = useDataset();
   const [reviewOpen, setReviewOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   if (loading) return null;
@@ -35,12 +63,12 @@ export function DatasetHeader() {
             Draft
           </Badge>
 
-          {isDirty && (
-            <Button size="sm" onClick={() => setReviewOpen(true)} disabled={saving}>
-              <Eye className="size-3" />
-              {changeLog.length} {changeLog.length === 1 ? "change" : "changes"} · Review
-            </Button>
-          )}
+          <SaveStatusIndicator status={saveStatus} />
+
+          <Button size="sm" onClick={() => setReviewOpen(true)} disabled={saving}>
+            <Eye className="size-3" />
+            Review
+          </Button>
 
           <Button
             variant="ghost"
@@ -92,27 +120,12 @@ export function DatasetHeader() {
     );
   }
 
-  // ── Live mode: show start editing button ────────────
+  // ── Live mode: just show badge ────────────
   return (
     <div className="flex items-center gap-2">
       <Badge variant="secondary" className="gap-1">
         Live
       </Badge>
-      <Button
-        size="sm"
-        disabled={creating}
-        onClick={async () => {
-          setCreating(true);
-          try {
-            await createDraft();
-          } finally {
-            setCreating(false);
-          }
-        }}
-      >
-        {creating ? <Loader2 className="size-4 animate-spin" /> : <FilePenLine className="size-4" />}
-        Start editing
-      </Button>
     </div>
   );
 }

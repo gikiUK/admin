@@ -71,6 +71,19 @@ function computeDetails(action: MutationAction, before: DatasetData): FieldChang
       );
     case "ADD_RULE":
       return diffFields(undefined, action.rule as unknown as Record<string, unknown>);
+    case "SET_CONSTANT_VALUE": {
+      const existing = before.constants[action.group]?.find((v) => v.id === action.valueId);
+      return diffFields(
+        existing as unknown as Record<string, unknown> | undefined,
+        action.value as unknown as Record<string, unknown>
+      );
+    }
+    case "ADD_CONSTANT_VALUE":
+      return diffFields(undefined, action.value as unknown as Record<string, unknown>);
+    case "TOGGLE_CONSTANT_VALUE": {
+      const val = before.constants[action.group]?.find((v) => v.id === action.valueId);
+      return val ? [{ field: "enabled", from: formatValue(val.enabled), to: formatValue(action.enabled) }] : [];
+    }
     default:
       return [];
   }
@@ -100,6 +113,12 @@ function describeAction(action: MutationAction): string {
       return `Disabled question #${action.index + 1}`;
     case "RESTORE_QUESTION":
       return `Enabled question #${action.index + 1}`;
+    case "SET_CONSTANT_VALUE":
+      return `Edited constant "${action.group}" value #${action.valueId}`;
+    case "ADD_CONSTANT_VALUE":
+      return `Added value "${action.value.name}" to "${action.group}"`;
+    case "TOGGLE_CONSTANT_VALUE":
+      return `${action.enabled ? "Enabled" : "Disabled"} constant "${action.group}" value #${action.valueId}`;
     default:
       return "Unknown change";
   }

@@ -1,4 +1,4 @@
-import type { BlobFact, BlobQuestion, BlobRule, DatasetData } from "./types";
+import type { BlobConstantValue, BlobFact, BlobQuestion, BlobRule, DatasetData } from "./types";
 
 // ── Mutation actions (data-only subset of DatasetAction) ──
 
@@ -13,7 +13,10 @@ export type MutationAction =
   | { type: "SET_QUESTION"; index: number; question: BlobQuestion }
   | { type: "ADD_QUESTION"; question: BlobQuestion }
   | { type: "DISCARD_QUESTION"; index: number }
-  | { type: "RESTORE_QUESTION"; index: number };
+  | { type: "RESTORE_QUESTION"; index: number }
+  | { type: "SET_CONSTANT_VALUE"; group: string; valueId: number; value: BlobConstantValue }
+  | { type: "ADD_CONSTANT_VALUE"; group: string; value: BlobConstantValue }
+  | { type: "TOGGLE_CONSTANT_VALUE"; group: string; valueId: number; enabled: boolean };
 
 export function applyAction(data: DatasetData, action: MutationAction): DatasetData {
   switch (action.type) {
@@ -73,6 +76,38 @@ export function applyAction(data: DatasetData, action: MutationAction): DatasetD
       if (!question) return data;
       questions[action.index] = { ...question, enabled: true };
       return { ...data, questions };
+    }
+
+    case "SET_CONSTANT_VALUE": {
+      const group = data.constants[action.group];
+      if (!group) return data;
+      return {
+        ...data,
+        constants: {
+          ...data.constants,
+          [action.group]: group.map((v) => (v.id === action.valueId ? action.value : v))
+        }
+      };
+    }
+
+    case "ADD_CONSTANT_VALUE": {
+      const existing = data.constants[action.group] ?? [];
+      return {
+        ...data,
+        constants: { ...data.constants, [action.group]: [...existing, action.value] }
+      };
+    }
+
+    case "TOGGLE_CONSTANT_VALUE": {
+      const group = data.constants[action.group];
+      if (!group) return data;
+      return {
+        ...data,
+        constants: {
+          ...data.constants,
+          [action.group]: group.map((v) => (v.id === action.valueId ? { ...v, enabled: action.enabled } : v))
+        }
+      };
     }
 
     default:

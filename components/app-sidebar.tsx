@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Database, FileQuestion, ListChecks, LogOut } from "lucide-react";
+import { Braces, ChevronRight, Database, FileQuestion, ListChecks, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -21,7 +21,8 @@ import { useAuth } from "@/lib/auth/auth-context";
 const dataItems = [
   { title: "Facts", href: "/data/facts", icon: Database },
   { title: "Questions", href: "/data/questions", icon: FileQuestion },
-  { title: "Constants", href: "/data/constants", icon: ListChecks }
+  { title: "Constants", href: "/data/constants", icon: ListChecks },
+  { title: "Raw JSON", href: "/data/raw", icon: Braces }
 ];
 
 export function AppSidebar() {
