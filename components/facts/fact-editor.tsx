@@ -59,9 +59,7 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
   // Rules for this fact
   const factRules = (() => {
     if (!blob || !factId) return [];
-    return blob.rules
-      .map((r, i) => ({ rule: r, index: i }))
-      .filter(({ rule }) => rule.sets === factId && !rule.discarded);
+    return blob.rules.map((r, i) => ({ rule: r, index: i })).filter(({ rule }) => rule.sets === factId && rule.enabled);
   })();
 
   function handleFieldChange(field: keyof BlobFact, value: string | boolean) {
@@ -94,6 +92,7 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
         type: newType,
         core: newCore,
         category: assignCategory(id),
+        enabled: true,
         ...(newValuesRef ? { values_ref: newValuesRef } : {})
       }
     });
@@ -108,7 +107,7 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
     if (!factId) return;
     dispatch({
       type: "ADD_RULE",
-      rule: { sets: factId, value: false, source: "general", when: { "": true } }
+      rule: { sets: factId, value: false, source: "general", when: { "": true }, enabled: true }
     });
   }
 
@@ -217,7 +216,7 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
           <ArrowLeft className="size-4" /> Back to Facts
         </Link>
 
-        {fact.discarded ? (
+        {!fact.enabled ? (
           <Button variant="outline" size="sm" onClick={handleRestore}>
             <RotateCcw className="size-3" /> Restore
           </Button>
@@ -250,12 +249,12 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
       </div>
 
       <h1 className="text-2xl font-semibold tracking-tight">
-        {fact.discarded && <span className="text-muted-foreground line-through">Edit: {factId}</span>}
-        {!fact.discarded && `Edit: ${factId}`}
+        {!fact.enabled && <span className="text-muted-foreground line-through">Edit: {factId}</span>}
+        {!!fact.enabled && `Edit: ${factId}`}
       </h1>
 
       {/* Properties */}
-      <Card className={fact.discarded ? "opacity-50" : undefined}>
+      <Card className={!fact.enabled ? "opacity-50" : undefined}>
         <CardHeader>
           <h2 className="text-sm font-semibold">Properties</h2>
         </CardHeader>
@@ -318,7 +317,7 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
       {enriched && <FactSourcesCard relationships={enriched.relationships} />}
 
       {/* Rules */}
-      <Card className={fact.discarded ? "opacity-50" : undefined}>
+      <Card className={!fact.enabled ? "opacity-50" : undefined}>
         <CardContent className="pt-6">
           <RuleEditor
             rules={factRules}

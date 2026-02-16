@@ -1,6 +1,6 @@
 // ── Condition types ──────────────────────────────────────
 
-export type SimpleCondition = Record<string, string | boolean | string[]>;
+export type SimpleCondition = Record<string, string | boolean | number | number[] | string[]>;
 
 export type AnyCondition = { any: SimpleCondition[] };
 
@@ -13,9 +13,9 @@ export type FactType = "boolean_state" | "enum" | "array";
 export type BlobFact = {
   type: FactType;
   core: boolean;
-  category: string;
+  category?: string;
   values_ref?: string;
-  discarded?: boolean;
+  enabled: boolean;
 };
 
 // ── Question ─────────────────────────────────────────────
@@ -39,7 +39,7 @@ export type BlobQuestion = {
   show_when?: BlobCondition;
   hide_when?: BlobCondition;
   unknowable?: boolean;
-  discarded?: boolean;
+  enabled: boolean;
 };
 
 // ── Rule ─────────────────────────────────────────────────
@@ -49,15 +49,31 @@ export type BlobRule = {
   value: boolean | string;
   source: "general" | "hotspot";
   when: BlobCondition;
-  discarded?: boolean;
+  enabled: boolean;
 };
 
 // ── Action condition ─────────────────────────────────────
 
+export type BlobDismissOption = {
+  label: string;
+  sets: Record<string, boolean | string> | null;
+};
+
 export type BlobActionCondition = {
+  enabled: boolean;
   include_when: BlobCondition;
   exclude_when: BlobCondition;
-  discarded?: boolean;
+  dismiss_options?: BlobDismissOption[];
+};
+
+// ── Constants ────────────────────────────────────────────
+
+export type BlobConstantValue = {
+  id: number;
+  name: string;
+  label?: string;
+  description: string | null;
+  enabled: boolean;
 };
 
 // ── Dataset ──────────────────────────────────────────────
@@ -66,6 +82,7 @@ export type DatasetData = {
   facts: Record<string, BlobFact>;
   questions: BlobQuestion[];
   rules: BlobRule[];
+  constants: Record<string, BlobConstantValue[]>;
   action_conditions: Record<string, BlobActionCondition>;
 };
 
@@ -83,10 +100,8 @@ export type DatasetBlob = {
 export type DatasetStatus = "live" | "draft";
 
 export type DatasetMeta = {
-  id: string;
+  id: number;
   status: DatasetStatus;
-  created_at: string;
-  updated_at: string;
 };
 
 export type Dataset = DatasetMeta & DatasetBlob;
@@ -119,7 +134,7 @@ export type EnrichedFact = {
   core: boolean;
   category: string;
   values_ref?: string;
-  discarded?: boolean;
+  enabled: boolean;
   relationships: FactRelationships;
 };
 

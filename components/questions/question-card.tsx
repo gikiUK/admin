@@ -22,7 +22,7 @@ export function QuestionCard({ question, conditionallyHidden }: QuestionCardProp
         className={cn(
           "transition-colors hover:border-primary/40",
           conditionallyHidden && "border-dashed opacity-80",
-          q.discarded && "opacity-50"
+          !q.enabled && "opacity-50"
         )}
       >
         <CardHeader>
