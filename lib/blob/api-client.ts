@@ -34,6 +34,9 @@ async function api<T>(path: string, options?: RequestInit): Promise<T> {
     ...options
   });
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
     const body = await res.json().catch(() => ({}));
     throw new ApiError(res.status, body.error?.type, body.error?.message);
   }
