@@ -11,7 +11,6 @@ import {
   RotateCcw,
   Send,
   SquarePen,
-  Trash2,
   Undo2
 } from "lucide-react";
 import Link from "next/link";
