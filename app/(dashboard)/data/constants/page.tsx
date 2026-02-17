@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeOff, Plus, Search, X } from "lucide-react";
+import { Eye, EyeOff, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -107,43 +107,13 @@ function EditConstantDialog({
 function ValuePill({
   value,
   onEdit,
-  onToggle,
-  onDelete
+  onToggle
 }: {
   value: BlobConstantValue;
   onEdit: () => void;
   onToggle: () => void;
-  onDelete: () => void;
 }) {
-  const [confirming, setConfirming] = useState(false);
   const display = value.label ?? value.name;
-
-  if (confirming) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-destructive/30 bg-destructive/10 px-3 py-1 text-sm">
-        <span className="text-destructive">Delete?</span>
-        <button
-          type="button"
-          className="font-medium text-destructive hover:underline"
-          onClick={() => {
-            onDelete();
-            setConfirming(false);
-          }}
-        >
-          Yes
-        </button>
-        <span className="text-muted-foreground">/</span>
-        <button
-          type="button"
-          className="font-medium text-muted-foreground hover:underline"
-          onClick={() => setConfirming(false)}
-        >
-          No
-        </button>
-      </span>
-    );
-  }
-
   const ToggleIcon = value.enabled ? EyeOff : Eye;
 
   return (
@@ -168,7 +138,7 @@ function ValuePill({
             <button
               type="button"
               className={cn(
-                "cursor-pointer py-1 pl-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100",
+                "cursor-pointer rounded-r-full py-1 pr-2 pl-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100",
                 value.enabled ? "hover:text-foreground" : "hover:text-primary"
               )}
               onClick={onToggle}
@@ -177,18 +147,6 @@ function ValuePill({
             </button>
           </TooltipTrigger>
           <TooltipContent>{value.enabled ? "Disable" : "Enable"}</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              className="cursor-pointer rounded-r-full py-1 pr-2 pl-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-              onClick={() => setConfirming(true)}
-            >
-              <X className="size-3" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>Delete</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     </span>
@@ -206,14 +164,12 @@ function ConstantGroupCard({
   values,
   onEditValue,
   onToggleValue,
-  onDeleteValue,
   onAddValue
 }: {
   groupKey: string;
   values: BlobConstantValue[];
   onEditValue: (group: string, value: BlobConstantValue) => void;
   onToggleValue: (group: string, valueId: number, enabled: boolean) => void;
-  onDeleteValue: (group: string, valueId: number) => void;
   onAddValue: (group: string) => void;
 }) {
   const [search, setSearch] = useState("");
@@ -283,7 +239,6 @@ function ConstantGroupCard({
               value={value}
               onEdit={() => onEditValue(groupKey, value)}
               onToggle={() => onToggleValue(groupKey, value.id, !value.enabled)}
-              onDelete={() => onDeleteValue(groupKey, value.id)}
             />
           ))}
           {filtered.length === 0 && (
@@ -325,10 +280,6 @@ export default function ConstantsPage() {
     dispatch({ type: "TOGGLE_CONSTANT_VALUE", group, valueId, enabled });
   }
 
-  function handleDeleteValue(group: string, valueId: number) {
-    dispatch({ type: "DELETE_CONSTANT_VALUE", group, valueId });
-  }
-
   function handleSave(state: EditState) {
     if (state.isNew) {
       dispatch({ type: "ADD_CONSTANT_VALUE", group: state.group, value: state.value });
@@ -350,7 +301,6 @@ export default function ConstantsPage() {
             values={values}
             onEditValue={handleEditValue}
             onToggleValue={handleToggleValue}
-            onDeleteValue={handleDeleteValue}
             onAddValue={handleAddValue}
           />
         ))}

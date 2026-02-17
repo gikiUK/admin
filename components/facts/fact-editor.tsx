@@ -141,6 +141,10 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
     dispatch({ type: "DISCARD_RULE", index: globalIndex });
   }
 
+  function handleRestoreRule(globalIndex: number) {
+    dispatch({ type: "RESTORE_RULE", index: globalIndex });
+  }
+
   if (isNew) {
     return (
       <div className="mx-auto max-w-3xl space-y-6">
@@ -352,6 +356,7 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
             onChange={handleRuleChange}
             onAdd={handleAddRule}
             onDiscard={handleDiscardRule}
+            onRestore={handleRestoreRule}
           />
         </CardContent>
       </Card>
