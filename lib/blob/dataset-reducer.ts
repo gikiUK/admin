@@ -150,7 +150,8 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         isDirty: hasPending,
         isEditing: true,
         draftCreating: false,
-        pendingMutations: []
+        pendingMutations: [],
+        mutationVersion: hasPending ? state.mutationVersion + 1 : state.mutationVersion
       };
     }
 

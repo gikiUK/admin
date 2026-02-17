@@ -1,8 +1,8 @@
 "use client";
 
-import { Check, Eye, FilePenLine, Loader2, Trash2, X } from "lucide-react";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { formatDistanceToNow } from "date-fns";
+import { CloudCheck, Eye, FilePenLine, Globe, Loader2, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,74 +13,128 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SaveStatus } from "@/lib/blob/dataset-reducer";
 import { useDataset } from "@/lib/blob/use-dataset";
 import { ReviewDialog } from "./review-dialog";
 
-function SaveStatusIndicator({ status }: { status: SaveStatus }) {
-  if (status === "saving") {
+function SavedTimeAgo({ lastSavedAt, saveStatus }: { lastSavedAt: number | null; saveStatus: SaveStatus }) {
+  const [visible, setVisible] = useState(false);
+  const [, setTick] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Show "Saved successfully" for 3s then fade out
+  useEffect(() => {
+    if (saveStatus === "saved" && lastSavedAt) {
+      setVisible(true);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setVisible(false), 3000);
+    }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [saveStatus, lastSavedAt]);
+
+  // Re-render periodically to keep relative time in tooltip fresh
+  useEffect(() => {
+    if (!lastSavedAt) return;
+    const id = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(id);
+  }, [lastSavedAt]);
+
+  if (saveStatus === "error") {
     return (
-      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Loader2 className="size-3 animate-spin" />
-        Saving...
-      </span>
-    );
-  }
-  if (status === "saved") {
-    return (
-      <span className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
-        <Check className="size-3" />
-        Saved
-      </span>
-    );
-  }
-  if (status === "error") {
-    return (
-      <span className="flex items-center gap-1.5 text-xs text-destructive">
+      <span className="flex items-center gap-1.5 text-sm text-destructive">
         <X className="size-3" />
         Save failed
       </span>
     );
   }
-  return null;
+
+  const isSyncing = saveStatus === "saving";
+
+  if (!isSyncing && !lastSavedAt) return null;
+
+  return (
+    <span className="flex items-center gap-1.5 text-sm">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {isSyncing ? (
+              <Loader2 className="size-3.5 text-muted-foreground animate-spin" />
+            ) : (
+              <CloudCheck className="size-3.5 text-green-600 dark:text-green-400 cursor-default" />
+            )}
+          </TooltipTrigger>
+          {lastSavedAt && (
+            <TooltipContent>Draft changes saved {formatDistanceToNow(lastSavedAt, { addSuffix: true })}</TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
+      <span
+        className={`transition-opacity duration-500 ${isSyncing ? "opacity-100 text-muted-foreground" : visible ? "opacity-100 text-green-600 dark:text-green-400" : "opacity-0 text-green-600 dark:text-green-400"}`}
+        aria-live="polite"
+      >
+        {isSyncing ? "Syncing..." : "Synced"}
+      </span>
+    </span>
+  );
 }
 
 export function DatasetHeader() {
-  const { isEditing, saving, saveStatus, deleteDraft, loading } = useDataset();
+  const { isEditing, saving, deleteDraft, loading } = useDataset();
   const [reviewOpen, setReviewOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   if (loading) return null;
 
-  // ── Editing mode: show draft controls ───────────────
   if (isEditing) {
     return (
       <>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="gap-1 border-amber-500/40 text-amber-600 dark:text-amber-400">
-            <FilePenLine className="size-3" />
-            Draft
-          </Badge>
+        <TooltipProvider>
+          <div className="flex items-center rounded-full bg-muted/60 border border-border h-8 overflow-hidden">
+            {/* Mode indicator */}
+            <div className="flex items-center gap-1.5 pl-3 pr-2 text-xs font-medium text-amber-600 dark:text-amber-400">
+              <FilePenLine className="size-3" />
+              Draft
+            </div>
 
-          <SaveStatusIndicator status={saveStatus} />
+            <div className="w-px h-4 bg-border" />
 
-          <Button size="sm" onClick={() => setReviewOpen(true)} disabled={saving}>
-            <Eye className="size-3" />
-            Review
-          </Button>
+            {/* Review */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center justify-center px-2.5 h-full text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+                  onClick={() => setReviewOpen(true)}
+                  disabled={saving}
+                >
+                  <Eye className="size-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Review changes</TooltipContent>
+            </Tooltip>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive"
-            onClick={() => setDiscardOpen(true)}
-            disabled={saving}
-          >
-            <Trash2 className="size-3" />
-            Discard draft
-          </Button>
-        </div>
+            <div className="w-px h-4 bg-border" />
+
+            {/* Discard */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center justify-center px-2.5 pr-3 h-full text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+                  onClick={() => setDiscardOpen(true)}
+                  disabled={saving}
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Discard draft</TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
 
         <ReviewDialog open={reviewOpen} onOpenChange={setReviewOpen} />
 
@@ -120,12 +174,15 @@ export function DatasetHeader() {
     );
   }
 
-  // ── Live mode: just show badge ────────────
+  // ── Live mode ────────────
   return (
-    <div className="flex items-center gap-2">
-      <Badge variant="secondary" className="gap-1">
+    <div className="flex items-center rounded-full bg-muted/60 border border-border h-8 overflow-hidden">
+      <div className="flex items-center gap-1.5 px-3 text-xs font-medium text-green-600 dark:text-green-400">
+        <Globe className="size-3" />
         Live
-      </Badge>
+      </div>
     </div>
   );
 }
+
+export { SavedTimeAgo };
