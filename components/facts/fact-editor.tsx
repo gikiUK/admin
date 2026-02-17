@@ -3,7 +3,7 @@
 import { ArrowLeft, RotateCcw, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -26,6 +26,32 @@ import { useDataset } from "@/lib/blob/use-dataset";
 import { assignCategory } from "@/lib/data/fact-categories";
 import { FactSourcesCard } from "./fact-sources-card";
 import { RuleEditor } from "./rule-editor";
+
+function BlurInput({
+  value,
+  onCommit,
+  ...props
+}: Omit<React.ComponentProps<typeof Input>, "onChange" | "defaultValue"> & {
+  value: string;
+  onCommit: (value: string) => void;
+}) {
+  const [local, setLocal] = useState(value);
+
+  useEffect(() => {
+    setLocal(value);
+  }, [value]);
+
+  return (
+    <Input
+      {...props}
+      value={local}
+      onChange={(e) => setLocal(e.target.value)}
+      onBlur={() => {
+        if (local !== value) onCommit(local);
+      }}
+    />
+  );
+}
 
 type FactEditorProps = {
   factId?: string;
@@ -302,10 +328,10 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
 
           <div className="space-y-2">
             <Label htmlFor="values-ref">Values ref</Label>
-            <Input
+            <BlurInput
               id="values-ref"
               value={fact.values_ref ?? ""}
-              onChange={(e) => handleFieldChange("values_ref", e.target.value)}
+              onCommit={(v) => handleFieldChange("values_ref", v)}
               placeholder="e.g. industries"
               className="font-mono"
             />

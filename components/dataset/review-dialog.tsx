@@ -3,6 +3,7 @@
 import {
   Clock,
   ExternalLink,
+  EyeOff,
   GitCompare,
   Loader2,
   Minus,
@@ -17,7 +18,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import type { ChangeEntry, FieldChange } from "@/lib/blob/change-log";
 import {
@@ -44,8 +52,8 @@ const kindConfig: Record<DiffKind, { label: string; icon: typeof Plus; color: st
   },
   disabled: {
     label: "Disabled",
-    icon: Trash2,
-    color: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+    icon: EyeOff,
+    color: "bg-muted text-muted-foreground"
   },
   restored: {
     label: "Restored",
@@ -99,6 +107,13 @@ function buildRevertTarget(entry: DiffEntry, fieldName: string): RevertFieldTarg
   if (entry.entity === "rule") {
     const index = Number.parseInt(entry.key.replace("r-", ""), 10);
     return { entity: "rule", index, field: fieldName };
+  }
+  if (entry.entity === "constant") {
+    // key format: "const-{group}-{id}"
+    const match = entry.key.match(/^const-(.+)-(\d+)$/);
+    if (match) {
+      return { entity: "constant", group: match[1], valueId: Number.parseInt(match[2], 10), field: fieldName };
+    }
   }
   return null;
 }
@@ -159,9 +174,16 @@ function DiffCard({
 }) {
   const config = kindConfig[entry.kind];
   const Icon = config.icon;
+  const canRevertWhole =
+    (entry.kind === "disabled" || entry.kind === "restored") && buildRevertTarget(entry, "enabled") !== null;
+
+  function handleRevertWhole() {
+    const target = buildRevertTarget(entry, "enabled");
+    if (target) onRevert(target);
+  }
 
   return (
-    <div className="rounded-lg border bg-card">
+    <div className={`rounded-lg border bg-card ${entry.kind === "disabled" ? "border-dashed bg-muted/30" : ""}`}>
       <div className="flex items-center justify-between gap-3 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <Badge className={`gap-1 ${config.color}`}>
@@ -170,15 +192,28 @@ function DiffCard({
           </Badge>
           <span className="font-mono text-sm font-medium">{entry.label}</span>
         </div>
-        {entry.href && (
-          <Link
-            href={entry.href}
-            onClick={onNavigate}
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs"
-          >
-            View <ExternalLink className="size-3" />
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          {canRevertWhole && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRevertWhole}
+              className="text-muted-foreground hover:text-foreground h-7 gap-1 px-2 text-xs"
+            >
+              <Undo2 className="size-3" />
+              Undo
+            </Button>
+          )}
+          {entry.href && (
+            <Link
+              href={entry.href}
+              onClick={onNavigate}
+              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs"
+            >
+              View <ExternalLink className="size-3" />
+            </Link>
+          )}
+        </div>
       </div>
 
       {entry.fields.length > 0 && (
@@ -322,11 +357,14 @@ function ActivityTab() {
 // ── Main dialog ─────────────────────────────────────────
 
 export function ReviewDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const { saving, publish, blob, live } = useDataset();
+  const { saving, publish, deleteDraft, changeLog, blob, live } = useDataset();
   const [tab, setTab] = useState<Tab>("review");
+  const [discardOpen, setDiscardOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const diff = live && blob ? computeDatasetDiff(live.data, blob) : null;
   const changeCount = diff?.totalChanges ?? 0;
+  const hasActivity = changeLog.length > 0;
 
   async function handlePublish() {
     await publish();
@@ -334,59 +372,105 @@ export function ReviewDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
-        <DialogHeader className="shrink-0 space-y-3 px-6 pt-6 pb-4">
-          <DialogTitle className="text-lg">
-            Review changes
-            <span className="text-muted-foreground ml-2 text-sm font-normal">
-              {changeCount} {changeCount === 1 ? "change" : "changes"}
-            </span>
-          </DialogTitle>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
+          <DialogHeader className="shrink-0 space-y-3 px-6 pt-6 pb-4">
+            <DialogTitle className="text-lg">
+              Review changes
+              <span className="text-muted-foreground ml-2 text-sm font-normal">
+                {changeCount} {changeCount === 1 ? "change" : "changes"}
+              </span>
+            </DialogTitle>
 
-          {/* Tab switcher */}
-          <div className="bg-muted inline-flex rounded-lg p-1">
-            <button
-              type="button"
-              onClick={() => setTab("review")}
-              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                tab === "review"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <GitCompare className="size-3" />
-              Review
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("activity")}
-              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                tab === "activity"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Clock className="size-3" />
-              Activity
-            </button>
+            {hasActivity && (
+              <div className="bg-muted inline-flex rounded-lg p-1">
+                <button
+                  type="button"
+                  onClick={() => setTab("review")}
+                  className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                    tab === "review"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <GitCompare className="size-3" />
+                  Review
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTab("activity")}
+                  className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                    tab === "activity"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Clock className="size-3" />
+                  Activity
+                </button>
+              </div>
+            )}
+          </DialogHeader>
+
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-4">
+            {tab === "review" || !hasActivity ? <ReviewTab onNavigate={() => onOpenChange(false)} /> : <ActivityTab />}
           </div>
-        </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-4">
-          {tab === "review" ? <ReviewTab onNavigate={() => onOpenChange(false)} /> : <ActivityTab />}
-        </div>
+          <DialogFooter className="shrink-0 border-t px-6 py-4">
+            <Button
+              variant="ghost"
+              className="text-destructive hover:text-destructive mr-auto"
+              onClick={() => setDiscardOpen(true)}
+              disabled={saving}
+            >
+              <Trash2 className="size-4" />
+              Discard draft
+            </Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Keep editing
+            </Button>
+            <Button onClick={handlePublish} disabled={saving}>
+              {saving ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+              Publish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-        <DialogFooter className="shrink-0 border-t px-6 py-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Keep editing
-          </Button>
-          <Button onClick={handlePublish} disabled={saving}>
-            {saving ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-            Publish
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <Dialog open={discardOpen} onOpenChange={setDiscardOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Discard draft</DialogTitle>
+            <DialogDescription>
+              This will permanently delete the current draft. All unsaved changes will be lost. The live dataset will
+              remain unchanged.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDiscardOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleting}
+              onClick={async () => {
+                setDeleting(true);
+                try {
+                  await deleteDraft();
+                  setDiscardOpen(false);
+                  onOpenChange(false);
+                } finally {
+                  setDeleting(false);
+                }
+              }}
+            >
+              {deleting && <Loader2 className="size-4 animate-spin" />}
+              Discard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -22,8 +22,10 @@ export type DatasetState = {
   draftCreating: boolean;
   saveStatus: SaveStatus;
   lastSavedAt: number | null;
-  /** Increments on each mutation, used by auto-save to debounce. */
+  /** Increments on each data change (mutation, undo, revert), used by auto-save to debounce. */
   mutationVersion: number;
+  /** Set to mutationVersion after a successful auto-save. */
+  savedVersion: number;
 };
 
 export const initialState: DatasetState = {
@@ -40,7 +42,8 @@ export const initialState: DatasetState = {
   draftCreating: false,
   saveStatus: "idle",
   lastSavedAt: null,
-  mutationVersion: 0
+  mutationVersion: 0,
+  savedVersion: 0
 };
 
 // ── Actions ──────────────────────────────────────────────
@@ -48,7 +51,8 @@ export const initialState: DatasetState = {
 export type RevertFieldTarget =
   | { entity: "fact"; key: string; field: string }
   | { entity: "question"; index: number; field: string }
-  | { entity: "rule"; index: number; field: string };
+  | { entity: "rule"; index: number; field: string }
+  | { entity: "constant"; group: string; valueId: number; field: string };
 
 export type DatasetAction =
   | { type: "LOAD_LIVE"; payload: Dataset }
@@ -66,7 +70,7 @@ export type DatasetAction =
   | { type: "SET_SAVING"; saving: boolean }
   | { type: "MARK_SAVED"; payload: Dataset }
   | { type: "SET_SAVE_STATUS"; status: SaveStatus }
-  | { type: "AUTO_SAVED"; payload: Dataset };
+  | { type: "AUTO_SAVED"; payload: Dataset; savedVersion: number };
 
 // ── Helpers ──────────────────────────────────────────────
 
@@ -92,7 +96,8 @@ export function isMutationAction(action: DatasetAction): action is MutationActio
     action.type === "RESTORE_QUESTION" ||
     action.type === "SET_CONSTANT_VALUE" ||
     action.type === "ADD_CONSTANT_VALUE" ||
-    action.type === "TOGGLE_CONSTANT_VALUE"
+    action.type === "TOGGLE_CONSTANT_VALUE" ||
+    action.type === "DELETE_CONSTANT_VALUE"
   );
 }
 
@@ -115,9 +120,9 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         ...state,
         draft: action.payload,
         dataset: action.payload,
-        original: structuredClone(action.payload.data),
+        original: state.live ? structuredClone(state.live.data) : structuredClone(action.payload.data),
         changeLog: [],
-        isDirty: false,
+        isDirty: state.live ? JSON.stringify(state.live.data) !== JSON.stringify(action.payload.data) : false,
         isEditing: true
       };
 
@@ -140,12 +145,13 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         ...state,
         draft: { ...action.payload, data },
         dataset: { ...action.payload, data },
-        original: structuredClone(action.payload.data),
+        original: state.live ? structuredClone(state.live.data) : structuredClone(action.payload.data),
         changeLog: entries,
         isDirty: hasPending,
         isEditing: true,
         draftCreating: false,
-        pendingMutations: []
+        pendingMutations: [],
+        mutationVersion: hasPending ? state.mutationVersion + 1 : state.mutationVersion
       };
     }
 
@@ -181,7 +187,7 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         ...state,
         draft: action.payload,
         dataset: action.payload,
-        original: structuredClone(action.payload.data),
+        original: state.live ? structuredClone(state.live.data) : structuredClone(action.payload.data),
         changeLog: [],
         isDirty: false,
         saving: false
@@ -190,16 +196,21 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
     case "SET_SAVE_STATUS":
       return { ...state, saveStatus: action.status };
 
-    case "AUTO_SAVED":
+    case "AUTO_SAVED": {
+      // Keep local data — server response is stale if edits happened during save.
+      // Only adopt server metadata (id, status) and mark the saved version.
+      const localData = state.dataset?.data ?? action.payload.data;
+      const merged: Dataset = { ...action.payload, data: localData };
       return {
         ...state,
-        draft: action.payload,
-        original: structuredClone(action.payload.data),
-        changeLog: [],
-        isDirty: false,
+        draft: merged,
+        dataset: merged,
+        changeLog: state.changeLog,
+        savedVersion: action.savedVersion,
         saveStatus: "saved",
         lastSavedAt: Date.now()
       };
+    }
 
     case "SET_SAVING":
       return { ...state, saving: action.saving };
@@ -212,7 +223,8 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         ...state,
         dataset: { ...state.dataset, data },
         changeLog: remaining,
-        isDirty: remaining.length > 0
+        isDirty: remaining.length > 0,
+        mutationVersion: state.mutationVersion + 1
       };
     }
 
@@ -222,12 +234,14 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         ...state,
         dataset: { ...state.dataset, data: structuredClone(state.original) },
         changeLog: [],
-        isDirty: false
+        isDirty: false,
+        mutationVersion: state.mutationVersion + 1
       };
     }
 
     case "REVERT_FIELD": {
-      if (!state.dataset || !state.original) return state;
+      if (!state.dataset || !state.live) return state;
+      const liveData = state.live.data;
       const { target } = action;
       const data = structuredClone(state.dataset.data);
       let entityLabel = "";
@@ -235,7 +249,7 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
       let toVal = "";
 
       if (target.entity === "fact") {
-        const orig = state.original.facts[target.key];
+        const orig = liveData.facts[target.key];
         const curr = data.facts[target.key];
         if (orig && curr) {
           fromVal = formatUnknown((curr as Record<string, unknown>)[target.field]);
@@ -244,7 +258,7 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
           entityLabel = target.key;
         }
       } else if (target.entity === "question") {
-        const orig = state.original.questions[target.index];
+        const orig = liveData.questions[target.index];
         const curr = data.questions[target.index];
         if (orig && curr) {
           fromVal = formatUnknown((curr as Record<string, unknown>)[target.field]);
@@ -253,7 +267,7 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
           entityLabel = `question #${target.index + 1}`;
         }
       } else if (target.entity === "rule") {
-        const orig = state.original.rules[target.index];
+        const orig = liveData.rules[target.index];
         const curr = data.rules[target.index];
         if (orig && curr) {
           fromVal = formatUnknown((curr as Record<string, unknown>)[target.field]);
@@ -261,9 +275,25 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
           (curr as Record<string, unknown>)[target.field] = (orig as Record<string, unknown>)[target.field];
           entityLabel = `rule #${target.index + 1}`;
         }
+      } else if (target.entity === "constant") {
+        const origGroup = liveData.constants[target.group] ?? [];
+        const currGroup = data.constants[target.group] ?? [];
+        const orig = origGroup.find((v) => v.id === target.valueId);
+        const currIdx = currGroup.findIndex((v) => v.id === target.valueId);
+        const curr = currIdx >= 0 ? currGroup[currIdx] : undefined;
+        if (orig && curr) {
+          fromVal = formatUnknown((curr as Record<string, unknown>)[target.field]);
+          toVal = formatUnknown((orig as Record<string, unknown>)[target.field]);
+          const restored = { ...curr, [target.field]: (orig as Record<string, unknown>)[target.field] };
+          data.constants = {
+            ...data.constants,
+            [target.group]: currGroup.map((v) => (v.id === target.valueId ? restored : v))
+          };
+          entityLabel = `${target.group} / ${curr.name}`;
+        }
       }
 
-      const hasChanges = JSON.stringify(data) !== JSON.stringify(state.original);
+      const hasChanges = JSON.stringify(data) !== JSON.stringify(liveData);
       const revertEntry: ChangeEntry = {
         id: crypto.randomUUID(),
         timestamp: Date.now(),
@@ -277,7 +307,8 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         ...state,
         dataset: { ...state.dataset, data },
         changeLog: [...state.changeLog, revertEntry],
-        isDirty: hasChanges
+        isDirty: hasChanges,
+        mutationVersion: state.mutationVersion + 1
       };
     }
 

@@ -16,7 +16,8 @@ export type MutationAction =
   | { type: "RESTORE_QUESTION"; index: number }
   | { type: "SET_CONSTANT_VALUE"; group: string; valueId: number; value: BlobConstantValue }
   | { type: "ADD_CONSTANT_VALUE"; group: string; value: BlobConstantValue }
-  | { type: "TOGGLE_CONSTANT_VALUE"; group: string; valueId: number; enabled: boolean };
+  | { type: "TOGGLE_CONSTANT_VALUE"; group: string; valueId: number; enabled: boolean }
+  | { type: "DELETE_CONSTANT_VALUE"; group: string; valueId: number };
 
 export function applyAction(data: DatasetData, action: MutationAction): DatasetData {
   switch (action.type) {
@@ -106,6 +107,18 @@ export function applyAction(data: DatasetData, action: MutationAction): DatasetD
         constants: {
           ...data.constants,
           [action.group]: group.map((v) => (v.id === action.valueId ? { ...v, enabled: action.enabled } : v))
+        }
+      };
+    }
+
+    case "DELETE_CONSTANT_VALUE": {
+      const group = data.constants[action.group];
+      if (!group) return data;
+      return {
+        ...data,
+        constants: {
+          ...data.constants,
+          [action.group]: group.filter((v) => v.id !== action.valueId)
         }
       };
     }
