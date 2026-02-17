@@ -84,6 +84,10 @@ function computeDetails(action: MutationAction, before: DatasetData): FieldChang
       const val = before.constants[action.group]?.find((v) => v.id === action.valueId);
       return val ? [{ field: "enabled", from: formatValue(val.enabled), to: formatValue(action.enabled) }] : [];
     }
+    case "DELETE_CONSTANT_VALUE": {
+      const val = before.constants[action.group]?.find((v) => v.id === action.valueId);
+      return val ? diffFields(val as unknown as Record<string, unknown>, {}) : [];
+    }
     default:
       return [];
   }
@@ -119,6 +123,8 @@ function describeAction(action: MutationAction): string {
       return `Added value "${action.value.name}" to "${action.group}"`;
     case "TOGGLE_CONSTANT_VALUE":
       return `${action.enabled ? "Enabled" : "Disabled"} constant "${action.group}" value #${action.valueId}`;
+    case "DELETE_CONSTANT_VALUE":
+      return `Deleted constant "${action.group}" value #${action.valueId}`;
     default:
       return "Unknown change";
   }

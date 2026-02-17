@@ -3,6 +3,7 @@
 import {
   Clock,
   ExternalLink,
+  EyeOff,
   GitCompare,
   Loader2,
   Minus,
@@ -10,7 +11,6 @@ import {
   RotateCcw,
   Send,
   SquarePen,
-  Trash2,
   Undo2
 } from "lucide-react";
 import Link from "next/link";
@@ -44,8 +44,8 @@ const kindConfig: Record<DiffKind, { label: string; icon: typeof Plus; color: st
   },
   disabled: {
     label: "Disabled",
-    icon: Trash2,
-    color: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+    icon: EyeOff,
+    color: "bg-muted text-muted-foreground"
   },
   restored: {
     label: "Restored",
@@ -99,6 +99,13 @@ function buildRevertTarget(entry: DiffEntry, fieldName: string): RevertFieldTarg
   if (entry.entity === "rule") {
     const index = Number.parseInt(entry.key.replace("r-", ""), 10);
     return { entity: "rule", index, field: fieldName };
+  }
+  if (entry.entity === "constant") {
+    // key format: "const-{group}-{id}"
+    const match = entry.key.match(/^const-(.+)-(\d+)$/);
+    if (match) {
+      return { entity: "constant", group: match[1], valueId: Number.parseInt(match[2], 10), field: fieldName };
+    }
   }
   return null;
 }
@@ -159,9 +166,16 @@ function DiffCard({
 }) {
   const config = kindConfig[entry.kind];
   const Icon = config.icon;
+  const canRevertWhole =
+    (entry.kind === "disabled" || entry.kind === "restored") && buildRevertTarget(entry, "enabled") !== null;
+
+  function handleRevertWhole() {
+    const target = buildRevertTarget(entry, "enabled");
+    if (target) onRevert(target);
+  }
 
   return (
-    <div className="rounded-lg border bg-card">
+    <div className={`rounded-lg border bg-card ${entry.kind === "disabled" ? "border-dashed bg-muted/30" : ""}`}>
       <div className="flex items-center justify-between gap-3 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <Badge className={`gap-1 ${config.color}`}>
@@ -170,15 +184,28 @@ function DiffCard({
           </Badge>
           <span className="font-mono text-sm font-medium">{entry.label}</span>
         </div>
-        {entry.href && (
-          <Link
-            href={entry.href}
-            onClick={onNavigate}
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs"
-          >
-            View <ExternalLink className="size-3" />
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          {canRevertWhole && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRevertWhole}
+              className="text-muted-foreground hover:text-foreground h-7 gap-1 px-2 text-xs"
+            >
+              <Undo2 className="size-3" />
+              Undo
+            </Button>
+          )}
+          {entry.href && (
+            <Link
+              href={entry.href}
+              onClick={onNavigate}
+              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs"
+            >
+              View <ExternalLink className="size-3" />
+            </Link>
+          )}
+        </div>
       </div>
 
       {entry.fields.length > 0 && (
