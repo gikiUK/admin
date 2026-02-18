@@ -116,7 +116,10 @@ export function RuleCard({ rule, facts, constants }: RuleCardProps) {
       <Card className={cn("gap-0 py-0 transition-colors hover:border-primary/50", !rule.enabled && "opacity-50")}>
         <CardHeader className="flex flex-row items-center justify-between gap-2 px-4 py-3">
           <span className="flex items-center gap-1.5 text-sm">
-            Rule for <Badge variant="outline" className="font-medium">{rule.sets}</Badge>
+            Rule for{" "}
+            <Badge variant="outline" className="font-medium">
+              {rule.sets}
+            </Badge>
           </span>
           <Badge variant={rule.source === "hotspot" ? "default" : "secondary"} className="text-xs">
             {rule.source}
