@@ -94,24 +94,6 @@ export function DatasetHeader() {
 
   return (
     <div className="flex items-center gap-2">
-      {/* History button — always visible when there's history, independent of draft/live */}
-      {hasHistory && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="flex items-center justify-center size-8 rounded-full border border-border bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                onClick={toggleHistory}
-              >
-                <History className="size-3.5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>History</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
-
       {/* Draft/Live pill */}
       {isEditing ? (
         <TooltipProvider>
@@ -164,6 +146,24 @@ export function DatasetHeader() {
             Live
           </div>
         </div>
+      )}
+
+      {/* History button — always visible when there's history, independent of draft/live */}
+      {hasHistory && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center justify-center size-8 rounded-full border border-border bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                onClick={toggleHistory}
+              >
+                <History className="size-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>History</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
 
       {/* Dialogs */}

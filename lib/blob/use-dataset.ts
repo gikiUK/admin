@@ -71,8 +71,22 @@ export function useDataset() {
   }
 
   const { history } = state;
-  const canUndo = history.cursor >= 0;
-  const canRedo = history.cursor < history.entries.length - 1;
+  const { entries } = history;
+
+  // Find nearest non-lifecycle entry index searching in `dir` from `from` (inclusive)
+  function findActionIndex(from: number, dir: -1 | 1): number | null {
+    for (let i = from; i >= 0 && i < entries.length; i += dir) {
+      if (!entries[i].isLifecycle) return i;
+    }
+    return null;
+  }
+
+  // Can undo if there's a non-lifecycle entry at or before cursor
+  const undoTarget = history.cursor >= 0 ? findActionIndex(history.cursor, -1) : null;
+  // Can redo if there's a non-lifecycle entry after cursor
+  const redoTarget = findActionIndex(history.cursor + 1, 1);
+  const canUndo = undoTarget !== null;
+  const canRedo = redoTarget !== null;
 
   // Ensure a draft exists when data will differ from live after undo/redo
   const ensureDraft = useCallback(() => {
@@ -87,15 +101,16 @@ export function useDataset() {
   }, [dispatch, state.isEditing, state.draftCreating]);
 
   function undo() {
-    if (!canUndo) return;
-    dispatch({ type: "UNDO", cursor: history.cursor - 1 });
-    // If we're undoing to a point that still differs from live, ensure draft exists
-    if (history.cursor - 1 >= 0) ensureDraft();
+    if (undoTarget === null) return;
+    // Move cursor to just before this action entry (skip lifecycle entries)
+    const newCursor = undoTarget - 1;
+    dispatch({ type: "UNDO", cursor: newCursor });
+    if (newCursor >= 0) ensureDraft();
   }
 
   function redo() {
-    if (!canRedo) return;
-    dispatch({ type: "REDO", cursor: history.cursor + 1 });
+    if (redoTarget === null) return;
+    dispatch({ type: "REDO", cursor: redoTarget });
     ensureDraft();
   }
 

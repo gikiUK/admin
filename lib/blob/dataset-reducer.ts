@@ -144,11 +144,14 @@ function buildRevertMutation(
   return null;
 }
 
-/** Append a new entry to history, truncating any future (redoable) entries. Captures base on first entry. */
+/** Append a new entry to history. Lifecycle entries are inserted without truncating or moving cursor. */
 function appendToHistory(history: HistoryState, entry: ChangeEntry, currentData: DatasetData): HistoryState {
-  const entries = [...history.entries.slice(0, history.cursor + 1), entry];
-  // Capture base snapshot when the first entry is recorded
   const base = history.base ?? structuredClone(currentData);
+  if (entry.isLifecycle) {
+    // Lifecycle markers don't truncate future entries or move the cursor
+    return { entries: [...history.entries, entry], cursor: history.cursor, base };
+  }
+  const entries = [...history.entries.slice(0, history.cursor + 1), entry];
   return { entries, cursor: entries.length - 1, base };
 }
 
@@ -223,17 +226,37 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
       };
     }
 
-    case "DRAFT_DELETED":
+    case "DRAFT_DELETED": {
+      const discardEntry: ChangeEntry = {
+        id: crypto.randomUUID(),
+        timestamp: Date.now(),
+        action: null,
+        description: "Discarded draft",
+        details: [],
+        isLifecycle: true
+      };
+      const hist = appendToHistory(state.history, discardEntry, state.dataset?.data ?? ({} as DatasetData));
       return {
         ...state,
         draft: null,
         dataset: state.live,
         original: state.live ? structuredClone(state.live.data) : null,
         isDirty: false,
-        isEditing: false
+        isEditing: false,
+        history: { ...hist, cursor: -1 }
       };
+    }
 
-    case "DRAFT_PUBLISHED":
+    case "DRAFT_PUBLISHED": {
+      const publishEntry: ChangeEntry = {
+        id: crypto.randomUUID(),
+        timestamp: Date.now(),
+        action: null,
+        description: "Published to live",
+        details: [],
+        isLifecycle: true
+      };
+      const hist = appendToHistory(state.history, publishEntry, state.dataset?.data ?? ({} as DatasetData));
       return {
         ...state,
         live: action.payload,
@@ -242,8 +265,10 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         original: structuredClone(action.payload.data),
         isDirty: false,
         saving: false,
-        isEditing: false
+        isEditing: false,
+        history: { ...hist, cursor: hist.entries.length - 1 }
       };
+    }
 
     case "QUEUE_MUTATION":
       return { ...state, pendingMutations: [...state.pendingMutations, action.mutation] };

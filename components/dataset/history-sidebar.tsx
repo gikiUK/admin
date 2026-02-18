@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, ExternalLink, Minus, PanelRightClose, Plus, Trash2, Undo2 } from "lucide-react";
+import { Clock, ExternalLink, Flag, Minus, PanelRightClose, Plus, Redo2, Trash2, Undo2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { ChangeEntry, FieldChange } from "@/lib/blob/change-log";
@@ -90,8 +90,8 @@ function HistoryEntry({
   return (
     <button
       type="button"
-      className={`relative flex w-full cursor-pointer gap-3 rounded-md px-2 py-2 text-left transition-colors ${
-        isUndone ? "opacity-40 hover:opacity-70" : ""
+      className={`relative flex w-full cursor-pointer gap-3 rounded-md border px-2 py-2 text-left transition-colors ${
+        isUndone ? "border-dashed border-muted-foreground/40 opacity-60 hover:opacity-80" : "border-transparent"
       } ${isCurrent ? "bg-primary/5 ring-primary/30 ring-1" : "hover:bg-muted/50"}`}
       onClick={() => onTravel(index)}
     >
@@ -171,11 +171,25 @@ function HistoryEntry({
   );
 }
 
+// ── Lifecycle marker ─────────────────────────────────────
+
+function LifecycleMarker({ entry }: { entry: ChangeEntry }) {
+  return (
+    <div className="flex items-center gap-2 px-2 py-1.5">
+      <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted">
+        <Flag className="size-3 text-muted-foreground" />
+      </div>
+      <span className="text-muted-foreground text-xs font-medium">{entry.description}</span>
+      <span className="text-muted-foreground/60 ml-auto text-[10px]">{formatRelativeTime(entry.timestamp)}</span>
+    </div>
+  );
+}
+
 // ── Sidebar ─────────────────────────────────────────────
 
 export function HistorySidebar() {
   const { open, setOpen } = useHistorySidebar();
-  const { history, travelTo, clearHistory } = useDataset();
+  const { history, travelTo, undo, redo, canUndo, canRedo, clearHistory } = useDataset();
   const { entries, cursor } = history;
 
   return (
@@ -197,9 +211,17 @@ export function HistorySidebar() {
           <span className="text-muted-foreground text-xs">
             {entries.length} {entries.length === 1 ? "change" : "changes"}
           </span>
-          <Button variant="ghost" size="icon" className="ml-auto size-7" onClick={() => setOpen(false)}>
-            <PanelRightClose className="size-4" />
-          </Button>
+          <div className="ml-auto flex items-center gap-0.5">
+            <Button variant="ghost" size="icon" className="size-7" onClick={undo} disabled={!canUndo}>
+              <Undo2 className="size-3.5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="size-7" onClick={redo} disabled={!canRedo}>
+              <Redo2 className="size-3.5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="size-7" onClick={() => setOpen(false)}>
+              <PanelRightClose className="size-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Content */}
@@ -210,6 +232,9 @@ export function HistorySidebar() {
             <div className="space-y-1">
               {[...entries].reverse().map((entry, reversedIdx) => {
                 const realIndex = entries.length - 1 - reversedIdx;
+                if (entry.isLifecycle) {
+                  return <LifecycleMarker key={entry.id} entry={entry} />;
+                }
                 return (
                   <HistoryEntry
                     key={entry.id}
