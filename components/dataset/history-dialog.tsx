@@ -1,7 +1,8 @@
 "use client";
 
-import { Clock, Minus, Plus, Undo2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Clock, Minus, Plus, Trash2, Undo2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ChangeEntry, FieldChange } from "@/lib/blob/change-log";
 import { computeSegments, type DiffSegment } from "@/lib/blob/dataset-diff";
 import { useDataset } from "@/lib/blob/use-dataset";
@@ -40,30 +41,60 @@ function InlineSegments({ segments, mode }: { segments: DiffSegment[]; mode: "re
   );
 }
 
-// ── Activity entry ───────────────────────────────────────
+// ── History entry ────────────────────────────────────────
 
-function ActivityEntry({ entry }: { entry: ChangeEntry }) {
+function HistoryEntry({
+  entry,
+  index,
+  isCurrent,
+  isUndone,
+  onTravel
+}: {
+  entry: ChangeEntry;
+  index: number;
+  isCurrent: boolean;
+  isUndone: boolean;
+  onTravel: (index: number) => void;
+}) {
   return (
-    <div className="relative flex gap-3 pb-6 last:pb-0">
+    <button
+      type="button"
+      className={`relative flex w-full cursor-pointer gap-3 rounded-md px-2 py-2 text-left transition-colors ${
+        isUndone ? "opacity-40 hover:opacity-70" : ""
+      } ${isCurrent ? "bg-primary/5 ring-primary/30 ring-1" : "hover:bg-muted/50"}`}
+      onClick={() => onTravel(index)}
+    >
+      {/* Timeline dot */}
       <div className="flex flex-col items-center">
         <div
           className={`flex size-6 shrink-0 items-center justify-center rounded-full ${
-            entry.isRevert ? "bg-blue-100 dark:bg-blue-900" : "bg-border"
+            isCurrent
+              ? "bg-primary text-primary-foreground"
+              : entry.isRevert
+                ? "bg-blue-100 dark:bg-blue-900"
+                : "bg-border"
           }`}
         >
-          {entry.isRevert ? (
+          {entry.isRevert && !isCurrent ? (
             <Undo2 className="size-3 text-blue-600 dark:text-blue-400" />
           ) : (
-            <Clock className="text-muted-foreground size-3" />
+            <Clock className={`size-3 ${isCurrent ? "" : "text-muted-foreground"}`} />
           )}
         </div>
-        <div className="bg-border w-px flex-1" />
       </div>
 
+      {/* Content */}
       <div className="-mt-0.5 min-w-0 flex-1">
-        <p className="text-sm font-medium leading-tight">{entry.description}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium leading-tight">{entry.description}</p>
+          {isCurrent && (
+            <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+              HEAD
+            </span>
+          )}
+        </div>
         <p className="text-muted-foreground text-xs">{formatRelativeTime(entry.timestamp)}</p>
-        {entry.details.length > 0 && (
+        {entry.details.length > 0 && !isUndone && (
           <div className="mt-2 space-y-1.5">
             {entry.details.map((d: FieldChange) => {
               const segments = computeSegments(d.from, d.to);
@@ -92,38 +123,72 @@ function ActivityEntry({ entry }: { entry: ChangeEntry }) {
           </div>
         )}
       </div>
-    </div>
+    </button>
   );
 }
 
 // ── Dialog ───────────────────────────────────────────────
 
-export function ActivityDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const { changeLog } = useDataset();
+export function HistoryDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const { history, travelTo, clearHistory } = useDataset();
+  const { entries, cursor } = history;
+  const hasUndone = cursor < entries.length - 1;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
         <DialogHeader className="shrink-0 px-6 pt-6 pb-4">
           <DialogTitle className="text-lg">
-            Activity
+            History
             <span className="text-muted-foreground ml-2 text-sm font-normal">
-              {changeLog.length} {changeLog.length === 1 ? "action" : "actions"}
+              {entries.length} {entries.length === 1 ? "change" : "changes"}
             </span>
           </DialogTitle>
+          {entries.length > 0 && (
+            <p className="text-muted-foreground text-xs">
+              Click any entry to travel to that point. {hasUndone && "New edits will replace future entries."}
+            </p>
+          )}
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
-          {changeLog.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center text-sm">No activity yet.</p>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          {entries.length === 0 ? (
+            <p className="text-muted-foreground py-8 text-center text-sm">No history yet.</p>
           ) : (
-            <div>
-              {[...changeLog].reverse().map((entry) => (
-                <ActivityEntry key={entry.id} entry={entry} />
-              ))}
+            <div className="space-y-1">
+              {[...entries].reverse().map((entry, reversedIdx) => {
+                const realIndex = entries.length - 1 - reversedIdx;
+                return (
+                  <HistoryEntry
+                    key={entry.id}
+                    entry={entry}
+                    index={realIndex}
+                    isCurrent={realIndex === cursor}
+                    isUndone={realIndex > cursor}
+                    onTravel={travelTo}
+                  />
+                );
+              })}
             </div>
           )}
         </div>
+
+        {entries.length > 0 && (
+          <DialogFooter className="shrink-0 border-t px-6 py-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-destructive"
+              onClick={() => {
+                clearHistory();
+                onOpenChange(false);
+              }}
+            >
+              <Trash2 className="size-3.5" />
+              Clear history
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

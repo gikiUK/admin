@@ -3,6 +3,7 @@
 import { createContext, type Dispatch, type ReactNode, useCallback, useEffect, useReducer, useRef } from "react";
 import { deleteDraft as apiDeleteDraft, loadDraftDataset, loadLiveDataset } from "./api-client";
 import { type DatasetAction, type DatasetState, datasetReducer, initialState } from "./dataset-reducer";
+import { clearHistory, loadHistory, saveHistory } from "./history";
 import { useAutoSave } from "./use-auto-save";
 
 type DatasetContextValue = {
@@ -21,7 +22,9 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
   const droppingRef = useRef(false);
   const holdCountRef = useRef(0);
   const pendingDropRef = useRef(false);
+  const historyRestoredRef = useRef(false);
 
+  // Load live + draft, then restore history from localStorage
   useEffect(() => {
     async function load() {
       try {
@@ -32,12 +35,30 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
         if (draft) {
           dispatch({ type: "LOAD_DRAFT", payload: draft });
         }
+
+        // Restore history after both live and draft are loaded
+        const saved = loadHistory();
+        if (saved && saved.entries.length > 0) {
+          dispatch({ type: "RESTORE_HISTORY", history: saved });
+        }
+        historyRestoredRef.current = true;
       } catch {
         // TODO: surface error to UI
+        historyRestoredRef.current = true;
       }
     }
     load();
   }, []);
+
+  // Persist history to localStorage on changes
+  useEffect(() => {
+    if (!historyRestoredRef.current) return;
+    if (state.history.entries.length === 0) {
+      clearHistory();
+    } else {
+      saveHistory(state.history);
+    }
+  }, [state.history]);
 
   const doDrop = useCallback(() => {
     if (droppingRef.current) return;

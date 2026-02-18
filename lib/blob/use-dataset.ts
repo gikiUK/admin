@@ -70,16 +70,51 @@ export function useDataset() {
     }
   }
 
-  function undoChange(entryId: string) {
-    dispatch({ type: "UNDO_CHANGE", entryId });
+  const { history } = state;
+  const canUndo = history.cursor >= 0;
+  const canRedo = history.cursor < history.entries.length - 1;
+
+  // Ensure a draft exists when data will differ from live after undo/redo
+  const ensureDraft = useCallback(() => {
+    if (state.isEditing || state.draftCreating) return;
+    dispatch({ type: "DRAFT_CREATING" });
+    apiCreateDraft()
+      .then((draft) => dispatch({ type: "DRAFT_CREATED", payload: draft }))
+      .catch((err) => {
+        dispatch({ type: "DRAFT_CREATE_FAILED" });
+        if (err instanceof ApiError) console.error("Failed to create draft:", err.message);
+      });
+  }, [dispatch, state.isEditing, state.draftCreating]);
+
+  function undo() {
+    if (!canUndo) return;
+    dispatch({ type: "UNDO", cursor: history.cursor - 1 });
+    // If we're undoing to a point that still differs from live, ensure draft exists
+    if (history.cursor - 1 >= 0) ensureDraft();
   }
 
-  function undoAll() {
-    dispatch({ type: "UNDO_ALL" });
+  function redo() {
+    if (!canRedo) return;
+    dispatch({ type: "REDO", cursor: history.cursor + 1 });
+    ensureDraft();
+  }
+
+  function travelTo(cursor: number) {
+    if (cursor < history.cursor) {
+      dispatch({ type: "UNDO", cursor });
+      if (cursor >= 0) ensureDraft();
+    } else if (cursor > history.cursor) {
+      dispatch({ type: "REDO", cursor });
+      ensureDraft();
+    }
   }
 
   function revertField(target: RevertFieldTarget) {
     dispatch({ type: "REVERT_FIELD", target });
+  }
+
+  function clearHistory() {
+    dispatch({ type: "CLEAR_HISTORY" });
   }
 
   return {
@@ -89,11 +124,15 @@ export function useDataset() {
     isDirty: state.isDirty,
     saving: state.saving,
     loading: state.loading,
-    changeLog: state.changeLog,
+    history: state.history,
     original: state.original,
-    undoChange,
-    undoAll,
+    undo,
+    redo,
+    travelTo,
+    canUndo,
+    canRedo,
     revertField,
+    clearHistory,
     // Draft/live workflow
     live: state.live,
     draft: state.draft,

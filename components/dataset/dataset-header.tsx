@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { Clock, CloudCheck, Eye, FilePenLine, Globe, Loader2, Trash2, X } from "lucide-react";
+import { CloudCheck, Eye, FilePenLine, Globe, History, Loader2, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +16,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SaveStatus } from "@/lib/blob/dataset-reducer";
 import { useDataset } from "@/lib/blob/use-dataset";
-import { ActivityDialog } from "./activity-dialog";
+import { HistoryDialog } from "./history-dialog";
 import { ReviewDialog } from "./review-dialog";
 
 function SavedTimeAgo({ lastSavedAt, saveStatus }: { lastSavedAt: number | null; saveStatus: SaveStatus }) {
@@ -83,18 +83,37 @@ function SavedTimeAgo({ lastSavedAt, saveStatus }: { lastSavedAt: number | null;
 }
 
 export function DatasetHeader() {
-  const { isEditing, saving, deleteDraft, loading, changeLog } = useDataset();
+  const { isEditing, saving, deleteDraft, loading, history } = useDataset();
   const [reviewOpen, setReviewOpen] = useState(false);
-  const [activityOpen, setActivityOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const hasActivity = changeLog.length > 0;
+  const hasHistory = history.entries.length > 0;
 
   if (loading) return null;
 
-  if (isEditing) {
-    return (
-      <>
+  return (
+    <div className="flex items-center gap-2">
+      {/* History button — always visible when there's history, independent of draft/live */}
+      {hasHistory && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center justify-center size-8 rounded-full border border-border bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                onClick={() => setHistoryOpen(true)}
+              >
+                <History className="size-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>History</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+
+      {/* Draft/Live pill */}
+      {isEditing ? (
         <TooltipProvider>
           <div className="flex items-center rounded-full bg-muted/60 border border-border h-8 overflow-hidden">
             {/* Mode indicator */}
@@ -120,26 +139,6 @@ export function DatasetHeader() {
               <TooltipContent>Review changes</TooltipContent>
             </Tooltip>
 
-            {hasActivity && (
-              <>
-                <div className="w-px h-4 bg-border" />
-
-                {/* Activity */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="flex items-center justify-center px-2.5 h-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                      onClick={() => setActivityOpen(true)}
-                    >
-                      <Clock className="size-3.5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Activity log</TooltipContent>
-                </Tooltip>
-              </>
-            )}
-
             <div className="w-px h-4 bg-border" />
 
             {/* Discard */}
@@ -158,53 +157,51 @@ export function DatasetHeader() {
             </Tooltip>
           </div>
         </TooltipProvider>
+      ) : (
+        <div className="flex items-center rounded-full bg-muted/60 border border-border h-8 overflow-hidden">
+          <div className="flex items-center gap-1.5 px-3 text-xs font-medium text-green-600 dark:text-green-400">
+            <Globe className="size-3" />
+            Live
+          </div>
+        </div>
+      )}
 
-        <ReviewDialog open={reviewOpen} onOpenChange={setReviewOpen} />
-        <ActivityDialog open={activityOpen} onOpenChange={setActivityOpen} />
+      {/* Dialogs */}
+      <HistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} />
+      <ReviewDialog open={reviewOpen} onOpenChange={setReviewOpen} />
 
-        <Dialog open={discardOpen} onOpenChange={setDiscardOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Discard draft</DialogTitle>
-              <DialogDescription>
-                This will permanently delete the current draft. All unsaved changes will be lost. The live dataset will
-                remain unchanged.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button
-                variant="destructive"
-                disabled={deleting}
-                onClick={async () => {
-                  setDeleting(true);
-                  try {
-                    await deleteDraft();
-                    setDiscardOpen(false);
-                  } finally {
-                    setDeleting(false);
-                  }
-                }}
-              >
-                {deleting && <Loader2 className="size-4 animate-spin" />}
-                Discard
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </>
-    );
-  }
-
-  // ── Live mode ────────────
-  return (
-    <div className="flex items-center rounded-full bg-muted/60 border border-border h-8 overflow-hidden">
-      <div className="flex items-center gap-1.5 px-3 text-xs font-medium text-green-600 dark:text-green-400">
-        <Globe className="size-3" />
-        Live
-      </div>
+      <Dialog open={discardOpen} onOpenChange={setDiscardOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Discard draft</DialogTitle>
+            <DialogDescription>
+              This will permanently delete the current draft. All unsaved changes will be lost. The live dataset will
+              remain unchanged.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              disabled={deleting}
+              onClick={async () => {
+                setDeleting(true);
+                try {
+                  await deleteDraft();
+                  setDiscardOpen(false);
+                } finally {
+                  setDeleting(false);
+                }
+              }}
+            >
+              {deleting && <Loader2 className="size-4 animate-spin" />}
+              Discard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
