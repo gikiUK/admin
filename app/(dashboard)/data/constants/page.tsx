@@ -190,7 +190,7 @@ function ConstantGroupCard({
   const hasFilters = search || filter !== "all";
 
   return (
-    <Card>
+    <Card id={groupKey}>
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <h3 className="font-mono text-sm font-semibold">{groupKey}</h3>
