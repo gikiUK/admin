@@ -1,6 +1,7 @@
 import { buildChangeEntry, type ChangeEntry, replayChanges } from "./change-log";
 import type { MutationAction } from "./dataset-mutations";
 import { applyAction } from "./dataset-mutations";
+import { emptyHistory, type HistoryState } from "./history";
 import type { Dataset, DatasetData } from "./types";
 
 // ── State ────────────────────────────────────────────────
@@ -13,7 +14,7 @@ export type DatasetState = {
   /** The active dataset: draft if editing, otherwise live. */
   dataset: Dataset | null;
   original: DatasetData | null;
-  changeLog: ChangeEntry[];
+  history: HistoryState;
   isDirty: boolean;
   saving: boolean;
   loading: boolean;
@@ -33,7 +34,7 @@ export const initialState: DatasetState = {
   draft: null,
   dataset: null,
   original: null,
-  changeLog: [],
+  history: emptyHistory,
   isDirty: false,
   saving: false,
   loading: true,
@@ -64,22 +65,17 @@ export type DatasetAction =
   | { type: "DRAFT_PUBLISHED"; payload: Dataset }
   | MutationAction
   | { type: "QUEUE_MUTATION"; mutation: MutationAction }
-  | { type: "UNDO_CHANGE"; entryId: string }
-  | { type: "UNDO_ALL" }
+  | { type: "UNDO"; cursor: number }
+  | { type: "REDO"; cursor: number }
   | { type: "REVERT_FIELD"; target: RevertFieldTarget }
+  | { type: "RESTORE_HISTORY"; history: HistoryState }
+  | { type: "CLEAR_HISTORY" }
   | { type: "SET_SAVING"; saving: boolean }
   | { type: "MARK_SAVED"; payload: Dataset }
   | { type: "SET_SAVE_STATUS"; status: SaveStatus }
   | { type: "AUTO_SAVED"; payload: Dataset; savedVersion: number };
 
 // ── Helpers ──────────────────────────────────────────────
-
-function formatUnknown(v: unknown): string {
-  if (v === undefined) return "(none)";
-  if (typeof v === "string") return v;
-  if (typeof v === "boolean") return v ? "true" : "false";
-  return JSON.stringify(v);
-}
 
 export function isMutationAction(action: DatasetAction): action is MutationAction {
   return (
@@ -102,6 +98,63 @@ export function isMutationAction(action: DatasetAction): action is MutationActio
   );
 }
 
+/** Replay entries[0..cursor] from history base to produce dataset data. */
+function replayToCursor(history: HistoryState): DatasetData | null {
+  if (!history.base) return null;
+  const applied = history.entries.slice(0, history.cursor + 1);
+  return replayChanges(structuredClone(history.base), applied);
+}
+
+/** Build a replayable SET_* mutation that reverts a single field to its live value. */
+function buildRevertMutation(
+  target: RevertFieldTarget,
+  currentData: DatasetData,
+  liveData: DatasetData
+): MutationAction | null {
+  if (target.entity === "fact") {
+    const orig = liveData.facts[target.key];
+    const curr = currentData.facts[target.key];
+    if (!orig || !curr) return null;
+    const reverted = { ...curr, [target.field]: (orig as Record<string, unknown>)[target.field] };
+    return { type: "SET_FACT", id: target.key, fact: reverted };
+  }
+  if (target.entity === "question") {
+    const orig = liveData.questions[target.index];
+    const curr = currentData.questions[target.index];
+    if (!orig || !curr) return null;
+    const reverted = { ...curr, [target.field]: (orig as Record<string, unknown>)[target.field] };
+    return { type: "SET_QUESTION", index: target.index, question: reverted };
+  }
+  if (target.entity === "rule") {
+    const orig = liveData.rules[target.index];
+    const curr = currentData.rules[target.index];
+    if (!orig || !curr) return null;
+    const reverted = { ...curr, [target.field]: (orig as Record<string, unknown>)[target.field] };
+    return { type: "SET_RULE", index: target.index, rule: reverted };
+  }
+  if (target.entity === "constant") {
+    const origGroup = liveData.constants[target.group] ?? [];
+    const currGroup = currentData.constants[target.group] ?? [];
+    const orig = origGroup.find((v) => v.id === target.valueId);
+    const curr = currGroup.find((v) => v.id === target.valueId);
+    if (!orig || !curr) return null;
+    const reverted = { ...curr, [target.field]: (orig as Record<string, unknown>)[target.field] };
+    return { type: "SET_CONSTANT_VALUE", group: target.group, valueId: target.valueId, value: reverted };
+  }
+  return null;
+}
+
+/** Append a new entry to history. Lifecycle entries are inserted without truncating or moving cursor. */
+function appendToHistory(history: HistoryState, entry: ChangeEntry, currentData: DatasetData): HistoryState {
+  const base = history.base ?? structuredClone(currentData);
+  if (entry.isLifecycle) {
+    // Lifecycle markers don't truncate future entries or move the cursor
+    return { entries: [...history.entries, entry], cursor: history.cursor, base };
+  }
+  const entries = [...history.entries.slice(0, history.cursor + 1), entry];
+  return { entries, cursor: entries.length - 1, base };
+}
+
 // ── Reducer ──────────────────────────────────────────────
 
 export function datasetReducer(state: DatasetState, action: DatasetAction): DatasetState {
@@ -122,7 +175,6 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         draft: action.payload,
         dataset: action.payload,
         original: state.live ? structuredClone(state.live.data) : structuredClone(action.payload.data),
-        changeLog: [],
         isDirty: state.live ? JSON.stringify(state.live.data) !== JSON.stringify(action.payload.data) : false,
         isEditing: true
       };
@@ -135,50 +187,88 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
 
     case "DRAFT_CREATED": {
       // Replay any mutations that were queued while draft was being created
-      let data = action.payload.data;
-      const entries: ChangeEntry[] = [];
+      const serverData = action.payload.data;
+      let data = serverData;
+      const newEntries: ChangeEntry[] = [];
       for (const mutation of state.pendingMutations) {
-        entries.push(buildChangeEntry(mutation, data));
+        newEntries.push(buildChangeEntry(mutation, data));
         data = applyAction(data, mutation);
       }
       const hasPending = state.pendingMutations.length > 0;
+
+      // If data was already modified (e.g., by undo/redo from live mode), keep the local data
+      const localData = state.dataset?.data;
+      const liveData = state.live?.data;
+      const hasLocalChanges = localData && liveData && JSON.stringify(localData) !== JSON.stringify(liveData);
+      if (!hasPending && hasLocalChanges) {
+        data = localData;
+      }
+      const isDirty = hasPending || !!hasLocalChanges;
+
+      const prevEntries = state.history.entries.slice(0, state.history.cursor + 1);
+      const base = state.history.base ?? (isDirty ? structuredClone(serverData) : null);
+      const history: HistoryState = {
+        entries: [...prevEntries, ...newEntries],
+        cursor: state.history.cursor + newEntries.length,
+        base
+      };
       return {
         ...state,
         draft: { ...action.payload, data },
         dataset: { ...action.payload, data },
-        original: state.live ? structuredClone(state.live.data) : structuredClone(action.payload.data),
-        changeLog: entries,
-        isDirty: hasPending,
+        original: liveData ? structuredClone(liveData) : structuredClone(serverData),
+        history,
+        isDirty,
         isEditing: true,
         draftCreating: false,
         pendingMutations: [],
-        mutationVersion: hasPending ? state.mutationVersion + 1 : state.mutationVersion
+        mutationVersion: isDirty ? state.mutationVersion + 1 : state.mutationVersion
       };
     }
 
-    case "DRAFT_DELETED":
+    case "DRAFT_DELETED": {
+      const discardEntry: ChangeEntry = {
+        id: crypto.randomUUID(),
+        timestamp: Date.now(),
+        action: null,
+        description: "Discarded draft",
+        details: [],
+        isLifecycle: true
+      };
+      const hist = appendToHistory(state.history, discardEntry, state.dataset?.data ?? ({} as DatasetData));
       return {
         ...state,
         draft: null,
         dataset: state.live,
         original: state.live ? structuredClone(state.live.data) : null,
-        changeLog: [],
         isDirty: false,
-        isEditing: false
+        isEditing: false,
+        history: { ...hist, cursor: -1 }
       };
+    }
 
-    case "DRAFT_PUBLISHED":
+    case "DRAFT_PUBLISHED": {
+      const publishEntry: ChangeEntry = {
+        id: crypto.randomUUID(),
+        timestamp: Date.now(),
+        action: null,
+        description: "Published to live",
+        details: [],
+        isLifecycle: true
+      };
+      const hist = appendToHistory(state.history, publishEntry, state.dataset?.data ?? ({} as DatasetData));
       return {
         ...state,
         live: action.payload,
         draft: null,
         dataset: action.payload,
         original: structuredClone(action.payload.data),
-        changeLog: [],
         isDirty: false,
         saving: false,
-        isEditing: false
+        isEditing: false,
+        history: { ...hist, cursor: hist.entries.length - 1 }
       };
+    }
 
     case "QUEUE_MUTATION":
       return { ...state, pendingMutations: [...state.pendingMutations, action.mutation] };
@@ -189,7 +279,6 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         draft: action.payload,
         dataset: action.payload,
         original: state.live ? structuredClone(state.live.data) : structuredClone(action.payload.data),
-        changeLog: [],
         isDirty: false,
         saving: false
       };
@@ -206,7 +295,6 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         ...state,
         draft: merged,
         dataset: merged,
-        changeLog: state.changeLog,
         savedVersion: action.savedVersion,
         saveStatus: "saved",
         lastSavedAt: Date.now()
@@ -216,99 +304,78 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
     case "SET_SAVING":
       return { ...state, saving: action.saving };
 
-    case "UNDO_CHANGE": {
-      if (!state.dataset || !state.original) return state;
-      const remaining = state.changeLog.filter((e) => e.id !== action.entryId);
-      const data = replayChanges(structuredClone(state.original), remaining);
+    case "UNDO": {
+      const base = state.history.base;
+      if (!state.dataset || !base) return state;
+      const cursor = Math.max(-1, Math.min(action.cursor, state.history.entries.length - 1));
+      if (cursor >= state.history.cursor) return state;
+      const history = { ...state.history, cursor };
+      const data = cursor === -1 ? structuredClone(base) : (replayToCursor(history) ?? state.dataset.data);
+      const liveData = state.live?.data;
+      const isDirty = liveData ? JSON.stringify(data) !== JSON.stringify(liveData) : cursor >= 0;
       return {
         ...state,
         dataset: { ...state.dataset, data },
-        changeLog: remaining,
-        isDirty: remaining.length > 0,
+        history,
+        isDirty,
         mutationVersion: state.mutationVersion + 1
       };
     }
 
-    case "UNDO_ALL": {
-      if (!state.dataset || !state.original) return state;
+    case "REDO": {
+      if (!state.dataset || !state.history.base) return state;
+      const cursor = Math.max(-1, Math.min(action.cursor, state.history.entries.length - 1));
+      if (cursor <= state.history.cursor) return state;
+      const history = { ...state.history, cursor };
+      const data = replayToCursor(history) ?? state.dataset.data;
+      const liveData = state.live?.data;
+      const isDirty = liveData ? JSON.stringify(data) !== JSON.stringify(liveData) : true;
       return {
         ...state,
-        dataset: { ...state.dataset, data: structuredClone(state.original) },
-        changeLog: [],
-        isDirty: false,
+        dataset: { ...state.dataset, data },
+        history,
+        isDirty,
         mutationVersion: state.mutationVersion + 1
       };
     }
+
+    case "RESTORE_HISTORY": {
+      if (!state.dataset) return state;
+      const { history } = action;
+      if (!history.base) return { ...state, history };
+      // Clamp cursor to valid range
+      const cursor = Math.max(-1, Math.min(history.cursor, history.entries.length - 1));
+      const clamped: HistoryState = { entries: history.entries, cursor, base: history.base };
+      const data = cursor === -1 ? structuredClone(history.base) : (replayToCursor(clamped) ?? state.dataset.data);
+      const liveData = state.live?.data;
+      const isDirty = liveData ? JSON.stringify(data) !== JSON.stringify(liveData) : cursor >= 0;
+      return {
+        ...state,
+        dataset: { ...state.dataset, data },
+        history: clamped,
+        isDirty,
+        mutationVersion: state.mutationVersion + 1
+      };
+    }
+
+    case "CLEAR_HISTORY":
+      return { ...state, history: emptyHistory };
 
     case "REVERT_FIELD": {
       if (!state.dataset || !state.live) return state;
+      const mutation = buildRevertMutation(target(action), state.dataset.data, state.live.data);
+      if (!mutation) return state;
+      // Treat the revert as a normal mutation — append to history, truncate future
+      const entry = buildChangeEntry(mutation, state.dataset.data);
+      entry.isRevert = true;
+      const data = applyAction(state.dataset.data, mutation);
       const liveData = state.live.data;
-      const { target } = action;
-      const data = structuredClone(state.dataset.data);
-      let entityLabel = "";
-      let fromVal = "";
-      let toVal = "";
-
-      if (target.entity === "fact") {
-        const orig = liveData.facts[target.key];
-        const curr = data.facts[target.key];
-        if (orig && curr) {
-          fromVal = formatUnknown((curr as Record<string, unknown>)[target.field]);
-          toVal = formatUnknown((orig as Record<string, unknown>)[target.field]);
-          (curr as Record<string, unknown>)[target.field] = (orig as Record<string, unknown>)[target.field];
-          entityLabel = target.key;
-        }
-      } else if (target.entity === "question") {
-        const orig = liveData.questions[target.index];
-        const curr = data.questions[target.index];
-        if (orig && curr) {
-          fromVal = formatUnknown((curr as Record<string, unknown>)[target.field]);
-          toVal = formatUnknown((orig as Record<string, unknown>)[target.field]);
-          (curr as Record<string, unknown>)[target.field] = (orig as Record<string, unknown>)[target.field];
-          entityLabel = `question #${target.index + 1}`;
-        }
-      } else if (target.entity === "rule") {
-        const orig = liveData.rules[target.index];
-        const curr = data.rules[target.index];
-        if (orig && curr) {
-          fromVal = formatUnknown((curr as Record<string, unknown>)[target.field]);
-          toVal = formatUnknown((orig as Record<string, unknown>)[target.field]);
-          (curr as Record<string, unknown>)[target.field] = (orig as Record<string, unknown>)[target.field];
-          entityLabel = `rule #${target.index + 1}`;
-        }
-      } else if (target.entity === "constant") {
-        const origGroup = liveData.constants[target.group] ?? [];
-        const currGroup = data.constants[target.group] ?? [];
-        const orig = origGroup.find((v) => v.id === target.valueId);
-        const currIdx = currGroup.findIndex((v) => v.id === target.valueId);
-        const curr = currIdx >= 0 ? currGroup[currIdx] : undefined;
-        if (orig && curr) {
-          fromVal = formatUnknown((curr as Record<string, unknown>)[target.field]);
-          toVal = formatUnknown((orig as Record<string, unknown>)[target.field]);
-          const restored = { ...curr, [target.field]: (orig as Record<string, unknown>)[target.field] };
-          data.constants = {
-            ...data.constants,
-            [target.group]: currGroup.map((v) => (v.id === target.valueId ? restored : v))
-          };
-          entityLabel = `${target.group} / ${curr.name}`;
-        }
-      }
-
-      const hasChanges = JSON.stringify(data) !== JSON.stringify(liveData);
-      const revertEntry: ChangeEntry = {
-        id: crypto.randomUUID(),
-        timestamp: Date.now(),
-        action: null,
-        description: `Reverted ${target.field} on ${entityLabel}`,
-        details: [{ field: target.field, from: fromVal, to: toVal }],
-        isRevert: true
-      };
-
+      const isDirty = JSON.stringify(data) !== JSON.stringify(liveData);
       return {
         ...state,
         dataset: { ...state.dataset, data },
-        changeLog: [...state.changeLog, revertEntry],
-        isDirty: hasChanges,
+        history: appendToHistory(state.history, entry, state.dataset.data),
+        isDirty,
         mutationVersion: state.mutationVersion + 1
       };
     }
@@ -323,10 +390,14 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
       return {
         ...state,
         dataset: { ...state.dataset, data },
-        changeLog: [...state.changeLog, entry],
+        history: appendToHistory(state.history, entry, state.dataset.data),
         isDirty: true,
         mutationVersion: state.mutationVersion + 1
       };
     }
   }
+}
+
+function target(action: { target: RevertFieldTarget }): RevertFieldTarget {
+  return action.target;
 }

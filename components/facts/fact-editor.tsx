@@ -1,21 +1,11 @@
 "use client";
 
-import { ArrowLeft, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -97,15 +87,9 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
     dispatch({ type: "SET_FACT", id: factId, fact: updated });
   }
 
-  function handleDiscard() {
+  function handleToggleEnabled() {
     if (!factId) return;
-    dispatch({ type: "DISCARD_FACT", id: factId });
-    router.push("/data/facts");
-  }
-
-  function handleRestore() {
-    if (!factId) return;
-    dispatch({ type: "RESTORE_FACT", id: factId });
+    dispatch({ type: fact?.enabled ? "DISCARD_FACT" : "RESTORE_FACT", id: factId });
   }
 
   function handleCreate() {
@@ -246,36 +230,17 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
           <ArrowLeft className="size-4" /> Back to Facts
         </Link>
 
-        {!fact.enabled ? (
-          <Button variant="outline" size="sm" onClick={handleRestore}>
-            <RotateCcw className="size-3" /> Restore
-          </Button>
-        ) : (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <Trash2 className="size-3" /> Discard
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Discard fact</DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to discard <span className="font-mono font-semibold">{factId}</span>? It will be
-                  greyed out but can be restored.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button variant="destructive" onClick={handleDiscard}>
-                  Discard
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+        <Button variant={fact.enabled ? "outline" : "default"} size="sm" onClick={handleToggleEnabled}>
+          {fact.enabled ? (
+            <>
+              <EyeOff className="size-3" /> Disable
+            </>
+          ) : (
+            <>
+              <Eye className="size-3" /> Enable
+            </>
+          )}
+        </Button>
       </div>
 
       <h1 className="text-2xl font-semibold tracking-tight">

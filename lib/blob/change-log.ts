@@ -14,6 +14,7 @@ export type ChangeEntry = {
   description: string;
   details: FieldChange[];
   isRevert?: boolean;
+  isLifecycle?: boolean;
 };
 
 function formatValue(v: unknown): string {

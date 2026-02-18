@@ -1,21 +1,11 @@
 "use client";
 
-import { ArrowLeft, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -37,7 +27,6 @@ const QUESTION_TYPES: QuestionType[] = ["boolean_state", "single-select", "multi
 // ── Edit existing question ──────────────────────────────
 
 function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
-  const router = useRouter();
   const { blob, dispatch } = useDataset();
 
   const question = blob?.questions[questionIndex];
@@ -70,13 +59,8 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
     dispatchUpdate(patch);
   }
 
-  function handleDiscard() {
-    dispatch({ type: "DISCARD_QUESTION", index: questionIndex });
-    router.push("/data/questions");
-  }
-
-  function handleRestore() {
-    dispatch({ type: "RESTORE_QUESTION", index: questionIndex });
+  function handleToggleEnabled() {
+    dispatch({ type: question?.enabled ? "DISCARD_QUESTION" : "RESTORE_QUESTION", index: questionIndex });
   }
 
   return (
@@ -89,35 +73,17 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
           <ArrowLeft className="size-4" /> Back to Questions
         </Link>
 
-        {!question.enabled ? (
-          <Button variant="outline" size="sm" onClick={handleRestore}>
-            <RotateCcw className="size-3" /> Restore
-          </Button>
-        ) : (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <Trash2 className="size-3" /> Discard
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Discard question</DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to discard <span className="font-semibold">Q{questionIndex + 1}</span>?
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button variant="destructive" onClick={handleDiscard}>
-                  Discard
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+        <Button variant={question.enabled ? "outline" : "default"} size="sm" onClick={handleToggleEnabled}>
+          {question.enabled ? (
+            <>
+              <EyeOff className="size-3" /> Disable
+            </>
+          ) : (
+            <>
+              <Eye className="size-3" /> Enable
+            </>
+          )}
+        </Button>
       </div>
 
       <h1 className="text-2xl font-semibold tracking-tight">Edit: Q{questionIndex + 1}</h1>
