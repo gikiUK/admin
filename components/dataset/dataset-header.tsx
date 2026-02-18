@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { CloudCheck, Eye, FilePenLine, Globe, Loader2, Trash2, X } from "lucide-react";
+import { Clock, CloudCheck, Eye, FilePenLine, Globe, Loader2, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SaveStatus } from "@/lib/blob/dataset-reducer";
 import { useDataset } from "@/lib/blob/use-dataset";
+import { ActivityDialog } from "./activity-dialog";
 import { ReviewDialog } from "./review-dialog";
 
 function SavedTimeAgo({ lastSavedAt, saveStatus }: { lastSavedAt: number | null; saveStatus: SaveStatus }) {
@@ -82,10 +83,12 @@ function SavedTimeAgo({ lastSavedAt, saveStatus }: { lastSavedAt: number | null;
 }
 
 export function DatasetHeader() {
-  const { isEditing, saving, deleteDraft, loading } = useDataset();
+  const { isEditing, saving, deleteDraft, loading, changeLog } = useDataset();
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const hasActivity = changeLog.length > 0;
 
   if (loading) return null;
 
@@ -117,6 +120,26 @@ export function DatasetHeader() {
               <TooltipContent>Review changes</TooltipContent>
             </Tooltip>
 
+            {hasActivity && (
+              <>
+                <div className="w-px h-4 bg-border" />
+
+                {/* Activity */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="flex items-center justify-center px-2.5 h-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      onClick={() => setActivityOpen(true)}
+                    >
+                      <Clock className="size-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Activity log</TooltipContent>
+                </Tooltip>
+              </>
+            )}
+
             <div className="w-px h-4 bg-border" />
 
             {/* Discard */}
@@ -137,6 +160,7 @@ export function DatasetHeader() {
         </TooltipProvider>
 
         <ReviewDialog open={reviewOpen} onOpenChange={setReviewOpen} />
+        <ActivityDialog open={activityOpen} onOpenChange={setActivityOpen} />
 
         <Dialog open={discardOpen} onOpenChange={setDiscardOpen}>
           <DialogContent>

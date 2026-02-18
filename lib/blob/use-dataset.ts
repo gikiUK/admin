@@ -15,7 +15,7 @@ export function useDataset() {
   const ctx = useContext(DatasetContext);
   if (!ctx) throw new Error("useDataset must be used within a DatasetProvider");
 
-  const { state, dispatch, flushSave } = ctx;
+  const { state, dispatch, flushSave, holdDraftDrop, releaseDraftDrop } = ctx;
 
   // Smart dispatch: auto-creates draft on first mutation
   const smartDispatch = useCallback(
@@ -103,6 +103,9 @@ export function useDataset() {
     flushSave,
     // Auto-save status
     saveStatus: state.saveStatus,
-    lastSavedAt: state.lastSavedAt
+    lastSavedAt: state.lastSavedAt,
+    // Draft drop hold (for dialogs that revert changes)
+    holdDraftDrop,
+    releaseDraftDrop
   };
 }
