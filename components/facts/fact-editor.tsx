@@ -85,7 +85,7 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
   // Rules for this fact
   const factRules = (() => {
     if (!blob || !factId) return [];
-    return blob.rules.map((r, i) => ({ rule: r, index: i })).filter(({ rule }) => rule.sets === factId && rule.enabled);
+    return blob.rules.map((r, i) => ({ rule: r, index: i })).filter(({ rule }) => rule.sets === factId);
   })();
 
   function handleFieldChange(field: keyof BlobFact, value: string | boolean) {
@@ -139,6 +139,10 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
 
   function handleDiscardRule(globalIndex: number) {
     dispatch({ type: "DISCARD_RULE", index: globalIndex });
+  }
+
+  function handleRestoreRule(globalIndex: number) {
+    dispatch({ type: "RESTORE_RULE", index: globalIndex });
   }
 
   if (isNew) {
@@ -345,6 +349,11 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
       {/* Rules */}
       <Card className={!fact.enabled ? "opacity-50" : undefined}>
         <CardContent className="pt-6">
+          <div className="mb-3 flex items-center justify-end">
+            <Link href="/data/rules" className="text-xs text-muted-foreground hover:text-foreground">
+              View all rules
+            </Link>
+          </div>
           <RuleEditor
             rules={factRules}
             factId={factId}
@@ -352,6 +361,7 @@ export function FactEditor({ factId, isNew }: FactEditorProps) {
             onChange={handleRuleChange}
             onAdd={handleAddRule}
             onDiscard={handleDiscardRule}
+            onRestore={handleRestoreRule}
           />
         </CardContent>
       </Card>

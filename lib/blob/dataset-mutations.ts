@@ -10,6 +10,7 @@ export type MutationAction =
   | { type: "SET_RULE"; index: number; rule: BlobRule }
   | { type: "ADD_RULE"; rule: BlobRule }
   | { type: "DISCARD_RULE"; index: number }
+  | { type: "RESTORE_RULE"; index: number }
   | { type: "SET_QUESTION"; index: number; question: BlobQuestion }
   | { type: "ADD_QUESTION"; question: BlobQuestion }
   | { type: "DISCARD_QUESTION"; index: number }
@@ -51,6 +52,14 @@ export function applyAction(data: DatasetData, action: MutationAction): DatasetD
       const rule = rules[action.index];
       if (!rule) return data;
       rules[action.index] = { ...rule, enabled: false };
+      return { ...data, rules };
+    }
+
+    case "RESTORE_RULE": {
+      const rules = [...data.rules];
+      const rule = rules[action.index];
+      if (!rule) return data;
+      rules[action.index] = { ...rule, enabled: true };
       return { ...data, rules };
     }
 

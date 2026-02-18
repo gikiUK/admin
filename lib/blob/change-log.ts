@@ -109,6 +109,8 @@ function describeAction(action: MutationAction): string {
       return `Added rule "${action.rule.sets}"`;
     case "DISCARD_RULE":
       return `Disabled rule #${action.index + 1}`;
+    case "RESTORE_RULE":
+      return `Enabled rule #${action.index + 1}`;
     case "SET_QUESTION":
       return `Edited question #${action.index + 1}`;
     case "ADD_QUESTION":

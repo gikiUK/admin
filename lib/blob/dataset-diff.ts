@@ -164,11 +164,12 @@ export function computeDatasetDiff(original: DatasetData, current: DatasetData):
     const orig = original.rules[i];
     const curr = current.rules[i];
     const label = curr?.sets ?? orig?.sets ?? `Rule #${i + 1}`;
+    const factId = curr?.sets ?? orig?.sets;
     const entry = compareEntity(
       "rule",
       `r-${i}`,
       label,
-      null,
+      factId ? `/data/facts/${factId}` : null,
       orig as unknown as Record<string, unknown> | undefined,
       curr as unknown as Record<string, unknown> | undefined
     );

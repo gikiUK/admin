@@ -90,6 +90,7 @@ export function isMutationAction(action: DatasetAction): action is MutationActio
     action.type === "SET_RULE" ||
     action.type === "ADD_RULE" ||
     action.type === "DISCARD_RULE" ||
+    action.type === "RESTORE_RULE" ||
     action.type === "SET_QUESTION" ||
     action.type === "ADD_QUESTION" ||
     action.type === "DISCARD_QUESTION" ||
