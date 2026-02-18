@@ -16,7 +16,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SaveStatus } from "@/lib/blob/dataset-reducer";
 import { useDataset } from "@/lib/blob/use-dataset";
-import { HistoryDialog } from "./history-dialog";
+import { useHistorySidebar } from "@/lib/history-sidebar-context";
 import { ReviewDialog } from "./review-dialog";
 
 function SavedTimeAgo({ lastSavedAt, saveStatus }: { lastSavedAt: number | null; saveStatus: SaveStatus }) {
@@ -84,8 +84,8 @@ function SavedTimeAgo({ lastSavedAt, saveStatus }: { lastSavedAt: number | null;
 
 export function DatasetHeader() {
   const { isEditing, saving, deleteDraft, loading, history } = useDataset();
+  const { toggleOpen: toggleHistory } = useHistorySidebar();
   const [reviewOpen, setReviewOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const hasHistory = history.entries.length > 0;
@@ -102,7 +102,7 @@ export function DatasetHeader() {
               <button
                 type="button"
                 className="flex items-center justify-center size-8 rounded-full border border-border bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                onClick={() => setHistoryOpen(true)}
+                onClick={toggleHistory}
               >
                 <History className="size-3.5" />
               </button>
@@ -167,7 +167,6 @@ export function DatasetHeader() {
       )}
 
       {/* Dialogs */}
-      <HistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} />
       <ReviewDialog open={reviewOpen} onOpenChange={setReviewOpen} />
 
       <Dialog open={discardOpen} onOpenChange={setDiscardOpen}>

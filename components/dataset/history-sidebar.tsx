@@ -1,11 +1,13 @@
 "use client";
 
-import { Clock, Minus, Plus, Trash2, Undo2 } from "lucide-react";
+import { Clock, ExternalLink, Minus, PanelRightClose, Plus, Trash2, Undo2 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ChangeEntry, FieldChange } from "@/lib/blob/change-log";
 import { computeSegments, type DiffSegment } from "@/lib/blob/dataset-diff";
+import type { MutationAction } from "@/lib/blob/dataset-mutations";
 import { useDataset } from "@/lib/blob/use-dataset";
+import { useHistorySidebar } from "@/lib/history-sidebar-context";
 
 // ── Helpers ──────────────────────────────────────────────
 
@@ -16,6 +18,35 @@ function formatRelativeTime(timestamp: number): string {
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
   return `${hours}h ago`;
+}
+
+function actionHref(action: MutationAction | null): string | null {
+  if (!action) return null;
+  switch (action.type) {
+    case "SET_FACT":
+    case "ADD_FACT":
+    case "DISCARD_FACT":
+    case "RESTORE_FACT":
+      return `/data/facts/${action.id}`;
+    case "SET_QUESTION":
+    case "DISCARD_QUESTION":
+    case "RESTORE_QUESTION":
+      return `/data/questions/${action.index}`;
+    case "ADD_QUESTION":
+      return "/data/questions";
+    case "SET_RULE":
+    case "ADD_RULE":
+    case "DISCARD_RULE":
+    case "RESTORE_RULE":
+      return "/data/rules";
+    case "SET_CONSTANT_VALUE":
+    case "ADD_CONSTANT_VALUE":
+    case "TOGGLE_CONSTANT_VALUE":
+    case "DELETE_CONSTANT_VALUE":
+      return "/data/constants";
+    default:
+      return null;
+  }
 }
 
 function segmentKey(seg: DiffSegment, index: number) {
@@ -86,15 +117,28 @@ function HistoryEntry({
       {/* Content */}
       <div className="-mt-0.5 min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium leading-tight">{entry.description}</p>
+          <p className="min-w-0 text-sm font-medium leading-tight">{entry.description}</p>
           {isCurrent && (
             <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
               HEAD
             </span>
           )}
+          {(() => {
+            const href = actionHref(entry.action);
+            if (!href) return null;
+            return (
+              <Link
+                href={href}
+                className="ml-auto shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="size-3" />
+              </Link>
+            );
+          })()}
         </div>
         <p className="text-muted-foreground text-xs">{formatRelativeTime(entry.timestamp)}</p>
-        {entry.details.length > 0 && !isUndone && (
+        {entry.details.length > 0 && (
           <div className="mt-2 space-y-1.5">
             {entry.details.map((d: FieldChange) => {
               const segments = computeSegments(d.from, d.to);
@@ -127,31 +171,39 @@ function HistoryEntry({
   );
 }
 
-// ── Dialog ───────────────────────────────────────────────
+// ── Sidebar ─────────────────────────────────────────────
 
-export function HistoryDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function HistorySidebar() {
+  const { open, setOpen } = useHistorySidebar();
   const { history, travelTo, clearHistory } = useDataset();
   const { entries, cursor } = history;
-  const hasUndone = cursor < entries.length - 1;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
-        <DialogHeader className="shrink-0 px-6 pt-6 pb-4">
-          <DialogTitle className="text-lg">
-            History
-            <span className="text-muted-foreground ml-2 text-sm font-normal">
-              {entries.length} {entries.length === 1 ? "change" : "changes"}
-            </span>
-          </DialogTitle>
-          {entries.length > 0 && (
-            <p className="text-muted-foreground text-xs">
-              Click any entry to travel to that point. {hasUndone && "New edits will replace future entries."}
-            </p>
-          )}
-        </DialogHeader>
+    <div data-state={open ? "expanded" : "collapsed"}>
+      {/* Gap — takes up space in the flex row so SidebarInset shrinks */}
+      <div
+        className="relative w-0 bg-transparent transition-[width] duration-200 ease-linear data-[state=expanded]:w-[24rem]"
+        data-state={open ? "expanded" : "collapsed"}
+      />
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+      {/* Fixed panel */}
+      <aside
+        className="bg-sidebar text-sidebar-foreground fixed inset-y-0 right-0 z-10 hidden h-svh w-[24rem] flex-col border-l transition-[right] duration-200 ease-linear md:flex data-[state=collapsed]:right-[calc(24rem*-1)]"
+        data-state={open ? "expanded" : "collapsed"}
+      >
+        {/* Header */}
+        <div className="flex h-12 items-center gap-2 border-b px-4">
+          <span className="text-sm font-semibold">History</span>
+          <span className="text-muted-foreground text-xs">
+            {entries.length} {entries.length === 1 ? "change" : "changes"}
+          </span>
+          <Button variant="ghost" size="icon" className="ml-auto size-7" onClick={() => setOpen(false)}>
+            <PanelRightClose className="size-4" />
+          </Button>
+        </div>
+
+        {/* Content */}
+        <div className="min-h-0 flex-1 overflow-y-auto p-3">
           {entries.length === 0 ? (
             <p className="text-muted-foreground py-8 text-center text-sm">No history yet.</p>
           ) : (
@@ -173,23 +225,24 @@ export function HistoryDialog({ open, onOpenChange }: { open: boolean; onOpenCha
           )}
         </div>
 
+        {/* Footer */}
         {entries.length > 0 && (
-          <DialogFooter className="shrink-0 border-t px-6 py-4">
+          <div className="border-t px-4 py-3">
             <Button
               variant="ghost"
               size="sm"
               className="text-muted-foreground hover:text-destructive"
               onClick={() => {
                 clearHistory();
-                onOpenChange(false);
+                setOpen(false);
               }}
             >
               <Trash2 className="size-3.5" />
               Clear history
             </Button>
-          </DialogFooter>
+          </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </aside>
+    </div>
   );
 }
