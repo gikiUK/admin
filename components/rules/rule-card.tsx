@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { AnyCondition, BlobCondition, BlobConstantValue, BlobFact, BlobRule } from "@/lib/blob/types";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +29,6 @@ function resolveArrayItem(
   constants: ConstantsLookup
 ): string {
   if (typeof item === "string") return item;
-  // Numeric ID — resolve via fact's values_ref → constants group
   const fact = facts[factKey];
   const group = fact?.values_ref ? constants[fact.values_ref] : undefined;
   const entry = group?.find((c) => c.id === item);
@@ -49,7 +49,7 @@ function ConditionEntry({
   if (Array.isArray(value)) {
     return (
       <div>
-        <span className="font-mono text-muted-foreground">{factKey}</span> contains:
+        <code className="rounded bg-primary/10 px-1 py-0.5 font-mono text-xs text-primary">{factKey}</code> contains:
         <div className="mt-1 flex flex-wrap gap-1">
           {value.map((item) => (
             <Badge key={String(item)} variant="secondary" className="font-normal">
@@ -63,7 +63,7 @@ function ConditionEntry({
 
   return (
     <div>
-      <span className="font-mono text-muted-foreground">{factKey}</span> is{" "}
+      <code className="rounded bg-primary/10 px-1 py-0.5 font-mono text-xs text-primary">{factKey}</code> is{" "}
       <span className="font-medium">{formatScalar(value)}</span>
     </div>
   );
@@ -81,7 +81,7 @@ function ConditionText({
   if (isAnyCondition(condition)) {
     return (
       <div className="space-y-1">
-        <span className="text-muted-foreground">When any of:</span>
+        <span className="font-medium">When any of this is true:</span>
         <ul className="list-disc space-y-1 pl-5">
           {condition.any.map((sub, i) =>
             Object.entries(sub).map(([key, val]) => (
@@ -100,7 +100,7 @@ function ConditionText({
 
   return (
     <div className="space-y-1">
-      <span className="text-muted-foreground">{entries.length === 1 ? "When:" : "When all of:"}</span>
+      <span className="font-medium">{entries.length === 1 ? "When:" : "When all of:"}</span>
       <div className="space-y-1 pl-2">
         {entries.map(([key, val]) => (
           <ConditionEntry key={key} factKey={key} value={val} facts={facts} constants={constants} />
@@ -113,36 +113,31 @@ function ConditionText({
 export function RuleCard({ rule, facts, constants }: RuleCardProps) {
   return (
     <Link href={`/data/facts/${rule.sets}`} className="group block">
-      <div
-        className={cn(
-          "rounded-xl border bg-card px-4 py-3 text-sm shadow-sm transition-colors hover:border-primary/40",
-          !rule.enabled && "opacity-50"
-        )}
-      >
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-muted-foreground">
-            Rule for <span className="font-mono">{rule.sets}</span>
+      <Card className={cn("gap-0 py-0 transition-colors hover:border-primary/50", !rule.enabled && "opacity-50")}>
+        <CardHeader className="flex flex-row items-center justify-between gap-2 px-4 py-3">
+          <span className="flex items-center gap-1.5 text-sm">
+            Rule for <Badge variant="outline" className="font-medium">{rule.sets}</Badge>
           </span>
           <Badge variant={rule.source === "hotspot" ? "default" : "secondary"} className="text-xs">
             {rule.source}
           </Badge>
-        </div>
+        </CardHeader>
 
-        <div className="mt-1.5">
-          Sets <span className="font-mono font-medium">{rule.sets}</span> to{" "}
-          <span className="font-medium">{String(rule.value)}</span>
-        </div>
-
-        {rule.when && (
-          <div className="mt-2">
-            <ConditionText condition={rule.when} facts={facts} constants={constants} />
+        <CardContent className="space-y-2 border-t px-4 py-3 text-sm">
+          <div>
+            Sets to{" "}
+            <Badge variant="outline" className="font-mono">
+              {String(rule.value)}
+            </Badge>
           </div>
-        )}
 
-        <p className="mt-2 text-end text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
-          Click to edit
-        </p>
-      </div>
+          {rule.when && <ConditionText condition={rule.when} facts={facts} constants={constants} />}
+
+          <p className="text-end text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
+            Click to edit
+          </p>
+        </CardContent>
+      </Card>
     </Link>
   );
 }
