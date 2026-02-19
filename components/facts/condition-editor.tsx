@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
+import { Check, Plus, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,32 +10,92 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { ConstantsLookup, FactsLookup } from "@/lib/blob/resolve";
 import { resolveConstantId } from "@/lib/blob/resolve";
-import type { AnyCondition, BlobCondition, BlobConstantValue, SimpleCondition } from "@/lib/blob/types";
+import type { AnyCondition, BlobCondition, BlobConstantValue, FactType, SimpleCondition } from "@/lib/blob/types";
 import { useDataset } from "@/lib/blob/use-dataset";
+import { GateAnd, GateOr, GateSingle } from "./logic-gate-icons";
 
-type ConditionEditorProps = {
-  condition: BlobCondition;
-  onChange: (condition: BlobCondition) => void;
-  factIds: string[];
-};
+// ── Mode helpers ────────────────────────────────────────────
+
+type ConditionMode = "single" | "and" | "or";
 
 function isAnyCondition(c: BlobCondition): c is AnyCondition {
   return "any" in c;
 }
 
+function getMode(c: BlobCondition): ConditionMode {
+  if (isAnyCondition(c)) return "or";
+  return Object.keys(c).length > 1 ? "and" : "single";
+}
+
+function splitSimple(c: SimpleCondition): SimpleCondition[] {
+  return Object.entries(c).map(([k, v]) => ({ [k]: v }));
+}
+
+function mergeSimple(conditions: SimpleCondition[]): SimpleCondition {
+  const merged: SimpleCondition = {};
+  for (const c of conditions) {
+    for (const [k, v] of Object.entries(c)) {
+      merged[k] = v;
+    }
+  }
+  return merged;
+}
+
+function getSubs(c: BlobCondition, mode: ConditionMode): SimpleCondition[] {
+  if (mode === "or") return (c as AnyCondition).any;
+  if (mode === "and") return splitSimple(c as SimpleCondition);
+  return [c as SimpleCondition];
+}
+
+function buildCondition(mode: ConditionMode, subs: SimpleCondition[]): BlobCondition {
+  if (mode === "or") return { any: subs };
+  if (mode === "and") return mergeSimple(subs);
+  return subs[0] ?? { "": true };
+}
+
+// ── Value helpers ───────────────────────────────────────────
+
+function getOperatorsForType(type?: FactType): { value: string; label: string }[] {
+  if (type === "boolean_state") {
+    return [
+      { value: "true", label: "= true" },
+      { value: "false", label: "= false" },
+      { value: "not_applicable", label: "= not applicable" }
+    ];
+  }
+  if (type === "enum" || type === "array") {
+    return [
+      { value: "array", label: "contains" },
+      { value: "not_applicable", label: "= not applicable" }
+    ];
+  }
+  return [
+    { value: "true", label: "= true" },
+    { value: "false", label: "= false" },
+    { value: "not_applicable", label: "= not applicable" },
+    { value: "array", label: "contains" }
+  ];
+}
+
+function defaultValueForType(type?: FactType): boolean | string | number[] {
+  if (type === "enum" || type === "array") return [];
+  return true;
+}
+
+// ── Sub-components ──────────────────────────────────────────
+
 function ConstantPicker({
   values,
   selected,
-  onAdd
+  onToggle
 }: {
   values: BlobConstantValue[];
   selected: (string | number)[];
-  onAdd: (id: number) => void;
+  onToggle: (id: number) => void;
 }) {
   const [open, setOpen] = useState(false);
   const selectedSet = useMemo(() => new Set(selected.map(Number)), [selected]);
-
-  const available = useMemo(() => values.filter((v) => v.enabled && !selectedSet.has(v.id)), [values, selectedSet]);
+  const enabled = useMemo(() => values.filter((v) => v.enabled), [values]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -44,25 +104,20 @@ function ConstantPicker({
           <Plus className="size-3" /> Add value
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[260px] p-0" align="start">
+      <PopoverContent className="w-[260px] p-0" side="right" align="start">
         <Command>
           <CommandInput placeholder="Search values..." className="h-8 text-xs" />
           <CommandList>
             <CommandEmpty className="py-2 text-center text-xs text-muted-foreground">No values found.</CommandEmpty>
-            {available.map((v) => (
-              <CommandItem
-                key={v.id}
-                value={v.label ?? v.name}
-                onSelect={() => {
-                  onAdd(v.id);
-                  setOpen(false);
-                }}
-                className="text-xs"
-              >
-                {v.label ?? v.name}
-                <span className="ml-auto font-mono text-muted-foreground">{v.id}</span>
-              </CommandItem>
-            ))}
+            {enabled.map((v) => {
+              const isSelected = selectedSet.has(v.id);
+              return (
+                <CommandItem key={v.id} value={v.label ?? v.name} onSelect={() => onToggle(v.id)} className="text-xs">
+                  {isSelected && <Check className="size-3 text-primary" />}
+                  <span className={isSelected ? "font-medium" : ""}>{v.label ?? v.name}</span>
+                </CommandItem>
+              );
+            })}
           </CommandList>
         </Command>
       </PopoverContent>
@@ -91,11 +146,20 @@ function SimpleConditionRow({
 
   const fact = facts[factName];
   const constantValues = fact?.values_ref ? constants[fact.values_ref] : undefined;
+  const operators = getOperatorsForType(fact?.type);
+  const currentMode = isArray ? "array" : String(factValue);
 
   function handleFactChange(newFact: string) {
-    const val = condition[factName];
-    const next: SimpleCondition = { [newFact]: val ?? true };
-    onChange(next);
+    const newFactDef = facts[newFact];
+    const oldType = fact?.type;
+    const newType = newFactDef?.type;
+    const sameValuesRef = fact?.values_ref && newFactDef?.values_ref && fact.values_ref === newFactDef.values_ref;
+
+    if (oldType === newType && sameValuesRef) {
+      onChange({ [newFact]: condition[factName] ?? defaultValueForType(newType) });
+    } else {
+      onChange({ [newFact]: defaultValueForType(newType) });
+    }
   }
 
   function handleModeChange(mode: string) {
@@ -110,11 +174,14 @@ function SimpleConditionRow({
     }
   }
 
-  function handleAddValue(id: number) {
+  function handleToggleValue(id: number) {
     if (!isArray) return;
     const arr = factValue as number[];
-    if (arr.includes(id)) return;
-    onChange({ [factName]: [...arr, id] });
+    if (arr.includes(id)) {
+      onChange({ [factName]: arr.filter((v) => v !== id) });
+    } else {
+      onChange({ [factName]: [...arr, id] });
+    }
   }
 
   function handleAddTag(tag: string) {
@@ -128,8 +195,6 @@ function SimpleConditionRow({
     if (!isArray) return;
     onChange({ [factName]: (factValue as number[]).filter((t) => t !== tag) } as SimpleCondition);
   }
-
-  const currentMode = isArray ? "array" : String(factValue);
 
   return (
     <div className="space-y-2 rounded-md border p-3">
@@ -148,14 +213,15 @@ function SimpleConditionRow({
         </Select>
 
         <Select value={currentMode} onValueChange={handleModeChange}>
-          <SelectTrigger className="w-[120px] text-xs">
+          <SelectTrigger className="w-[140px] text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="true">= true</SelectItem>
-            <SelectItem value="false">= false</SelectItem>
-            <SelectItem value="not_applicable">= not applicable</SelectItem>
-            <SelectItem value="array">contains</SelectItem>
+            {operators.map((op) => (
+              <SelectItem key={op.value} value={op.value}>
+                {op.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -167,7 +233,7 @@ function SimpleConditionRow({
       </div>
 
       {isArray && (
-        <div className="space-y-2">
+        <div className="space-y-2 pl-10">
           <div className="flex flex-wrap gap-1">
             {(factValue as (string | number)[]).map((tag) => {
               const label = resolveConstantId(tag, factName, facts, constants);
@@ -185,7 +251,7 @@ function SimpleConditionRow({
             <ConstantPicker
               values={constantValues}
               selected={factValue as (string | number)[]}
-              onAdd={handleAddValue}
+              onToggle={handleToggleValue}
             />
           ) : (
             <TagInput onAdd={handleAddTag} />
@@ -211,77 +277,109 @@ function TagInput({ onAdd }: { onAdd: (tag: string) => void }) {
   return <Input placeholder="Type value and press Enter..." className="h-7 text-xs" onKeyDown={handleKeyDown} />;
 }
 
+// ── Main editor ─────────────────────────────────────────────
+
+type ConditionEditorProps = {
+  condition: BlobCondition;
+  onChange: (condition: BlobCondition) => void;
+  factIds: string[];
+};
+
 export function ConditionEditor({ condition, onChange, factIds }: ConditionEditorProps) {
   const { blob } = useDataset();
   const facts = blob?.facts ?? {};
   const constants = blob?.constants ?? {};
-  const isAny = isAnyCondition(condition);
+  const mode = getMode(condition);
+  const isMulti = mode !== "single";
 
-  function handleConvertToAny() {
-    const simple = condition as SimpleCondition;
-    onChange({ any: [simple] });
+  function handleModeChange(newMode: ConditionMode) {
+    if (newMode === mode) return;
+    const subs = getSubs(condition, mode);
+
+    if (newMode === "single") {
+      onChange(subs[0] ?? { "": true });
+    } else {
+      const padded = subs.length < 2 ? [...subs, { "": true }] : subs;
+      onChange(buildCondition(newMode, padded));
+    }
   }
 
-  function handleConvertToSimple() {
-    const any = condition as AnyCondition;
-    onChange(any.any[0] ?? { "": true });
+  function handleSubChange(index: number, updated: SimpleCondition) {
+    const subs = getSubs(condition, mode);
+    const next = [...subs];
+    next[index] = updated;
+    onChange(buildCondition(mode, next));
   }
 
-  if (isAny) {
-    const anyCondition = condition as AnyCondition;
-
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground">Any of (OR):</span>
-          <Button variant="ghost" size="xs" onClick={handleConvertToSimple}>
-            Switch to simple
-          </Button>
-        </div>
-        {anyCondition.any.map((c, i) => (
-          <SimpleConditionRow
-            key={`any-${Object.keys(c).join("-")}-${i}`}
-            condition={c}
-            onChange={(updated) => {
-              const next = [...anyCondition.any];
-              next[i] = updated;
-              onChange({ any: next });
-            }}
-            onRemove={
-              anyCondition.any.length > 1
-                ? () => {
-                    const next = anyCondition.any.filter((_, j) => j !== i);
-                    onChange({ any: next });
-                  }
-                : undefined
-            }
-            factIds={factIds}
-            facts={facts}
-            constants={constants}
-          />
-        ))}
-        <Button variant="outline" size="sm" onClick={() => onChange({ any: [...anyCondition.any, { "": true }] })}>
-          <Plus className="size-3" /> Add condition
-        </Button>
-      </div>
+  function handleSubRemove(index: number) {
+    const subs = getSubs(condition, mode);
+    onChange(
+      buildCondition(
+        mode,
+        subs.filter((_, j) => j !== index)
+      )
     );
   }
 
+  function handleSubAdd() {
+    const subs = getSubs(condition, mode);
+    onChange(buildCondition(mode, [...subs, { "": true }]));
+  }
+
+  const subs = getSubs(condition, mode);
+
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-medium text-muted-foreground">When:</span>
-        <Button variant="ghost" size="xs" onClick={handleConvertToAny}>
-          Switch to any-of (OR)
-        </Button>
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs font-medium text-muted-foreground">when</span>
+        <div className="flex">
+          <Button
+            variant={mode === "single" ? "default" : "outline"}
+            size="xs"
+            className="rounded-r-none"
+            onClick={() => handleModeChange("single")}
+          >
+            <GateSingle className="size-4" />
+            single condition is true
+          </Button>
+          <Button
+            variant={mode === "or" ? "default" : "outline"}
+            size="xs"
+            className="rounded-none border-x-0"
+            onClick={() => handleModeChange("or")}
+          >
+            <GateOr className="size-4" />
+            any of these is true
+          </Button>
+          <Button
+            variant={mode === "and" ? "default" : "outline"}
+            size="xs"
+            className="rounded-l-none"
+            onClick={() => handleModeChange("and")}
+          >
+            <GateAnd className="size-4" />
+            all of these are true
+          </Button>
+        </div>
       </div>
-      <SimpleConditionRow
-        condition={condition as SimpleCondition}
-        onChange={(updated) => onChange(updated)}
-        factIds={factIds}
-        facts={facts}
-        constants={constants}
-      />
+
+      {subs.map((sub, i) => (
+        <SimpleConditionRow
+          key={`${mode}-${Object.keys(sub)[0] || i}`}
+          condition={sub}
+          onChange={(updated) => handleSubChange(i, updated)}
+          onRemove={isMulti && subs.length > 1 ? () => handleSubRemove(i) : undefined}
+          factIds={factIds}
+          facts={facts}
+          constants={constants}
+        />
+      ))}
+
+      {isMulti && (
+        <Button variant="outline" size="sm" onClick={handleSubAdd}>
+          <Plus className="size-3" /> Add condition
+        </Button>
+      )}
     </div>
   );
 }

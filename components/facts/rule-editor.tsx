@@ -3,7 +3,6 @@
 import { Plus, RotateCcw, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { BlobRule } from "@/lib/blob/types";
 import { cn } from "@/lib/utils";
 import { ConditionEditor } from "./condition-editor";
@@ -19,6 +18,12 @@ type RuleEditorProps = {
   onDiscard: (globalIndex: number) => void;
   onRestore: (globalIndex: number) => void;
 };
+
+const VALUE_OPTIONS = [
+  { value: "true", label: "true" },
+  { value: "false", label: "false" },
+  { value: "not_applicable", label: "not_applicable" }
+] as const;
 
 function SingleRuleEditor({
   entry,
@@ -38,6 +43,11 @@ function SingleRuleEditor({
   const { rule, index: globalIndex } = entry;
   const disabled = rule.enabled === false;
 
+  function handleValueChange(v: string) {
+    const value = v === "true" ? true : v === "false" ? false : v;
+    onChange(globalIndex, { ...rule, value });
+  }
+
   return (
     <div className={cn("space-y-3 rounded-md border p-4", disabled && "opacity-50")}>
       <div className="flex items-center justify-between">
@@ -48,27 +58,6 @@ function SingleRuleEditor({
           <Badge variant={rule.source === "hotspot" ? "default" : "secondary"} className="text-xs">
             {rule.source}
           </Badge>
-          {!disabled && (
-            <>
-              <span className="text-xs text-muted-foreground">Sets to:</span>
-              <Select
-                value={String(rule.value)}
-                onValueChange={(v) => {
-                  const value = v === "true" ? true : v === "false" ? false : v;
-                  onChange(globalIndex, { ...rule, value });
-                }}
-              >
-                <SelectTrigger className="h-7 w-[160px] text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="true">true</SelectItem>
-                  <SelectItem value="false">false</SelectItem>
-                  <SelectItem value="not_applicable">not_applicable</SelectItem>
-                </SelectContent>
-              </Select>
-            </>
-          )}
         </div>
         {disabled ? (
           <Button variant="outline" size="sm" onClick={() => onRestore(globalIndex)}>
@@ -82,11 +71,29 @@ function SingleRuleEditor({
       </div>
 
       {!disabled && (
-        <ConditionEditor
-          condition={rule.when}
-          onChange={(when) => onChange(globalIndex, { ...rule, when })}
-          factIds={factIds}
-        />
+        <>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Set this fact</span>
+            <div className="flex gap-1">
+              {VALUE_OPTIONS.map((opt) => (
+                <Button
+                  key={opt.value}
+                  variant={String(rule.value) === opt.value ? "default" : "outline"}
+                  size="xs"
+                  onClick={() => handleValueChange(opt.value)}
+                >
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <ConditionEditor
+            condition={rule.when}
+            onChange={(when) => onChange(globalIndex, { ...rule, when })}
+            factIds={factIds}
+          />
+        </>
       )}
     </div>
   );

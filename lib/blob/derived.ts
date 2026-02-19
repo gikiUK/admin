@@ -75,7 +75,7 @@ export function computeEnrichedFacts(data: DatasetData): FactCategory[] {
     enabled: fact.enabled,
     relationships: {
       setByQuestion: fact.core ? findSetByQuestion(id, data.questions) : undefined,
-      derivedFrom: !fact.core ? data.rules.find((r) => r.sets === id && r.value === true && r.enabled) : undefined,
+      derivedFrom: data.rules.find((r) => r.sets === id && r.value === true && r.enabled),
       constrainedBy: data.rules.filter(
         (r) => r.sets === id && (r.value === false || r.value === "not_applicable") && r.enabled
       ),
