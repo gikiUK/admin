@@ -22,8 +22,8 @@ export function FactCategoryGroup({ label, facts }: FactCategoryGroupProps) {
         <span className="text-lg font-semibold">{label}</span>
         <Badge variant="secondary">{facts.length}</Badge>
       </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className="grid gap-3 py-3 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+      <CollapsibleContent className="@container">
+        <div className="grid gap-3 py-3 @md:grid-cols-2 @4xl:grid-cols-3">
           {facts.map((fact) => (
             <FactCard key={fact.id} fact={fact} />
           ))}

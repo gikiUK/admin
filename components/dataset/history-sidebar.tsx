@@ -26,15 +26,21 @@ export function HistorySidebar() {
 
   return (
     <div data-state={open ? "expanded" : "collapsed"}>
-      {/* Gap — takes up space in the flex row so SidebarInset shrinks */}
+      {/* Backdrop — mobile only, closes panel on tap */}
+      {open && (
+        // biome-ignore lint/a11y/useKeyWithClickEvents: backdrop dismiss doesn't need keyboard handling
+        <div className="fixed inset-0 z-10 bg-black/50 md:hidden" role="none" onClick={() => setOpen(false)} />
+      )}
+
+      {/* Gap — takes up space in the flex row so SidebarInset shrinks (desktop only) */}
       <div
-        className="relative w-0 bg-transparent transition-[width] duration-200 ease-linear data-[state=expanded]:w-[24rem]"
+        className="relative hidden w-0 bg-transparent transition-[width] duration-200 ease-linear data-[state=expanded]:w-[24rem] md:block"
         data-state={open ? "expanded" : "collapsed"}
       />
 
-      {/* Fixed panel */}
+      {/* Fixed panel — overlay on mobile, push on desktop */}
       <aside
-        className="bg-sidebar text-sidebar-foreground fixed inset-y-0 right-0 z-10 hidden h-svh w-[24rem] flex-col border-l transition-[right] duration-200 ease-linear md:flex data-[state=collapsed]:right-[calc(24rem*-1)]"
+        className="bg-sidebar text-sidebar-foreground fixed inset-y-0 right-0 z-20 flex h-svh w-[min(24rem,100vw)] flex-col border-l transition-[right] duration-200 ease-linear data-[state=collapsed]:right-[calc(min(24rem,100vw)*-1)]"
         data-state={open ? "expanded" : "collapsed"}
       >
         {/* Header */}
@@ -97,8 +103,8 @@ export function HistorySidebar() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Clear history?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently remove all {entries.length}{" "}
-                    {entries.length === 1 ? "entry" : "entries"} from your undo history.
+                    This will permanently remove all {entries.length} {entries.length === 1 ? "entry" : "entries"} from
+                    your undo history.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
