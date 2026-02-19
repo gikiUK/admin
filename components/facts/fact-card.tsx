@@ -34,7 +34,9 @@ export function FactCard({ fact }: FactCardProps) {
       <Card className={`gap-0 py-0 transition-colors hover:border-primary/50${!fact.enabled ? " opacity-50" : ""}`}>
         <CardHeader className="gap-0 px-4 py-3">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm leading-none font-semibold uppercase tracking-wide">{formatFactName(fact.id)}</span>
+            <span className="text-sm leading-none font-semibold uppercase tracking-wide">
+              {formatFactName(fact.id)}
+            </span>
             <div className="flex items-center gap-1.5">
               <TypeBadge type={fact.type} />
               <Badge variant={fact.core ? "default" : "secondary"}>{fact.core ? "Core" : "Derived"}</Badge>

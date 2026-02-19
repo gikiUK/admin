@@ -95,9 +95,7 @@ export function FactsMappingEditor({ facts, options, allFactIds, onChange }: Fac
             <tbody>
               {factIds.map((factId) => (
                 <tr key={factId} className="border-b last:border-b-0">
-                  <td className="px-2 py-1 text-xs font-semibold uppercase tracking-wide">
-                    {formatFactName(factId)}
-                  </td>
+                  <td className="px-2 py-1 text-xs font-semibold uppercase tracking-wide">{formatFactName(factId)}</td>
                   <td className="px-2 py-1">
                     <CellSelect value={defaults[factId]} onChange={(v) => handleDefaultChange(factId, v)} />
                   </td>
