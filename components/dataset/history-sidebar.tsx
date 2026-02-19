@@ -1,6 +1,17 @@
 "use client";
 
 import { PanelRightClose, Redo2, Trash2, Undo2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useDataset } from "@/lib/blob/use-dataset";
 import { useHistorySidebar } from "@/lib/history-sidebar-context";
@@ -75,18 +86,35 @@ export function HistorySidebar() {
         {/* Footer */}
         {entries.length > 0 && (
           <div className="border-t px-4 py-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => {
-                clearHistory();
-                setOpen(false);
-              }}
-            >
-              <Trash2 className="size-3.5" />
-              Clear history
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+                  <Trash2 className="size-3.5" />
+                  Clear history
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent size="sm">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Clear history?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently remove all {entries.length}{" "}
+                    {entries.length === 1 ? "entry" : "entries"} from your undo history.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    variant="destructive"
+                    onClick={() => {
+                      clearHistory();
+                      setOpen(false);
+                    }}
+                  >
+                    Clear
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         )}
       </aside>

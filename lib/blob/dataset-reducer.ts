@@ -206,9 +206,10 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
       const isDirty = hasPending || !!hasLocalChanges;
 
       const prevEntries = state.history.entries.slice(0, state.history.cursor + 1);
+      const futureEntries = state.history.entries.slice(state.history.cursor + 1);
       const base = state.history.base ?? (isDirty ? structuredClone(serverData) : null);
       const history: HistoryState = {
-        entries: [...prevEntries, ...newEntries],
+        entries: [...prevEntries, ...newEntries, ...futureEntries],
         cursor: state.history.cursor + newEntries.length,
         base
       };
@@ -227,15 +228,24 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
     }
 
     case "DRAFT_DELETED": {
-      const discardEntry: ChangeEntry = {
-        id: crypto.randomUUID(),
-        timestamp: Date.now(),
-        action: null,
-        description: "Discarded draft",
-        details: [],
-        isDiscard: true
-      };
-      const hist = appendToHistory(state.history, discardEntry, state.dataset?.data ?? ({} as DatasetData));
+      // If the cursor already points at a discard entry (e.g. we redo'd to it),
+      // the auto-drop is just a side effect of history traversal — don't duplicate.
+      const currentEntry = state.history.entries[state.history.cursor];
+      const alreadyAtDiscard = currentEntry?.isDiscard === true;
+      const hist = alreadyAtDiscard
+        ? state.history
+        : appendToHistory(
+            state.history,
+            {
+              id: crypto.randomUUID(),
+              timestamp: Date.now(),
+              action: null,
+              description: "Discarded draft",
+              details: [],
+              isDiscard: true
+            },
+            state.dataset?.data ?? ({} as DatasetData)
+          );
       return {
         ...state,
         draft: null,
