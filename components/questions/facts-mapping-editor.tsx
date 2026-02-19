@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { BlobOption } from "@/lib/blob/types";
+import { formatFactName } from "@/lib/utils";
 
 type FactsMap = Record<string, Record<string, string | boolean>>;
 
@@ -94,7 +95,9 @@ export function FactsMappingEditor({ facts, options, allFactIds, onChange }: Fac
             <tbody>
               {factIds.map((factId) => (
                 <tr key={factId} className="border-b last:border-b-0">
-                  <td className="px-2 py-1 font-mono">{factId}</td>
+                  <td className="px-2 py-1 text-xs font-semibold uppercase tracking-wide">
+                    {formatFactName(factId)}
+                  </td>
                   <td className="px-2 py-1">
                     <CellSelect value={defaults[factId]} onChange={(v) => handleDefaultChange(factId, v)} />
                   </td>

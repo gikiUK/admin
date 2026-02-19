@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { resolveConstantId } from "@/lib/blob/resolve";
 import type { AnyCondition, BlobCondition, SimpleCondition } from "@/lib/blob/types";
 import { useDataset } from "@/lib/blob/use-dataset";
+import { formatFactName } from "@/lib/utils";
 
 function isAnyCondition(condition: BlobCondition): condition is AnyCondition {
   return "any" in condition;
@@ -23,8 +24,8 @@ export function ConditionDisplay({ condition }: { condition?: BlobCondition }) {
           <TooltipProvider key={fact}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge variant="outline" className="cursor-help font-mono text-xs">
-                  {fact} ({value.length} values)
+                <Badge variant="outline" className="cursor-help text-xs font-semibold uppercase tracking-wide">
+                  {formatFactName(fact)} ({value.length} values)
                 </Badge>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-xs">
@@ -36,8 +37,8 @@ export function ConditionDisplay({ condition }: { condition?: BlobCondition }) {
       }
 
       return (
-        <Badge key={fact} variant="outline" className="font-mono text-xs">
-          {fact} = {String(value)}
+        <Badge key={fact} variant="outline" className="text-xs font-semibold uppercase tracking-wide">
+          {formatFactName(fact)} = {String(value)}
         </Badge>
       );
     });
