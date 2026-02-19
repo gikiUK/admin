@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import type { BlobQuestion } from "@/lib/blob/types";
+import { formatFactName } from "@/lib/utils";
 
 function FactLink({ fact }: { fact: string }) {
   return (
-    <Badge variant="secondary" className="font-mono text-xs transition-colors hover:text-primary" asChild>
-      <Link href={`/data/facts/${fact}`}>{fact}</Link>
+    <Badge
+      variant="secondary"
+      className="text-xs font-semibold uppercase tracking-wide transition-colors hover:text-primary"
+      asChild
+    >
+      <Link href={`/data/facts/${fact}`}>{formatFactName(fact)}</Link>
     </Badge>
   );
 }

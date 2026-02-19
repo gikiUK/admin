@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { ConstantsLookup, FactsLookup } from "@/lib/blob/resolve";
 import { resolveConstantId } from "@/lib/blob/resolve";
 import type { AnyCondition, BlobCondition, BlobRule } from "@/lib/blob/types";
-import { cn } from "@/lib/utils";
+import { cn, formatFactName } from "@/lib/utils";
 
 type RuleCardProps = {
   rule: BlobRule & { index: number };
@@ -35,7 +35,10 @@ function ConditionEntry({
   if (Array.isArray(value)) {
     return (
       <div>
-        <code className="rounded bg-primary/10 px-1 py-0.5 font-mono text-xs text-primary">{factKey}</code> contains:
+        <span className="rounded bg-primary/10 px-1 py-0.5 text-xs font-semibold uppercase tracking-wide text-primary">
+          {formatFactName(factKey)}
+        </span>{" "}
+        contains:
         <div className="mt-1 flex flex-wrap gap-1">
           {value.map((item) => (
             <Badge key={String(item)} variant="secondary" className="font-normal">
@@ -49,8 +52,10 @@ function ConditionEntry({
 
   return (
     <div>
-      <code className="rounded bg-primary/10 px-1 py-0.5 font-mono text-xs text-primary">{factKey}</code> is{" "}
-      <span className="font-medium">{formatScalar(value)}</span>
+      <span className="rounded bg-primary/10 px-1 py-0.5 text-xs font-semibold uppercase tracking-wide text-primary">
+        {formatFactName(factKey)}
+      </span>{" "}
+      is <span className="font-medium">{formatScalar(value)}</span>
     </div>
   );
 }
@@ -103,8 +108,8 @@ export function RuleCard({ rule, facts, constants }: RuleCardProps) {
         <CardHeader className="flex flex-row items-center justify-between gap-2 px-4 py-3">
           <span className="flex items-center gap-1.5 text-sm">
             Rule for{" "}
-            <Badge variant="outline" className="font-medium">
-              {rule.sets}
+            <Badge variant="outline" className="text-xs font-semibold uppercase tracking-wide">
+              {formatFactName(rule.sets)}
             </Badge>
           </span>
           <Badge variant={rule.source === "hotspot" ? "default" : "secondary"} className="text-xs">
