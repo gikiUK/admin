@@ -93,8 +93,8 @@ function ConstraintSources({ rules }: { rules: FactRelationships["constrainedBy"
         Constraints ({rules.length})
       </div>
       <div className="ml-5.5 space-y-2">
-        {rules.map((rule) => (
-          <div key={`${rule.sets}-${rule.value}`} className="flex flex-wrap items-center gap-1 text-sm">
+        {rules.map((rule, i) => (
+          <div key={`${rule.sets}-${rule.value}-${i}`} className="flex flex-wrap items-center gap-1 text-sm">
             <span>
               Set to <ValueBadge value={rule.value} /> when
             </span>

@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import type { AnyCondition, BlobCondition, BlobConstantValue, BlobFact, BlobRule } from "@/lib/blob/types";
+import type { ConstantsLookup, FactsLookup } from "@/lib/blob/resolve";
+import { resolveConstantId } from "@/lib/blob/resolve";
+import type { AnyCondition, BlobCondition, BlobRule } from "@/lib/blob/types";
 import { cn } from "@/lib/utils";
-
-type ConstantsLookup = Record<string, BlobConstantValue[]>;
-type FactsLookup = Record<string, BlobFact>;
 
 type RuleCardProps = {
   rule: BlobRule & { index: number };
@@ -20,19 +19,6 @@ function isAnyCondition(c: BlobCondition): c is AnyCondition {
 function formatScalar(v: string | boolean | number): string {
   if (typeof v === "boolean") return v ? "true" : "false";
   return String(v);
-}
-
-function resolveArrayItem(
-  item: string | number,
-  factKey: string,
-  facts: FactsLookup,
-  constants: ConstantsLookup
-): string {
-  if (typeof item === "string") return item;
-  const fact = facts[factKey];
-  const group = fact?.values_ref ? constants[fact.values_ref] : undefined;
-  const entry = group?.find((c) => c.id === item);
-  return entry?.label ?? entry?.name ?? String(item);
 }
 
 function ConditionEntry({
@@ -53,7 +39,7 @@ function ConditionEntry({
         <div className="mt-1 flex flex-wrap gap-1">
           {value.map((item) => (
             <Badge key={String(item)} variant="secondary" className="font-normal">
-              {resolveArrayItem(item, factKey, facts, constants)}
+              {resolveConstantId(item, factKey, facts, constants)}
             </Badge>
           ))}
         </div>
