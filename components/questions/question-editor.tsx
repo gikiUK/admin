@@ -3,9 +3,10 @@
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { DebouncedInput, DebouncedTextarea } from "@/components/ui/debounced-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -96,7 +97,7 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="q-label">Label</Label>
-            <BlurInput
+            <DebouncedInput
               id="q-label"
               value={question.label}
               onCommit={(v) => dispatchUpdate({ label: v })}
@@ -105,7 +106,7 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="q-description">Description</Label>
-            <BlurTextarea
+            <DebouncedTextarea
               id="q-description"
               value={question.description ?? ""}
               onCommit={(v) => dispatchUpdate({ description: v || undefined })}
@@ -333,60 +334,6 @@ function NewQuestionEditor() {
         </Button>
       </div>
     </div>
-  );
-}
-
-// ── Blur-commit input helpers ───────────────────────────
-
-function BlurInput({
-  value,
-  onCommit,
-  ...props
-}: Omit<React.ComponentProps<typeof Input>, "onChange" | "defaultValue"> & {
-  value: string;
-  onCommit: (value: string) => void;
-}) {
-  const [local, setLocal] = useState(value);
-
-  useEffect(() => {
-    setLocal(value);
-  }, [value]);
-
-  return (
-    <Input
-      {...props}
-      value={local}
-      onChange={(e) => setLocal(e.target.value)}
-      onBlur={() => {
-        if (local !== value) onCommit(local);
-      }}
-    />
-  );
-}
-
-function BlurTextarea({
-  value,
-  onCommit,
-  ...props
-}: Omit<React.ComponentProps<typeof Textarea>, "onChange" | "defaultValue"> & {
-  value: string;
-  onCommit: (value: string) => void;
-}) {
-  const [local, setLocal] = useState(value);
-
-  useEffect(() => {
-    setLocal(value);
-  }, [value]);
-
-  return (
-    <Textarea
-      {...props}
-      value={local}
-      onChange={(e) => setLocal(e.target.value)}
-      onBlur={() => {
-        if (local !== value) onCommit(local);
-      }}
-    />
   );
 }
 
