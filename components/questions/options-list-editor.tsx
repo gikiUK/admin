@@ -3,7 +3,7 @@
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Label } from "@/components/ui/label";
 import type { BlobOption } from "@/lib/blob/types";
 
@@ -43,15 +43,15 @@ export function OptionsListEditor({ options, onChange }: OptionsListEditorProps)
           {options.map((opt, i) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: editable list with no stable ID
             <div key={i} className="grid grid-cols-[1fr_120px_70px_32px] items-center gap-2">
-              <Input
+              <DebouncedInput
                 value={opt.label}
-                onChange={(e) => handleUpdate(i, { label: e.target.value })}
+                onCommit={(v) => handleUpdate(i, { label: v })}
                 placeholder="Label"
                 className="h-8 text-xs"
               />
-              <Input
+              <DebouncedInput
                 value={opt.value}
-                onChange={(e) => handleUpdate(i, { value: e.target.value })}
+                onCommit={(v) => handleUpdate(i, { value: v })}
                 placeholder="value"
                 className="h-8 font-mono text-xs"
               />

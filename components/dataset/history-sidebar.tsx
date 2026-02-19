@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { ChangeEntry, FieldChange } from "@/lib/blob/change-log";
 import { computeSegments, type DiffSegment } from "@/lib/blob/dataset-diff";
-import type { MutationAction } from "@/lib/blob/dataset-mutations";
+import type { BlobQuestion } from "@/lib/blob/types";
 import { useDataset } from "@/lib/blob/use-dataset";
 import { useHistorySidebar } from "@/lib/history-sidebar-context";
 
@@ -20,7 +20,8 @@ function formatRelativeTime(timestamp: number): string {
   return `${hours}h ago`;
 }
 
-function actionHref(action: MutationAction | null): string | null {
+function actionHref(entry: ChangeEntry, currentQuestions: BlobQuestion[]): string | null {
+  const { action, entityRef, entityAfter } = entry;
   if (!action) return null;
   switch (action.type) {
     case "SET_FACT":
@@ -30,10 +31,25 @@ function actionHref(action: MutationAction | null): string | null {
       return `/data/facts/${action.id}`;
     case "SET_QUESTION":
     case "DISCARD_QUESTION":
-    case "RESTORE_QUESTION":
-      return `/data/questions/${action.index}`;
-    case "ADD_QUESTION":
+    case "RESTORE_QUESTION": {
+      // Use entityAfter label to find current index (survives index shifts)
+      const label = (entityAfter as BlobQuestion | undefined)?.label;
+      if (label) {
+        const idx = currentQuestions.findIndex((q) => q.label === label);
+        if (idx >= 0) return `/data/questions/${idx}`;
+      }
+      // Fallback to entityRef index if label lookup fails
+      if (entityRef?.type === "question") return `/data/questions/${entityRef.index}`;
       return "/data/questions";
+    }
+    case "ADD_QUESTION": {
+      const label = (entityAfter as BlobQuestion | undefined)?.label;
+      if (label) {
+        const idx = currentQuestions.findIndex((q) => q.label === label);
+        if (idx >= 0) return `/data/questions/${idx}`;
+      }
+      return "/data/questions";
+    }
     case "SET_RULE":
     case "ADD_RULE":
     case "DISCARD_RULE":
@@ -79,13 +95,15 @@ function HistoryEntry({
   index,
   isCurrent,
   isUndone,
-  onTravel
+  onTravel,
+  currentQuestions
 }: {
   entry: ChangeEntry;
   index: number;
   isCurrent: boolean;
   isUndone: boolean;
   onTravel: (index: number) => void;
+  currentQuestions: BlobQuestion[];
 }) {
   return (
     <button
@@ -103,10 +121,14 @@ function HistoryEntry({
               ? "bg-primary text-primary-foreground"
               : entry.isRevert
                 ? "bg-blue-100 dark:bg-blue-900"
-                : "bg-border"
+                : entry.isDiscard
+                  ? "bg-orange-100 dark:bg-orange-900"
+                  : "bg-border"
           }`}
         >
-          {entry.isRevert && !isCurrent ? (
+          {entry.isDiscard && !isCurrent ? (
+            <Flag className="size-3 text-orange-600 dark:text-orange-400" />
+          ) : entry.isRevert && !isCurrent ? (
             <Undo2 className="size-3 text-blue-600 dark:text-blue-400" />
           ) : (
             <Clock className={`size-3 ${isCurrent ? "" : "text-muted-foreground"}`} />
@@ -124,7 +146,7 @@ function HistoryEntry({
             </span>
           )}
           {(() => {
-            const href = actionHref(entry.action);
+            const href = actionHref(entry, currentQuestions);
             if (!href) return null;
             return (
               <Link
@@ -189,7 +211,8 @@ function LifecycleMarker({ entry }: { entry: ChangeEntry }) {
 
 export function HistorySidebar() {
   const { open, setOpen } = useHistorySidebar();
-  const { history, travelTo, undo, redo, canUndo, canRedo, clearHistory } = useDataset();
+  const { history, travelTo, undo, redo, canUndo, canRedo, clearHistory, blob } = useDataset();
+  const currentQuestions = blob?.questions ?? [];
   const { entries, cursor } = history;
 
   return (
@@ -243,6 +266,7 @@ export function HistorySidebar() {
                     isCurrent={realIndex === cursor}
                     isUndone={realIndex > cursor}
                     onTravel={travelTo}
+                    currentQuestions={currentQuestions}
                   />
                 );
               })}

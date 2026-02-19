@@ -233,7 +233,7 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         action: null,
         description: "Discarded draft",
         details: [],
-        isLifecycle: true
+        isDiscard: true
       };
       const hist = appendToHistory(state.history, discardEntry, state.dataset?.data ?? ({} as DatasetData));
       return {
@@ -243,7 +243,7 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         original: state.live ? structuredClone(state.live.data) : null,
         isDirty: false,
         isEditing: false,
-        history: { ...hist, cursor: -1 }
+        history: hist
       };
     }
 
@@ -343,11 +343,15 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
       if (!state.dataset) return state;
       const { history } = action;
       if (!history.base) return { ...state, history };
+      // Discard stale history if base doesn't match current live data
+      const liveData = state.live?.data;
+      if (liveData && JSON.stringify(history.base) !== JSON.stringify(liveData)) {
+        return state;
+      }
       // Clamp cursor to valid range
       const cursor = Math.max(-1, Math.min(history.cursor, history.entries.length - 1));
       const clamped: HistoryState = { entries: history.entries, cursor, base: history.base };
       const data = cursor === -1 ? structuredClone(history.base) : (replayToCursor(clamped) ?? state.dataset.data);
-      const liveData = state.live?.data;
       const isDirty = liveData ? JSON.stringify(data) !== JSON.stringify(liveData) : cursor >= 0;
       return {
         ...state,

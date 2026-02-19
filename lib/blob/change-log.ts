@@ -7,14 +7,25 @@ export type FieldChange = {
   to: string;
 };
 
+export type EntityRef =
+  | { type: "fact"; key: string }
+  | { type: "question"; index: number }
+  | { type: "rule"; index: number }
+  | { type: "constant"; group: string; valueId: number };
+
 export type ChangeEntry = {
   id: string;
   timestamp: number;
   action: MutationAction | null;
   description: string;
   details: FieldChange[];
+  entityRef?: EntityRef;
+  entityBefore?: unknown;
+  entityAfter?: unknown;
   isRevert?: boolean;
   isLifecycle?: boolean;
+  /** When true, replaying this entry resets data back to the history base (used by "discard draft"). */
+  isDiscard?: boolean;
 };
 
 function formatValue(v: unknown): string {
@@ -38,15 +49,76 @@ function diffFields(a: Record<string, unknown> | undefined, b: Record<string, un
   return changes;
 }
 
+export function entityRefFromAction(action: MutationAction): EntityRef | undefined {
+  switch (action.type) {
+    case "SET_FACT":
+    case "ADD_FACT":
+    case "DISCARD_FACT":
+    case "RESTORE_FACT":
+      return { type: "fact", key: action.id };
+    case "SET_QUESTION":
+    case "ADD_QUESTION":
+    case "DISCARD_QUESTION":
+    case "RESTORE_QUESTION":
+      return { type: "question", index: "index" in action ? action.index : -1 };
+    case "SET_RULE":
+    case "ADD_RULE":
+    case "DISCARD_RULE":
+    case "RESTORE_RULE":
+      return { type: "rule", index: "index" in action ? action.index : -1 };
+    case "SET_CONSTANT_VALUE":
+    case "ADD_CONSTANT_VALUE":
+    case "TOGGLE_CONSTANT_VALUE":
+    case "DELETE_CONSTANT_VALUE":
+      return { type: "constant", group: action.group, valueId: "valueId" in action ? action.valueId : -1 };
+    default:
+      return undefined;
+  }
+}
+
+function lookupEntity(data: DatasetData, ref: EntityRef): unknown {
+  switch (ref.type) {
+    case "fact":
+      return data.facts[ref.key] ?? undefined;
+    case "question":
+      return ref.index >= 0 ? data.questions[ref.index] : undefined;
+    case "rule":
+      return ref.index >= 0 ? data.rules[ref.index] : undefined;
+    case "constant":
+      return data.constants[ref.group]?.find((v) => v.id === ref.valueId) ?? undefined;
+  }
+}
+
 export function buildChangeEntry(action: MutationAction, dataBefore: DatasetData): ChangeEntry {
   const details = computeDetails(action, dataBefore);
+  const entityRef = entityRefFromAction(action);
+  const entityBefore = entityRef ? lookupEntity(dataBefore, entityRef) : undefined;
+  const dataAfter = applyAction(dataBefore, action);
+  // For ADD_QUESTION/ADD_RULE, the new entity is at the end of the array
+  const afterRef = resolveAfterRef(action, entityRef, dataAfter);
+  const entityAfter = afterRef ? lookupEntity(dataAfter, afterRef) : undefined;
   return {
     id: crypto.randomUUID(),
     timestamp: Date.now(),
     action,
     description: describeAction(action),
-    details
+    details,
+    entityRef: afterRef ?? entityRef,
+    entityBefore: entityBefore ? structuredClone(entityBefore) : undefined,
+    entityAfter: entityAfter ? structuredClone(entityAfter) : undefined
   };
+}
+
+/** For ADD actions, the entityRef index is -1 at creation time — resolve to actual index after apply. */
+function resolveAfterRef(
+  action: MutationAction,
+  ref: EntityRef | undefined,
+  dataAfter: DatasetData
+): EntityRef | undefined {
+  if (!ref) return undefined;
+  if (action.type === "ADD_QUESTION") return { type: "question", index: dataAfter.questions.length - 1 };
+  if (action.type === "ADD_RULE") return { type: "rule", index: dataAfter.rules.length - 1 };
+  return ref;
 }
 
 function computeDetails(action: MutationAction, before: DatasetData): FieldChange[] {
@@ -134,5 +206,8 @@ function describeAction(action: MutationAction): string {
 }
 
 export function replayChanges(base: DatasetData, entries: ChangeEntry[]): DatasetData {
-  return entries.reduce((data, entry) => (entry.action ? applyAction(data, entry.action) : data), base);
+  return entries.reduce(
+    (data, entry) => (entry.isDiscard ? structuredClone(base) : entry.action ? applyAction(data, entry.action) : data),
+    base
+  );
 }
