@@ -13,6 +13,8 @@ type DebouncedInputProps = Omit<React.ComponentProps<typeof Input>, "onChange" |
 export function DebouncedInput({ value, onCommit, ...props }: DebouncedInputProps) {
   const [local, setLocal] = useState(value);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const valueRef = useRef(value);
+  valueRef.current = value;
 
   useEffect(() => {
     setLocal(value);
@@ -27,13 +29,13 @@ export function DebouncedInput({ value, onCommit, ...props }: DebouncedInputProp
     setLocal(next);
     clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      if (next !== value) onCommit(next);
+      if (next !== valueRef.current) onCommit(next);
     }, INPUT_COMMIT_DELAY_MS);
   }
 
   function handleBlur() {
     clearTimeout(timerRef.current);
-    if (local !== value) onCommit(local);
+    if (local !== valueRef.current) onCommit(local);
   }
 
   return <Input {...props} value={local} onChange={handleChange} onBlur={handleBlur} />;
@@ -47,6 +49,8 @@ type DebouncedTextareaProps = Omit<React.ComponentProps<typeof Textarea>, "onCha
 export function DebouncedTextarea({ value, onCommit, ...props }: DebouncedTextareaProps) {
   const [local, setLocal] = useState(value);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const valueRef = useRef(value);
+  valueRef.current = value;
 
   useEffect(() => {
     setLocal(value);
@@ -61,13 +65,13 @@ export function DebouncedTextarea({ value, onCommit, ...props }: DebouncedTextar
     setLocal(next);
     clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      if (next !== value) onCommit(next);
+      if (next !== valueRef.current) onCommit(next);
     }, INPUT_COMMIT_DELAY_MS);
   }
 
   function handleBlur() {
     clearTimeout(timerRef.current);
-    if (local !== value) onCommit(local);
+    if (local !== valueRef.current) onCommit(local);
   }
 
   return <Textarea {...props} value={local} onChange={handleChange} onBlur={handleBlur} />;
