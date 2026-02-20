@@ -1,3 +1,4 @@
+import { AnalysisIndicator } from "@/components/analysis/analysis-indicator";
 import { AppSidebar } from "@/components/app-sidebar";
 import { DatasetHeader } from "@/components/dataset/dataset-header";
 import { DatasetShell } from "@/components/dataset/dataset-shell";
@@ -19,6 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <header className="bg-background sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 border-b px-4">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 !h-4" />
+                <AnalysisIndicator />
                 <HeaderSaveStatus />
                 <div className="ml-auto">
                   <DatasetHeader />
