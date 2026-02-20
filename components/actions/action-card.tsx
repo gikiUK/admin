@@ -145,7 +145,7 @@ export function ActionCard({ action, condition, facts, constants }: ActionCardPr
   const dismissCount = condition?.dismiss_options?.length ?? 0;
 
   return (
-    <Card className={cn("gap-0 py-0 transition-colors", !action.enabled && "opacity-50")}>
+    <Card id={`a-${action.id}`} className={cn("gap-0 py-0 transition-colors", !action.enabled && "opacity-50")}>
       <CardHeader className="flex flex-row items-center justify-between gap-2 px-4 py-3">
         <span className="text-sm font-medium">{action.title}</span>
         <div className="flex items-center gap-1.5">

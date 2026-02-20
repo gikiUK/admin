@@ -12,7 +12,7 @@ function refHref(ref: { type: string; id: string }): string | null {
     case "rule":
       return `/data/rules#r-${ref.id}`;
     case "action":
-      return `/data/actions`;
+      return `/data/actions#a-${ref.id}`;
     default:
       return null;
   }
@@ -20,6 +20,7 @@ function refHref(ref: { type: string; id: string }): string | null {
 
 function refLabel(ref: { type: string; id: string; label?: string }): string {
   if (ref.label) return ref.label;
+  if (ref.type === "action") return `Action #${ref.id}`;
   return `${ref.type} ${ref.id}`;
 }
 
@@ -32,24 +33,28 @@ export function IssueRow({ issue, compact }: { issue: AnalysisIssue; compact?: b
         <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500" />
       )}
       <div className="min-w-0">
-        <span>{issue.message}</span>
         {issue.refs.length > 0 && (
-          <span className="ml-2 inline-flex gap-1.5">
+          <span className="mr-1.5 inline-flex gap-1.5">
             {issue.refs.map((ref) => {
               const href = refHref(ref);
               const label = refLabel(ref);
               return href ? (
-                <Link key={`${ref.type}-${ref.id}`} href={href} className="text-primary underline underline-offset-2">
+                <Link
+                  key={`${ref.type}-${ref.id}`}
+                  href={href}
+                  className="font-medium text-primary underline underline-offset-2"
+                >
                   {label}
                 </Link>
               ) : (
-                <span key={`${ref.type}-${ref.id}`} className="text-muted-foreground">
+                <span key={`${ref.type}-${ref.id}`} className="font-medium text-muted-foreground">
                   {label}
                 </span>
               );
             })}
           </span>
         )}
+        <span>{issue.message}</span>
         {!compact && issue.conditions && issue.conditions.length > 0 && (
           <div className="mt-1.5 space-y-1">
             {issue.conditions.map((c) => (

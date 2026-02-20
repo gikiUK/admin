@@ -26,7 +26,7 @@ export function checkUnreachableQuestions(data: DatasetData, model: SatModel): C
 
           issues.push({
             severity: "warning",
-            message: `Question "${q.label}" has a show_when condition that can never be satisfied`,
+            message: `show_when condition can never be satisfied`,
             suggestion,
             refs: [{ type: "question", id: String(i), label: q.label }],
             conditions: [{ tag: "show_when", condition: q.show_when, sourcelessFacts: sourceless }]
@@ -47,7 +47,7 @@ export function checkUnreachableQuestions(data: DatasetData, model: SatModel): C
 
           issues.push({
             severity: "warning",
-            message: `Question "${q.label}" has a hide_when condition that is always true — question is always hidden`,
+            message: `hide_when condition is always true — question is always hidden`,
             suggestion: `The hide_when condition is satisfied for every possible state. Either update the condition or disable this question.`,
             refs: [{ type: "question", id: String(i), label: q.label }],
             conditions: [{ tag: "hide_when", condition: q.hide_when, sourcelessFacts: sourceless }]

@@ -106,8 +106,8 @@ export function CheckResultCard({ result }: { result: CheckResult }) {
               <VirtualizedIssues result={result} />
             ) : (
               <div className="border-t px-4 py-2">
-                {result.issues.map((issue) => (
-                  <IssueRow key={issue.message} issue={issue} />
+                {result.issues.map((issue, i) => (
+                  <IssueRow key={`${issue.severity}-${i}`} issue={issue} />
                 ))}
               </div>
             ))}

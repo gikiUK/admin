@@ -25,7 +25,7 @@ export function checkIncludeExcludeOverlap(data: DatasetData, model: SatModel): 
     if (solution) {
       issues.push({
         severity: "warning",
-        message: `Action ${actionId} has include_when and exclude_when conditions that can both be true simultaneously`,
+        message: `include_when and exclude_when conditions can both be true simultaneously`,
         suggestion: `Some users will match both conditions, making the result ambiguous. Narrow either the include_when or exclude_when so they don't overlap.`,
         refs: [{ type: "action", id: actionId }],
         conditions: [

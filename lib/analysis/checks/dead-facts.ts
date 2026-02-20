@@ -54,7 +54,7 @@ export function checkDeadFacts(data: DatasetData): CheckResult {
     .filter(([id, fact]) => fact.enabled && !referenced.has(id))
     .map(([id]) => ({
       severity: "warning" as const,
-      message: `Fact "${id}" is never referenced by any question, rule, or action condition`,
+      message: "never referenced by any question, rule, or action condition",
       suggestion: `If this fact is no longer needed, disable it. If it's reserved for future use, this warning is safe to ignore.`,
       refs: [{ type: "fact" as const, id }]
     }));

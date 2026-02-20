@@ -31,25 +31,23 @@ function getFactValues(factId: string, data: DatasetData): Set<string> | null {
   return resolveConstantIdentifiers(fact.values_ref, data);
 }
 
-/** Check if fact exists but is disabled */
-function isDisabledFact(factId: string, data: DatasetData): boolean {
-  const fact = data.facts[factId];
-  return !!fact && !fact.enabled;
-}
-
 export function checkUndefinedRefs(data: DatasetData): CheckResult {
-  const factIds = new Set(Object.keys(data.facts));
+  const allFactIds = new Set(Object.keys(data.facts));
+  const enabledFactIds = new Set(Object.keys(data.facts).filter((id) => data.facts[id].enabled));
   const issues: AnalysisIssue[] = [];
 
   function checkCondition(condition: BlobCondition, context: string, contextRef: IssueRef) {
     for (const entry of extractEntries(condition)) {
       if (entry.key === "any_of" && Array.isArray(entry.value)) {
         for (const ref of entry.value as string[]) {
-          if (!factIds.has(ref)) {
+          if (!enabledFactIds.has(ref)) {
+            const disabled = allFactIds.has(ref);
             issues.push({
               severity: "error",
-              message: `${context} references undefined fact "${ref}" in any_of`,
-              suggestion: `Check for typos in the fact name. No fact called "${ref}" exists in the dataset.`,
+              message: `${context} references ${disabled ? "disabled" : "undefined"} fact "${ref}" in any_of`,
+              suggestion: disabled
+                ? `Fact "${ref}" exists but is disabled. Re-enable it or update the condition.`
+                : `Check for typos in the fact name. No fact called "${ref}" exists in the dataset.`,
               refs: [contextRef]
             });
           }
@@ -57,11 +55,11 @@ export function checkUndefinedRefs(data: DatasetData): CheckResult {
         continue;
       }
 
-      if (!factIds.has(entry.key)) {
-        const disabled = isDisabledFact(entry.key, data);
+      if (!enabledFactIds.has(entry.key)) {
+        const disabled = allFactIds.has(entry.key);
         issues.push({
           severity: "error",
-          message: `${context} references undefined fact "${entry.key}"`,
+          message: `${context} references ${disabled ? "disabled" : "undefined"} fact "${entry.key}"`,
           suggestion: disabled
             ? `Fact "${entry.key}" exists but is disabled. Re-enable it or update the condition.`
             : `Check for typos in the fact name. No fact called "${entry.key}" exists in the dataset.`,
@@ -105,38 +103,38 @@ export function checkUndefinedRefs(data: DatasetData): CheckResult {
     const q = data.questions[i];
     if (!q.enabled) continue;
     const ref: IssueRef = { type: "question", id: String(i), label: q.label };
-    if (q.fact && !factIds.has(q.fact)) {
+    if (q.fact && !allFactIds.has(q.fact)) {
       issues.push({
         severity: "error",
-        message: `Question "${q.label}" sets undefined fact "${q.fact}"`,
+        message: `sets undefined fact "${q.fact}"`,
         suggestion: `Create the fact "${q.fact}" or update this question to point to an existing fact.`,
         refs: [ref]
       });
     }
-    if (q.show_when) checkCondition(q.show_when, `Question "${q.label}" show_when`, ref);
-    if (q.hide_when) checkCondition(q.hide_when, `Question "${q.label}" hide_when`, ref);
+    if (q.show_when) checkCondition(q.show_when, "show_when", ref);
+    if (q.hide_when) checkCondition(q.hide_when, "hide_when", ref);
   }
 
   for (let i = 0; i < data.rules.length; i++) {
     const rule = data.rules[i];
     if (!rule.enabled) continue;
     const ref: IssueRef = { type: "rule", id: String(i), label: `Rule #${i} (sets ${rule.sets})` };
-    if (!factIds.has(rule.sets)) {
+    if (!allFactIds.has(rule.sets)) {
       issues.push({
         severity: "error",
-        message: `Rule #${i} sets undefined fact "${rule.sets}"`,
+        message: `sets undefined fact "${rule.sets}"`,
         suggestion: `Create the fact "${rule.sets}" or disable this rule.`,
         refs: [ref]
       });
     }
-    checkCondition(rule.when, `Rule #${i}`, ref);
+    checkCondition(rule.when, "when", ref);
   }
 
   for (const [actionId, ac] of Object.entries(data.action_conditions)) {
     if (!ac.enabled) continue;
     const ref: IssueRef = { type: "action", id: actionId };
-    checkCondition(ac.include_when, `Action ${actionId} include_when`, ref);
-    checkCondition(ac.exclude_when, `Action ${actionId} exclude_when`, ref);
+    checkCondition(ac.include_when, "include_when", ref);
+    checkCondition(ac.exclude_when, "exclude_when", ref);
   }
 
   return {

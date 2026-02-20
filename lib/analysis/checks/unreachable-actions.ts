@@ -27,7 +27,7 @@ export function checkUnreachableActions(data: DatasetData, model: SatModel): Che
 
       issues.push({
         severity: "warning",
-        message: `Action ${actionId} has an include_when condition that can never be satisfied`,
+        message: `include_when condition can never be satisfied`,
         suggestion,
         refs: [{ type: "action", id: actionId }],
         conditions: [{ tag: "include_when", condition: ac.include_when, sourcelessFacts: sourceless }]

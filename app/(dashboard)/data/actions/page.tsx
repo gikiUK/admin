@@ -30,7 +30,14 @@ export default function ActionsPage() {
     loadActions()
       .then(setActions)
       .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        // Scroll to hash anchor after actions render
+        requestAnimationFrame(() => {
+          const hash = window.location.hash;
+          if (hash) document.querySelector(hash)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+      });
   }, []);
 
   if (loading) return <p className="py-8 text-center text-muted-foreground">Loading actions...</p>;

@@ -28,7 +28,7 @@ export function findSourcelessFacts(factIds: string[], data: DatasetData): strin
     // Has a rule that derives it to true?
     for (const rule of data.rules) {
       if (!rule.enabled) continue;
-      if (rule.sets === id && rule.value === true) return false;
+      if (rule.sets === id && rule.value !== false) return false;
     }
 
     return true;
