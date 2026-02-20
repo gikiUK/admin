@@ -27,7 +27,11 @@ export function checkIncludeExcludeOverlap(data: DatasetData, model: SatModel): 
         severity: "warning",
         message: `Action ${actionId} has include_when and exclude_when conditions that can both be true simultaneously`,
         suggestion: `Some users will match both conditions, making the result ambiguous. Narrow either the include_when or exclude_when so they don't overlap.`,
-        refs: [{ type: "action", id: actionId }]
+        refs: [{ type: "action", id: actionId }],
+        conditions: [
+          { tag: "include_when", condition: ac.include_when },
+          { tag: "exclude_when", condition: ac.exclude_when }
+        ]
       });
     }
   }

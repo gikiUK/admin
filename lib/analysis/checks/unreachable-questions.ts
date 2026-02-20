@@ -1,41 +1,9 @@
 import Logic from "logic-solver";
-import type { AnyCondition, BlobCondition, DatasetData, SimpleCondition } from "@/lib/blob/types";
+import type { DatasetData } from "@/lib/blob/types";
 import type { SatModel } from "../sat-encoding";
 import { encodeCondition } from "../sat-encoding";
+import { extractConditionFacts, findSourcelessFacts } from "../sourceless-facts";
 import type { CheckResult } from "../types";
-
-function extractConditionFacts(condition: BlobCondition): string[] {
-  if ("any" in condition) {
-    return (condition as AnyCondition).any.flatMap((c) => Object.keys(c));
-  }
-  return Object.keys(condition as SimpleCondition).filter((k) => k !== "any_of");
-}
-
-function findSourcelessFacts(factIds: string[], data: DatasetData): string[] {
-  return factIds.filter((id) => {
-    const fact = data.facts[id];
-    if (!fact?.enabled) return false;
-
-    // Has an enabled question that sets it?
-    for (const q of data.questions) {
-      if (!q.enabled) continue;
-      if (q.fact === id) return false;
-      if (q.facts) {
-        for (const mapping of Object.values(q.facts)) {
-          if (id in mapping) return false;
-        }
-      }
-    }
-
-    // Has a rule that derives it to true?
-    for (const rule of data.rules) {
-      if (!rule.enabled) continue;
-      if (rule.sets === id && rule.value === true) return false;
-    }
-
-    return true;
-  });
-}
 
 export function checkUnreachableQuestions(data: DatasetData, model: SatModel): CheckResult {
   const issues: CheckResult["issues"] = [];
@@ -60,7 +28,8 @@ export function checkUnreachableQuestions(data: DatasetData, model: SatModel): C
             severity: "warning",
             message: `Question "${q.label}" has a show_when condition that can never be satisfied`,
             suggestion,
-            refs: [{ type: "question", id: String(i), label: q.label }]
+            refs: [{ type: "question", id: String(i), label: q.label }],
+            conditions: [{ tag: "show_when", condition: q.show_when, sourcelessFacts: sourceless }]
           });
           continue;
         }
@@ -73,11 +42,15 @@ export function checkUnreachableQuestions(data: DatasetData, model: SatModel): C
         const negated = Logic.not(formula);
         const solution = model.solver.solveAssuming(negated);
         if (!solution) {
+          const condFacts = extractConditionFacts(q.hide_when);
+          const sourceless = findSourcelessFacts(condFacts, data);
+
           issues.push({
             severity: "warning",
             message: `Question "${q.label}" has a hide_when condition that is always true — question is always hidden`,
             suggestion: `The hide_when condition is satisfied for every possible state. Either update the condition or disable this question.`,
-            refs: [{ type: "question", id: String(i), label: q.label }]
+            refs: [{ type: "question", id: String(i), label: q.label }],
+            conditions: [{ tag: "hide_when", condition: q.hide_when, sourcelessFacts: sourceless }]
           });
         }
       }

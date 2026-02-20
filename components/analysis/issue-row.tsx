@@ -1,6 +1,7 @@
 import { AlertCircle, AlertTriangle, Lightbulb } from "lucide-react";
 import Link from "next/link";
 import type { AnalysisIssue } from "@/lib/analysis/types";
+import { ConditionBadge } from "./condition-badge";
 
 function refHref(ref: { type: string; id: string }): string | null {
   switch (ref.type) {
@@ -48,6 +49,13 @@ export function IssueRow({ issue, compact }: { issue: AnalysisIssue; compact?: b
               );
             })}
           </span>
+        )}
+        {!compact && issue.conditions && issue.conditions.length > 0 && (
+          <div className="mt-1.5 space-y-1">
+            {issue.conditions.map((c) => (
+              <ConditionBadge key={c.tag} type={c.tag} condition={c.condition} sourcelessFacts={c.sourcelessFacts} />
+            ))}
+          </div>
         )}
         {!compact && issue.suggestion && (
           <div className="mt-1 flex items-start gap-1.5 text-xs text-muted-foreground">

@@ -2,36 +2,11 @@
 
 import { AlertCircle, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { runAnalysis } from "@/lib/analysis/run-analysis";
-import type { AnalysisReport } from "@/lib/analysis/types";
-import { useDataset } from "@/lib/blob/use-dataset";
+import { useAnalysis } from "@/lib/analysis/analysis-context";
 
 export function AnalysisIndicator() {
-  const { blob, loading } = useDataset();
-  const [report, setReport] = useState<AnalysisReport | null>(null);
-  const [running, setRunning] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
-
-  useEffect(() => {
-    if (!blob || loading) return;
-
-    setRunning(true);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    debounceRef.current = setTimeout(() => {
-      const result = runAnalysis(blob);
-      setReport(result);
-      setRunning(false);
-    }, 300);
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [blob, loading]);
-
-  if (loading || !blob) return null;
+  const { report, running } = useAnalysis();
 
   return (
     <TooltipProvider>

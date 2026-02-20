@@ -1,11 +1,11 @@
 "use client";
 
-import { Eye, EyeOff, HelpCircle } from "lucide-react";
+import { HelpCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ConditionBadge } from "@/components/analysis/condition-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { BlobQuestion } from "@/lib/blob/types";
 import { cn } from "@/lib/utils";
-import { ConditionDisplay } from "./condition-display";
 import { QuestionBehaviorSummary } from "./question-behavior-summary";
 import { QuestionTypeBadge } from "./question-type-badge";
 
@@ -52,24 +52,8 @@ export function QuestionCard({ question, conditionallyHidden }: QuestionCardProp
 
           {(q.show_when || q.hide_when || q.unknowable) && (
             <div className="space-y-1.5 border-t pt-3">
-              {q.show_when && (
-                <div className="flex items-center gap-1.5 text-xs">
-                  <Eye className="size-3.5 shrink-0 text-blue-500" />
-                  <div className="flex flex-wrap items-center gap-1">
-                    <span className="text-muted-foreground">Shown when</span>
-                    <ConditionDisplay condition={q.show_when} />
-                  </div>
-                </div>
-              )}
-              {q.hide_when && (
-                <div className="flex items-center gap-1.5 text-xs">
-                  <EyeOff className="size-3.5 shrink-0 text-orange-500" />
-                  <div className="flex flex-wrap items-center gap-1">
-                    <span className="text-muted-foreground">Hidden when</span>
-                    <ConditionDisplay condition={q.hide_when} />
-                  </div>
-                </div>
-              )}
+              {q.show_when && <ConditionBadge type="show_when" condition={q.show_when} />}
+              {q.hide_when && <ConditionBadge type="hide_when" condition={q.hide_when} />}
               {q.unknowable && (
                 <div className="flex items-center gap-1.5 text-xs">
                   <HelpCircle className="size-3.5 shrink-0 text-muted-foreground" />

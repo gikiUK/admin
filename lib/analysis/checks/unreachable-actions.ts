@@ -1,6 +1,7 @@
 import type { DatasetData } from "@/lib/blob/types";
 import type { SatModel } from "../sat-encoding";
 import { encodeCondition } from "../sat-encoding";
+import { extractConditionFacts, findSourcelessFacts } from "../sourceless-facts";
 import type { CheckResult } from "../types";
 
 export function checkUnreachableActions(data: DatasetData, model: SatModel): CheckResult {
@@ -17,11 +18,19 @@ export function checkUnreachableActions(data: DatasetData, model: SatModel): Che
 
     const solution = model.solver.solveAssuming(formula);
     if (!solution) {
+      const condFacts = extractConditionFacts(ac.include_when);
+      const sourceless = findSourcelessFacts(condFacts, data);
+      const suggestion =
+        sourceless.length > 0
+          ? `The include_when depends on ${sourceless.map((f) => `"${f}"`).join(", ")} which ${sourceless.length === 1 ? "has" : "have"} no source — no enabled question or rule sets ${sourceless.length === 1 ? "it" : "them"}. Enable the relevant question or update the condition.`
+          : `No combination of user answers can match this condition. The condition may reference values that conflict with each other. Review the include_when or disable this action condition.`;
+
       issues.push({
         severity: "warning",
         message: `Action ${actionId} has an include_when condition that can never be satisfied`,
-        suggestion: `No combination of user answers can match this condition. The condition may reference values that conflict with each other, or facts that have no source. Review the include_when or disable this action condition.`,
-        refs: [{ type: "action", id: actionId }]
+        suggestion,
+        refs: [{ type: "action", id: actionId }],
+        conditions: [{ tag: "include_when", condition: ac.include_when, sourcelessFacts: sourceless }]
       });
     }
   }
