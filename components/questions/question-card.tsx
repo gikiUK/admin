@@ -3,6 +3,7 @@
 import { HelpCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ConditionBadge } from "@/components/analysis/condition-badge";
+import { EntityIssueIndicator } from "@/components/analysis/entity-issue-indicator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { BlobQuestion } from "@/lib/blob/types";
 import { cn } from "@/lib/utils";
@@ -42,7 +43,10 @@ export function QuestionCard({ question, conditionallyHidden }: QuestionCardProp
               <span className="mr-2 text-muted-foreground">Q{q.index + 1}</span>
               {q.label}
             </CardTitle>
-            <QuestionTypeBadge type={q.type} />
+            <div className="flex items-center gap-1.5">
+              <EntityIssueIndicator type="question" id={String(q.index)} />
+              <QuestionTypeBadge type={q.type} />
+            </div>
           </div>
           {q.description && <p className="text-xs text-muted-foreground">{q.description}</p>}
         </CardHeader>

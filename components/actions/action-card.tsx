@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import { EntityIssueIndicator } from "@/components/analysis/entity-issue-indicator";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -149,6 +150,7 @@ export function ActionCard({ action, condition, facts, constants }: ActionCardPr
       <CardHeader className="flex flex-row items-center justify-between gap-2 px-4 py-3">
         <span className="text-sm font-medium">{action.title}</span>
         <div className="flex items-center gap-1.5">
+          <EntityIssueIndicator type="action" id={String(action.id)} />
           {!action.enabled && (
             <Badge variant="outline" className="text-xs">
               disabled
