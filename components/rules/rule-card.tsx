@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EntityIssueIndicator } from "@/components/analysis/entity-issue-indicator";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { ConstantsLookup, FactsLookup } from "@/lib/blob/resolve";
@@ -112,9 +113,12 @@ export function RuleCard({ rule, facts, constants }: RuleCardProps) {
               {formatFactName(rule.sets)}
             </Badge>
           </span>
-          <Badge variant={rule.source === "hotspot" ? "default" : "secondary"} className="text-xs">
-            {rule.source}
-          </Badge>
+          <div className="flex items-center gap-1.5">
+            <EntityIssueIndicator type="rule" id={String(rule.index)} />
+            <Badge variant={rule.source === "hotspot" ? "default" : "secondary"} className="text-xs">
+              {rule.source}
+            </Badge>
+          </div>
         </CardHeader>
 
         <CardContent className="space-y-2 border-t px-4 py-3 text-sm">

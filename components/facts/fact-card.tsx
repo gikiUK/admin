@@ -3,6 +3,7 @@
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { EntityIssueIndicator } from "@/components/analysis/entity-issue-indicator";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { EnrichedFact } from "@/lib/blob/types";
@@ -38,6 +39,7 @@ export function FactCard({ fact }: FactCardProps) {
               {formatFactName(fact.id)}
             </span>
             <div className="flex items-center gap-1.5">
+              <EntityIssueIndicator type="fact" id={fact.id} />
               <TypeBadge type={fact.type} />
               <Badge variant={fact.core ? "default" : "secondary"}>{fact.core ? "Core" : "Derived"}</Badge>
             </div>
