@@ -106,6 +106,14 @@ export type DatasetMeta = {
 
 export type Dataset = DatasetMeta & DatasetBlob;
 
+// ── Action (from /admin/actions, not part of dataset) ────
+
+export type Action = {
+  id: number;
+  title: string;
+  enabled: boolean;
+};
+
 // ── Enriched view types (computed, not stored) ───────────
 
 export type FactOptionMapping = {
