@@ -1,4 +1,4 @@
-import type { Dataset, DatasetBlob } from "./types";
+import type { Action, Dataset, DatasetBlob } from "./types";
 
 // Requests go through Next.js rewrites (/api/* → Rails API) to avoid CORS.
 // In the browser this is same-origin; no cross-origin headers needed.
@@ -94,4 +94,13 @@ export async function deleteDraft(): Promise<void> {
 export async function publishDraft(): Promise<Dataset> {
   const res = await api<DatasetResponse>("/admin/facts_datasets/draft/publish", { method: "POST" });
   return unwrapDataset(res);
+}
+
+// ── Action operations ───────────────────────────────────
+
+type ActionsResponse = { actions: Action[] };
+
+export async function loadActions(): Promise<Action[]> {
+  const res = await api<ActionsResponse>("/admin/actions");
+  return res.actions;
 }

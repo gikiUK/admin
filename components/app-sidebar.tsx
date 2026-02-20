@@ -9,7 +9,8 @@ import {
   GitBranch,
   ListChecks,
   LogOut,
-  Scale
+  Scale,
+  Zap
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -33,6 +34,7 @@ const dataItems = [
   { title: "Questions", href: "/data/questions", icon: FileQuestion },
   { title: "Rules", href: "/data/rules", icon: Scale },
   { title: "Constants", href: "/data/constants", icon: ListChecks },
+  { title: "Actions", href: "/data/actions", icon: Zap },
   { title: "Raw JSON", href: "/data/raw", icon: Braces }
 ];
 
