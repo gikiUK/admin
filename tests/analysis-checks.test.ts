@@ -181,4 +181,3 @@ describe("buildSatModel — any_of vars registration", () => {
     expect(model.vars.has("fact:fact_b:true")).toBe(true);
   });
 });
-
