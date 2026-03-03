@@ -3,10 +3,12 @@
 import { AlertCircle, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useAnalysis } from "@/lib/analysis/analysis-context";
+import { useAnalysisSafe } from "@/lib/analysis/analysis-context";
 
 export function AnalysisIndicator() {
-  const { report, running } = useAnalysis();
+  const ctx = useAnalysisSafe();
+  if (!ctx) return null;
+  const { report, running } = ctx;
 
   return (
     <TooltipProvider>

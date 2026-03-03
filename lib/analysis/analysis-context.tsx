@@ -86,6 +86,10 @@ export function useAnalysis(): AnalysisContextValue {
   return ctx;
 }
 
+export function useAnalysisSafe(): AnalysisContextValue | null {
+  return useContext(AnalysisContext);
+}
+
 export function useEntityIssues(type: string, id: string): AnalysisIssue[] {
   const { issuesByEntity } = useAnalysis();
   return issuesByEntity.get(`${type}:${id}`) ?? EMPTY_ISSUES;

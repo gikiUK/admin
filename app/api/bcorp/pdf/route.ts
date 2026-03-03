@@ -14,6 +14,10 @@ export async function POST(req: Request) {
 
   const { orgId } = await req.json();
 
+  if (typeof orgId !== "string" || !/^[\w-]+$/.test(orgId)) {
+    return new Response("Invalid orgId", { status: 400 });
+  }
+
   const route = `organizations/${orgId}/bcorp-printable`;
   const targetUrl = `${baseUrl}/${route}?print`;
 

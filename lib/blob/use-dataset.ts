@@ -11,6 +11,10 @@ import { DatasetContext } from "./dataset-context";
 import type { DatasetAction, RevertFieldTarget } from "./dataset-reducer";
 import { isMutationAction } from "./dataset-reducer";
 
+export function useDatasetSafe() {
+  return useContext(DatasetContext);
+}
+
 export function useDataset() {
   const ctx = useContext(DatasetContext);
   if (!ctx) throw new Error("useDataset must be used within a DatasetProvider");

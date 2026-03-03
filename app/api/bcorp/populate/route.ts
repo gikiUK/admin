@@ -4,7 +4,7 @@ import type { Plan } from "@/lib/bcorp/types";
 export const runtime = "edge";
 
 type PopulateRequest = {
-  orgName: string;
+  orgId: string;
   plan: Plan;
   existingData: Record<string, string>;
 };
@@ -74,7 +74,11 @@ Fields to reason about: company_description, cert_bcorp, cert_iso14001, initiati
   });
 
   const text = msg.content[0].type === "text" ? msg.content[0].text : "";
-  return JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? "{}");
+  try {
+    return JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? "{}");
+  } catch {
+    return { data: {}, reasoning: {} };
+  }
 }
 
 // Group B — Haiku: yes/no policy fields
@@ -107,7 +111,11 @@ Fields to reason about: policy_procurement, policy_supplier_code, policy_travel,
   });
 
   const text = msg.content[0].type === "text" ? msg.content[0].text : "";
-  return JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? "{}");
+  try {
+    return JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? "{}");
+  } catch {
+    return { data: {}, reasoning: {} };
+  }
 }
 
 // Group C — Haiku: numeric emission target extraction
@@ -139,7 +147,11 @@ Fields to reason about: target_scope12_interim, target_scope12_longterm, target_
   });
 
   const text = msg.content[0].type === "text" ? msg.content[0].text : "";
-  return JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? "{}");
+  try {
+    return JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? "{}");
+  } catch {
+    return { data: {}, reasoning: {} };
+  }
 }
 
 export async function POST(req: Request) {
@@ -148,11 +160,11 @@ export async function POST(req: Request) {
     return Response.json({ error: "ANTHROPIC_API_KEY not configured" }, { status: 500 });
   }
 
-  const { orgName, plan, existingData }: PopulateRequest = await req.json();
+  const { orgId, plan, existingData }: PopulateRequest = await req.json();
 
   const client = new Anthropic({ apiKey });
   const planSummary = buildPlanSummary(plan);
-  const context = buildContext(orgName, planSummary, existingData);
+  const context = buildContext(orgId, planSummary, existingData);
 
   const [groupA, groupB, groupC] = await Promise.all([
     runGroupA(client, context),
