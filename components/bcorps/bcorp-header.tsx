@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getApiUrl } from "@/lib/api/config";
 import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
 
 export function BcorpHeader({ orgId }: { orgId: string }) {
@@ -41,10 +42,19 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
   async function handleGeneratePdf() {
     setPdfState("generating");
     try {
+      const jitRes = await fetch(getApiUrl("/internal/jit_token"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ valid_endpoints: "admin/legacy/*" })
+      });
+      if (!jitRes.ok) throw new Error("Failed to get JIT token");
+      const { token: jit } = await jitRes.json();
+
       const res = await fetch("/api/bcorp/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orgId })
+        body: JSON.stringify({ orgId, jit })
       });
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();

@@ -49,11 +49,6 @@ export default function BcorpPrintablePage() {
 
   return (
     <div className="min-h-screen bg-white p-8 max-w-3xl mx-auto space-y-6 print:p-0">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold">B Corp Climate Action Report</h1>
-        <p className="text-sm text-gray-500">Organisation ID: {id}</p>
-      </div>
-
       <Section title="Company Summary">
         <div className="py-3">
           {d.company_description ? (

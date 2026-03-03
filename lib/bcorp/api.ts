@@ -11,10 +11,24 @@ class BcorpApiError extends Error {
   }
 }
 
+function getJitToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get("jit");
+}
+
 async function bcorpApi<T>(path: string, options?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    ...(options?.headers as Record<string, string>)
+  };
+  const jit = getJitToken();
+  if (jit) {
+    headers["X-JIT-Token"] = jit;
+  }
   const res = await fetch(getApiUrl(path), {
     credentials: "include",
-    headers: { "Content-Type": "application/json", Accept: "application/json", ...options?.headers },
+    headers,
     ...options
   });
   if (!res.ok) {
