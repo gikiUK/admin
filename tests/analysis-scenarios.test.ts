@@ -181,8 +181,8 @@ const impossibleConditionData: DatasetData = {
   action_conditions: {
     action_impossible: {
       enabled: true,
-      // JS deduplicates keys: this is equivalent to { has_office: false }
-      include_when: { has_office: true, ...{ has_office: false } } as { has_office: boolean },
+      // Documenting JS key-dedup: { has_office: true, has_office: false } collapses to { has_office: false }
+      include_when: { has_office: false },
       exclude_when: {}
     }
   }
