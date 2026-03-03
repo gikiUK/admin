@@ -1,4 +1,4 @@
-const API_URL = "/api";
+import { getApiUrl } from "@/lib/api/config";
 
 // ── Response types ──────────────────────────────────────
 
@@ -10,7 +10,7 @@ export type LoginResponse =
 // ── Auth API functions ──────────────────────────────────
 
 export async function login(email: string, password: string): Promise<LoginResponse> {
-  const res = await fetch(`${API_URL}/auth/login`, {
+  const res = await fetch(getApiUrl("/auth/login"), {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -24,7 +24,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
 }
 
 export async function verifyOtp(code: string): Promise<{ status: "success" }> {
-  const res = await fetch(`${API_URL}/auth/verify-2fa`, {
+  const res = await fetch(getApiUrl("/auth/verify-2fa"), {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -38,7 +38,7 @@ export async function verifyOtp(code: string): Promise<{ status: "success" }> {
 }
 
 export async function setupOtp(code: string): Promise<{ status: "success" }> {
-  const res = await fetch(`${API_URL}/auth/setup-2fa`, {
+  const res = await fetch(getApiUrl("/auth/setup-2fa"), {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -52,7 +52,7 @@ export async function setupOtp(code: string): Promise<{ status: "success" }> {
 }
 
 export async function logout(): Promise<void> {
-  await fetch(`${API_URL}/auth/logout`, {
+  await fetch(getApiUrl("/auth/logout"), {
     method: "DELETE",
     credentials: "include",
     headers: { Accept: "application/json" }
@@ -60,7 +60,7 @@ export async function logout(): Promise<void> {
 }
 
 export async function checkSession(): Promise<{ ok: boolean; error?: string }> {
-  const res = await fetch(`${API_URL}/admin/facts_datasets/live`, {
+  const res = await fetch(getApiUrl("/admin/facts_datasets/live"), {
     credentials: "include",
     headers: { Accept: "application/json" }
   });
