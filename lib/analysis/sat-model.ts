@@ -1,9 +1,8 @@
 import type { Solver } from "logic-solver";
 import Logic from "logic-solver";
 import type { DatasetData } from "@/lib/blob/types";
-import { factVar } from "./sat-condition-encoding";
+import { encodeCondition, factVar } from "./sat-condition-encoding";
 import { encodeFact, resolveConstantNames } from "./sat-fact-encoding";
-import { encodeCondition } from "./sat-condition-encoding";
 
 export type SatModel = {
   solver: Solver;
