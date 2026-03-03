@@ -43,6 +43,8 @@ export async function POST(req: Request) {
     // Combine all three PDFs
     const combined = await combinePdfs(headerBytes, numberedContent, footerBytes);
 
+    // const combined = await fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-content?print&jit=${encodeURIComponent(jit)}`, CONTENT_MARGIN);
+
     return new Response(combined as unknown as BodyInit, {
       headers: {
         "Content-Type": "application/pdf",
