@@ -79,8 +79,10 @@ export function CheckResultCard({ result }: { result: CheckResult }) {
       <div className="rounded-lg border bg-card">
         <CollapsibleTrigger className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted/50">
           <ChevronRight className="size-4 shrink-0 transition-transform [[data-state=open]>&]:rotate-90" />
-          {hasIssues ? (
+          {errorCount > 0 ? (
             <span className="size-2 shrink-0 rounded-full bg-destructive" />
+          ) : warningCount > 0 ? (
+            <span className="size-2 shrink-0 rounded-full bg-amber-500" />
           ) : (
             <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
           )}

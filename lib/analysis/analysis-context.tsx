@@ -42,6 +42,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
 
   const runNow = useCallback(() => {
     if (!blob) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     setRunning(true);
     setTimeout(() => {
       const result = runAnalysis(blob);
