@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useRef, useState } from "react";
 import type { SaveState } from "@/components/bcorps/bcorp-data-form";
+import type { Plan } from "@/lib/bcorp/types";
 
 export type PopulateState = "idle" | "populating" | "error";
 
@@ -16,6 +17,8 @@ type BcorpHeaderContextValue = {
   populateRef: React.MutableRefObject<(() => Promise<void>) | null>;
   isDirty: boolean;
   setDirty: (dirty: boolean) => void;
+  plan: Plan;
+  setPlan: (plan: Plan) => void;
 };
 
 const BcorpHeaderContext = createContext<BcorpHeaderContextValue | null>(null);
@@ -30,6 +33,7 @@ export function BcorpHeaderProvider({ children }: { children: React.ReactNode })
   const populateRef = useRef<(() => Promise<void>) | null>(null);
 
   const [isDirty, setDirty] = useState(false);
+  const [plan, setPlan] = useState<Plan>([]);
 
   function setSaveState(state: SaveState, error: string) {
     setSaveStateRaw(state);
@@ -53,7 +57,9 @@ export function BcorpHeaderProvider({ children }: { children: React.ReactNode })
         setPopulateState,
         populateRef,
         isDirty,
-        setDirty
+        setDirty,
+        plan,
+        setPlan
       }}
     >
       {children}

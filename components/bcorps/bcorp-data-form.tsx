@@ -1,11 +1,14 @@
 "use client";
 
+import { Info } from "lucide-react";
 import { useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { fetchPlan, patchBcorpData } from "@/lib/bcorp/api";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { patchBcorpData } from "@/lib/bcorp/api";
 import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
+
 import type { BcorpData } from "@/lib/bcorp/types";
 
 export type SaveState = "idle" | "saving" | "saved" | "error";
@@ -13,6 +16,7 @@ export type SaveState = "idle" | "saving" | "saved" | "error";
 type BcorpDataFormProps = {
   orgId: string;
   initialData: BcorpData;
+  initialReasoning?: Record<string, string>;
 };
 
 type YesNo = "yes" | "no" | "";
@@ -25,15 +29,33 @@ function yesNo(val: string | undefined): YesNo {
 function FieldGroup({
   label,
   description,
+  hint,
+  filled,
   children
 }: {
   label: string;
   description?: string;
+  hint?: string;
+  filled?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-1">
-      <Label>{label}</Label>
+      <div className="flex items-center gap-1.5">
+        <Label>{label}</Label>
+        {hint && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info
+                  className={`size-3.5 shrink-0 cursor-default ${filled ? "text-muted-foreground/50" : "text-amber-500"}`}
+                />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-60">{hint}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
       {description && <p className="text-xs text-muted-foreground">{description}</p>}
       {children}
     </div>
@@ -71,18 +93,32 @@ function SectionCard({ title, children }: { title: string; children: React.React
   );
 }
 
-export function BcorpDataForm({ orgId, initialData }: BcorpDataFormProps) {
-  const { saveRef, setSaveState, populateRef, setPopulateState, setDirty } = useBcorpHeader();
+export function BcorpDataForm({ orgId, initialData, initialReasoning = {} }: BcorpDataFormProps) {
+  const { saveRef, setSaveState, populateRef, setPopulateState, setDirty, plan } = useBcorpHeader();
   const [data, setData] = useState<Record<string, string>>({ ...initialData });
+  const [reasoning, setReasoning] = useState<Record<string, string>>(initialReasoning);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   function set(key: string, value: string) {
     setDirty(true);
     setData((prev) => ({ ...prev, [key]: value }));
+    setReasoning((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   }
 
   function get(key: string): string {
     return data[key] ?? "";
+  }
+
+  // hint props for a field — only shown after populate has run
+  function hint(key: string) {
+    const r = reasoning[key];
+    if (!r) return {};
+    return { hint: r, filled: get(key) !== "" };
   }
 
   async function handleSave() {
@@ -102,7 +138,6 @@ export function BcorpDataForm({ orgId, initialData }: BcorpDataFormProps) {
   async function handlePopulate() {
     setPopulateState("populating", "");
     try {
-      const plan = await fetchPlan(orgId);
       const res = await fetch("/api/bcorp/populate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -112,8 +147,10 @@ export function BcorpDataForm({ orgId, initialData }: BcorpDataFormProps) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? `Request failed (${res.status})`);
       }
-      const { data: populated } = await res.json();
-      setData((prev) => ({ ...prev, ...populated }));
+      const { data: llmData, reasoning: llmReasoning } = await res.json();
+      // Keep rule-derived reasoning for fields already set by rules
+      setData((prev) => ({ ...prev, ...llmData }));
+      setReasoning((prev) => ({ ...(llmReasoning ?? {}), ...prev }));
       setDirty(true);
       setPopulateState("idle", "");
     } catch (err) {
@@ -131,6 +168,7 @@ export function BcorpDataForm({ orgId, initialData }: BcorpDataFormProps) {
         <FieldGroup
           label="Company Description"
           description="A one paragraph summary of the company used in the introduction"
+          {...hint("company_description")}
         >
           <Textarea
             rows={4}
@@ -141,38 +179,46 @@ export function BcorpDataForm({ orgId, initialData }: BcorpDataFormProps) {
       </SectionCard>
 
       <SectionCard title="Sign Off">
-        <FieldGroup label="Approval Authority" description="Board / Directors / Trustees / Executive Committee">
+        <FieldGroup
+          label="Approval Authority"
+          description="Board / Directors / Trustees / Executive Committee"
+          {...hint("approval_authority")}
+        >
           <Input value={get("approval_authority")} onChange={(e) => set("approval_authority", e.target.value)} />
         </FieldGroup>
-        <FieldGroup label="Approval Date" description="Date of approval">
+        <FieldGroup label="Approval Date" description="Date of approval" {...hint("approval_date")}>
           <Input type="date" value={get("approval_date")} onChange={(e) => set("approval_date", e.target.value)} />
         </FieldGroup>
-        <FieldGroup label="Review Date" description="Next review date (max 36 months from approval)">
+        <FieldGroup
+          label="Review Date"
+          description="Next review date (max 36 months from approval)"
+          {...hint("review_date")}
+        >
           <Input type="date" value={get("review_date")} onChange={(e) => set("review_date", e.target.value)} />
         </FieldGroup>
       </SectionCard>
 
       <SectionCard title="Certifications & Initiatives">
-        <FieldGroup label="B Corp Certified">
+        <FieldGroup label="B Corp Certified" {...hint("cert_bcorp")}>
           <YesNoSelect value={yesNo(get("cert_bcorp"))} onChange={(v) => set("cert_bcorp", v)} />
         </FieldGroup>
-        <FieldGroup label="ISO 14001 Certified">
+        <FieldGroup label="ISO 14001 Certified" {...hint("cert_iso14001")}>
           <YesNoSelect value={yesNo(get("cert_iso14001"))} onChange={(v) => set("cert_iso14001", v)} />
         </FieldGroup>
-        <FieldGroup label="Signed up to SME Climate Hub">
+        <FieldGroup label="Signed up to SME Climate Hub" {...hint("initiative_smech")}>
           <YesNoSelect value={yesNo(get("initiative_smech"))} onChange={(v) => set("initiative_smech", v)} />
         </FieldGroup>
-        <FieldGroup label="Has a Science Based Target (SBTi)">
+        <FieldGroup label="Has a Science Based Target (SBTi)" {...hint("initiative_sbti")}>
           <YesNoSelect value={yesNo(get("initiative_sbti"))} onChange={(v) => set("initiative_sbti", v)} />
         </FieldGroup>
-        <FieldGroup label="Reports through CDP">
+        <FieldGroup label="Reports through CDP" {...hint("reporting_cdp")}>
           <YesNoSelect value={yesNo(get("reporting_cdp"))} onChange={(v) => set("reporting_cdp", v)} />
         </FieldGroup>
-        <FieldGroup label="Has an Ecovadis Rating">
+        <FieldGroup label="Has an Ecovadis Rating" {...hint("rating_ecovadis")}>
           <YesNoSelect value={yesNo(get("rating_ecovadis"))} onChange={(v) => set("rating_ecovadis", v)} />
         </FieldGroup>
         {get("rating_ecovadis") === "yes" && (
-          <FieldGroup label="Ecovadis Rating Level">
+          <FieldGroup label="Ecovadis Rating Level" {...hint("rating_ecovadis_level")}>
             <Input
               value={get("rating_ecovadis_level")}
               onChange={(e) => set("rating_ecovadis_level", e.target.value)}
@@ -182,46 +228,66 @@ export function BcorpDataForm({ orgId, initialData }: BcorpDataFormProps) {
       </SectionCard>
 
       <SectionCard title="Policies">
-        <FieldGroup label="Sustainable Procurement Policy">
+        <FieldGroup label="Sustainable Procurement Policy" {...hint("policy_procurement")}>
           <YesNoSelect value={yesNo(get("policy_procurement"))} onChange={(v) => set("policy_procurement", v)} />
         </FieldGroup>
-        <FieldGroup label="Supplier Code of Conduct">
+        <FieldGroup label="Supplier Code of Conduct" {...hint("policy_supplier_code")}>
           <YesNoSelect value={yesNo(get("policy_supplier_code"))} onChange={(v) => set("policy_supplier_code", v)} />
         </FieldGroup>
-        <FieldGroup label="Sustainable Travel Policy">
+        <FieldGroup label="Sustainable Travel Policy" {...hint("policy_travel")}>
           <YesNoSelect value={yesNo(get("policy_travel"))} onChange={(v) => set("policy_travel", v)} />
         </FieldGroup>
-        <FieldGroup label="Environmental Management Policy">
+        <FieldGroup label="Environmental Management Policy" {...hint("policy_environment")}>
           <YesNoSelect value={yesNo(get("policy_environment"))} onChange={(v) => set("policy_environment", v)} />
         </FieldGroup>
       </SectionCard>
 
       <SectionCard title="Emission Targets">
-        <FieldGroup label="Scope 1 & 2 Interim Target" description='e.g. "Reduce by 50% by 2030"'>
+        <FieldGroup
+          label="Scope 1 & 2 Interim Target"
+          description='e.g. "Reduce by 50% by 2030"'
+          {...hint("target_scope12_interim")}
+        >
           <Input
             value={get("target_scope12_interim")}
             onChange={(e) => set("target_scope12_interim", e.target.value)}
           />
         </FieldGroup>
-        <FieldGroup label="Scope 1 & 2 Long-term Target" description='e.g. "Net zero by 2050"'>
+        <FieldGroup
+          label="Scope 1 & 2 Long-term Target"
+          description='e.g. "Net zero by 2050"'
+          {...hint("target_scope12_longterm")}
+        >
           <Input
             value={get("target_scope12_longterm")}
             onChange={(e) => set("target_scope12_longterm", e.target.value)}
           />
         </FieldGroup>
-        <FieldGroup label="Scope 3 Interim Target" description='e.g. "Reduce by 30% by 2030"'>
+        <FieldGroup
+          label="Scope 3 Interim Target"
+          description='e.g. "Reduce by 30% by 2030"'
+          {...hint("target_scope3_interim")}
+        >
           <Input value={get("target_scope3_interim")} onChange={(e) => set("target_scope3_interim", e.target.value)} />
         </FieldGroup>
-        <FieldGroup label="Scope 3 Long-term Target" description='e.g. "Net zero by 2050"'>
+        <FieldGroup
+          label="Scope 3 Long-term Target"
+          description='e.g. "Net zero by 2050"'
+          {...hint("target_scope3_longterm")}
+        >
           <Input
             value={get("target_scope3_longterm")}
             onChange={(e) => set("target_scope3_longterm", e.target.value)}
           />
         </FieldGroup>
-        <FieldGroup label="Baseline Year">
+        <FieldGroup label="Baseline Year" {...hint("target_baseline_year")}>
           <Input value={get("target_baseline_year")} onChange={(e) => set("target_baseline_year", e.target.value)} />
         </FieldGroup>
-        <FieldGroup label="Baseline Emissions" description="Baseline emissions (tCO2e)">
+        <FieldGroup
+          label="Baseline Emissions"
+          description="Baseline emissions (tCO2e)"
+          {...hint("target_baseline_emissions")}
+        >
           <Input
             value={get("target_baseline_emissions")}
             onChange={(e) => set("target_baseline_emissions", e.target.value)}
