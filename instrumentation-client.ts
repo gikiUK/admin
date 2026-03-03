@@ -8,6 +8,7 @@ if (process.env.NODE_ENV === "production") {
 
   Sentry.init({
     dsn: "https://ee753f357061f11027b9bb0ba6bb4bac@o4510766458601472.ingest.de.sentry.io/4510880335396944",
+    release: process.env.NEXT_PUBLIC_DEPLOY_ID,
 
     // Add optional integrations for additional features
     integrations: [Sentry.replayIntegration()],
