@@ -54,10 +54,10 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!blob || loading) return;
 
-    setRunning(true);
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
     debounceRef.current = setTimeout(() => {
+      setRunning(true);
       const result = runAnalysis(blob);
       setReport(result);
       setRunning(false);

@@ -25,10 +25,10 @@ export function findSourcelessFacts(factIds: string[], data: DatasetData): strin
       }
     }
 
-    // Has a rule that derives it to true?
+    // Has a rule that derives it to true/a positive value (not false or not_applicable)?
     for (const rule of data.rules) {
       if (!rule.enabled) continue;
-      if (rule.sets === id && rule.value !== false) return false;
+      if (rule.sets === id && rule.value !== false && rule.value !== "not_applicable") return false;
     }
 
     return true;

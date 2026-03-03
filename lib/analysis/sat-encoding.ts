@@ -162,7 +162,11 @@ export function encodeCondition(
 
   for (const [key, value] of Object.entries(simple)) {
     if (key === "any_of" && Array.isArray(value)) {
-      const factVars = (value as string[]).map((f) => factVar(f, "true"));
+      const factVars = (value as string[]).map((f) => {
+        const v = factVar(f, "true");
+        vars.add(v);
+        return v;
+      });
       if (factVars.length > 0) parts.push(Logic.or(...factVars));
       continue;
     }
