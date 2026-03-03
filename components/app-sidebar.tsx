@@ -10,6 +10,7 @@ import {
   ListChecks,
   LogOut,
   Scale,
+  SearchCheck,
   Zap
 } from "lucide-react";
 import Link from "next/link";
@@ -35,7 +36,8 @@ const dataItems = [
   { title: "Rules", href: "/data/rules", icon: Scale },
   { title: "Constants", href: "/data/constants", icon: ListChecks },
   { title: "Actions", href: "/data/actions", icon: Zap },
-  { title: "Raw JSON", href: "/data/raw", icon: Braces }
+  { title: "Raw JSON", href: "/data/raw", icon: Braces },
+  { title: "Analysis", href: "/data/analysis", icon: SearchCheck }
 ];
 
 const docsItems = [
@@ -44,7 +46,8 @@ const docsItems = [
   { title: "Questions", href: "/docs/questions", icon: FileQuestion },
   { title: "Rules", href: "/docs/rules", icon: Scale },
   { title: "Constants", href: "/docs/constants", icon: ListChecks },
-  { title: "Conditions", href: "/docs/conditions", icon: Braces }
+  { title: "Conditions", href: "/docs/conditions", icon: Braces },
+  { title: "Analysis", href: "/docs/analysis", icon: SearchCheck }
 ];
 
 export function AppSidebar() {
