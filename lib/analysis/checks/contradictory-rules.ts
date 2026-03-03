@@ -4,7 +4,12 @@ import type { SatModel } from "../sat-encoding";
 import { encodeCondition } from "../sat-encoding";
 import type { CheckResult } from "../types";
 
-export function checkContradictoryRules(data: DatasetData, model: SatModel): CheckResult {
+/**
+ * conditionModel must be a model without rule implications (see buildConditionModel).
+ * Using the full SAT model here would cause contradictory rules to make the model
+ * unsatisfiable, meaning solveAssuming returns null and the check never fires.
+ */
+export function checkContradictoryRules(data: DatasetData, conditionModel: SatModel): CheckResult {
   const issues: CheckResult["issues"] = [];
   const enabledRules = data.rules
     .map((rule, index) => ({ rule, index }))
@@ -29,13 +34,13 @@ export function checkContradictoryRules(data: DatasetData, model: SatModel): Che
         // Same value → not a contradiction
         if (a.rule.value === b.rule.value) continue;
 
-        const condA = encodeCondition(a.rule.when, model.vars, model.idToName);
-        const condB = encodeCondition(b.rule.when, model.vars, model.idToName);
+        const condA = encodeCondition(a.rule.when, conditionModel.vars, conditionModel.idToName);
+        const condB = encodeCondition(b.rule.when, conditionModel.vars, conditionModel.idToName);
         if (!condA || !condB) continue;
 
         // Can both conditions be true at the same time?
         const both = Logic.and(condA, condB);
-        const solution = model.solver.solveAssuming(both);
+        const solution = conditionModel.solver.solveAssuming(both);
 
         if (solution) {
           issues.push({

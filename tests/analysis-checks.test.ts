@@ -1,7 +1,7 @@
 import { checkContradictoryRules } from "@/lib/analysis/checks/contradictory-rules";
 import { checkUndefinedRefs } from "@/lib/analysis/checks/undefined-refs";
 import { checkUnreachableActions } from "@/lib/analysis/checks/unreachable-actions";
-import { buildSatModel } from "@/lib/analysis/sat-encoding";
+import { buildConditionModel, buildSatModel } from "@/lib/analysis/sat-encoding";
 import { findSourcelessFacts } from "@/lib/analysis/sourceless-facts";
 import type { DatasetData } from "@/lib/blob/types";
 
@@ -189,14 +189,42 @@ describe("buildSatModel — any_of vars registration", () => {
 describe("checkContradictoryRules", () => {
   it("returns no issues for empty data", () => {
     const data = makeData();
-    const model = buildSatModel(data);
+    const model = buildConditionModel(data);
     expect(checkContradictoryRules(data, model).issues).toHaveLength(0);
   });
 
-  it("does not flag rules that can never overlap because conditions are exclusive", () => {
-    // Rule A fires only when cond_a is true and cond_b is false
-    // Rule B fires only when cond_b is true and cond_a is false
-    // Conditions are mutually exclusive → no issue
+  it("detects two rules setting same fact to different values under overlapping conditions", () => {
+    // Rule A: if cond_a → result = "hot"; Rule B: if cond_b → result = "cold"
+    // Both cond_a and cond_b can be true simultaneously → overlap detected
+    const data = makeData({
+      facts: {
+        cond_a: { type: "boolean_state", core: true, enabled: true },
+        cond_b: { type: "boolean_state", core: true, enabled: true },
+        result: { type: "enum", core: true, enabled: true, values_ref: "temperatures" }
+      },
+      constants: {
+        temperatures: [
+          { id: 1, name: "hot", description: null, enabled: true },
+          { id: 2, name: "cold", description: null, enabled: true }
+        ]
+      },
+      questions: [
+        { type: "boolean_state", label: "A", fact: "cond_a", enabled: true },
+        { type: "boolean_state", label: "B", fact: "cond_b", enabled: true }
+      ],
+      rules: [
+        { sets: "result", value: "hot", source: "general", when: { cond_a: true }, enabled: true },
+        { sets: "result", value: "cold", source: "general", when: { cond_b: true }, enabled: true }
+      ]
+    });
+    const model = buildConditionModel(data);
+    expect(checkContradictoryRules(data, model).issues).toHaveLength(1);
+  });
+
+  it("does not flag rules with mutually exclusive conditions", () => {
+    // Rule A fires only when cond_a=true AND cond_b=false
+    // Rule B fires only when cond_b=true AND cond_a=false
+    // Conditions cannot overlap → no issue
     const data = makeData({
       facts: {
         cond_a: { type: "boolean_state", core: true, enabled: true },
@@ -218,7 +246,7 @@ describe("checkContradictoryRules", () => {
         { sets: "result", value: "cold", source: "general", when: { cond_b: true, cond_a: false }, enabled: true }
       ]
     });
-    const model = buildSatModel(data);
+    const model = buildConditionModel(data);
     expect(checkContradictoryRules(data, model).issues).toHaveLength(0);
   });
 
@@ -237,7 +265,7 @@ describe("checkContradictoryRules", () => {
         { sets: "result", value: true, source: "general", when: { trigger: true }, enabled: true }
       ]
     });
-    const model = buildSatModel(data);
+    const model = buildConditionModel(data);
     expect(checkContradictoryRules(data, model).issues).toHaveLength(0);
   });
 });

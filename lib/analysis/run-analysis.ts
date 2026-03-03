@@ -7,16 +7,17 @@ import {
   checkUnreachableActions,
   checkUnreachableQuestions
 } from "./checks";
-import { buildSatModel } from "./sat-encoding";
+import { buildConditionModel, buildSatModel } from "./sat-encoding";
 import type { AnalysisReport } from "./types";
 
 export function runAnalysis(data: DatasetData): AnalysisReport {
   const model = buildSatModel(data);
+  const conditionModel = buildConditionModel(data);
 
   const checks = [
     checkDeadFacts(data),
     checkUndefinedRefs(data),
-    checkContradictoryRules(data, model),
+    checkContradictoryRules(data, conditionModel),
     checkUnreachableQuestions(data, model),
     checkUnreachableActions(data, model),
     checkIncludeExcludeOverlap(data, model)

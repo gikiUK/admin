@@ -41,6 +41,53 @@ function buildIdToNameMap(data: DatasetData): Map<string, string> {
   return map;
 }
 
+/**
+ * Build a model encoding only fact type constraints and sourceless forbids — no rule implications.
+ * Used by the contradictory-rules check to test whether two conditions can overlap without the
+ * rule effects poisoning satisfiability (contradictory rules make the full model unsatisfiable,
+ * which would prevent the check from ever firing).
+ */
+export function buildConditionModel(data: DatasetData): SatModel {
+  const solver = new Logic.Solver();
+  const vars = new Set<string>();
+  const idToName = buildIdToNameMap(data);
+
+  for (const [id, fact] of Object.entries(data.facts)) {
+    if (!fact.enabled) continue;
+    encodeFact(id, fact, data.constants, solver, vars);
+  }
+
+  const factsWithSource = new Set<string>();
+  for (const q of data.questions) {
+    if (!q.enabled) continue;
+    if (q.fact) factsWithSource.add(q.fact);
+    if (q.facts) {
+      for (const mapping of Object.values(q.facts)) {
+        for (const key of Object.keys(mapping)) factsWithSource.add(key);
+      }
+    }
+  }
+  for (const rule of data.rules) {
+    if (!rule.enabled) continue;
+    if (rule.value === true || (typeof rule.value === "string" && rule.value !== "not_applicable")) {
+      factsWithSource.add(rule.sets);
+    }
+  }
+
+  for (const [id, fact] of Object.entries(data.facts)) {
+    if (!fact.enabled) continue;
+    if (factsWithSource.has(id)) continue;
+    if (fact.type === "boolean_state") {
+      solver.forbid(factVar(id, "true"));
+    } else {
+      const names = fact.values_ref ? resolveConstantNames(fact.values_ref, data.constants) : [];
+      for (const name of names) solver.forbid(factVar(id, `val:${name}`));
+    }
+  }
+
+  return { solver, vars, idToName };
+}
+
 export function buildSatModel(data: DatasetData): SatModel {
   const solver = new Logic.Solver();
   const vars = new Set<string>();
