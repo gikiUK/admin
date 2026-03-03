@@ -15,6 +15,7 @@ if (process.env.NODE_ENV === "production") {
     project: "giki-admin",
     silent: !process.env.CI,
     widenClientFileUpload: true,
+    release: { name: process.env.NEXT_PUBLIC_DEPLOY_ID },
 
     webpack: {
       automaticVercelMonitors: false,
