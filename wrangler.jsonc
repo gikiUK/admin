@@ -1,0 +1,30 @@
+{
+  "name": "giki-admin",
+  "main": "worker-wrapper.js",
+  "compatibility_date": "2025-08-16",
+  "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env", "global_fetch_strictly_public"],
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  "assets": {
+    "directory": ".open-next/assets"
+  },
+  "routes": [
+    {
+      "pattern": "admin.gikiactions.com",
+      "custom_domain": true
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "build-cache"
+    }
+  ],
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "giki-admin"
+    }
+  ]
+}

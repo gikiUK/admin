@@ -10,9 +10,10 @@ This is a standalone project (not a monorepo). All commands run from the project
 
 ## Commands
 
-- `pnpm run dev` - Start dev server on port 3020
+- `pnpm run dev` - Start dev server on port 3112
 - `pnpm run build` - Build for production
 - `pnpm run start` - Start production server
+- `pnpm run deploy` - Build with OpenNext and deploy to Cloudflare Workers
 - `pnpm run check` - Run Biome (lint + format + organize imports)
 - `pnpm run check:fix` - Auto-fix Biome issues
 - `pnpm run lint` - Run Biome linter only
