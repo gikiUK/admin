@@ -2,6 +2,7 @@
 
 import { Info } from "lucide-react";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -153,6 +154,44 @@ export function BcorpDataForm({ orgId, initialData, initialReasoning = {} }: Bco
       setReasoning((prev) => ({ ...(llmReasoning ?? {}), ...prev }));
       setDirty(true);
       setPopulateState("idle", "");
+
+      const filled = (keys: string[]) => keys.filter((k) => llmData[k] !== undefined && llmData[k] !== "").length;
+      const GROUP_A = [
+        "company_description",
+        "cert_bcorp",
+        "cert_iso14001",
+        "initiative_smech",
+        "initiative_sbti",
+        "reporting_cdp",
+        "rating_ecovadis",
+        "rating_ecovadis_level"
+      ];
+      const GROUP_B = ["policy_procurement", "policy_supplier_code", "policy_travel", "policy_environment"];
+      const GROUP_C = [
+        "target_scope12_interim",
+        "target_scope12_longterm",
+        "target_scope3_interim",
+        "target_scope3_longterm",
+        "target_baseline_year",
+        "target_baseline_emissions"
+      ];
+
+      const aCount = filled(GROUP_A);
+      const bCount = filled(GROUP_B);
+      const cCount = filled(GROUP_C);
+
+      if (aCount > 0)
+        toast.success(`Certifications & description`, {
+          description: `${aCount} field${aCount !== 1 ? "s" : ""} populated`
+        });
+      else toast.info("Certifications & description", { description: "No fields populated" });
+
+      if (bCount > 0) toast.success("Policies", { description: `${bCount} field${bCount !== 1 ? "s" : ""} populated` });
+      else toast.info("Policies", { description: "No fields populated" });
+
+      if (cCount > 0)
+        toast.success("Emission targets", { description: `${cCount} field${cCount !== 1 ? "s" : ""} populated` });
+      else toast.info("Emission targets", { description: "No fields populated" });
     } catch (err) {
       setPopulateState("error", err instanceof Error ? err.message : "Populate failed");
     }

@@ -14,7 +14,25 @@ type OrganizationDetailProps = {
 };
 
 export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
-  const { setPlan } = useBcorpHeader();
+  const { setPlan, populateState, isDirty, setDirty } = useBcorpHeader();
+
+  useEffect(() => {
+    return () => setDirty(false);
+  }, [setDirty]);
+
+  useEffect(() => {
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      if (isDirty) e.preventDefault();
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
+  const [hasPopulated, setHasPopulated] = useState(false);
+  useEffect(() => {
+    if (populateState === "populating") setHasPopulated(true);
+  }, [populateState]);
+
   const [plan, setPlanLocal] = useState<Plan | null>(null);
   const [bcorpData, setBcorpData] = useState<BcorpData | null>(null);
   const [initialReasoning, setInitialReasoning] = useState<Record<string, string>>({});
@@ -49,19 +67,52 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
   if (loadError) return <div className="text-destructive">{loadError}</div>;
 
   return (
-    <Tabs defaultValue="bcorp">
-      <TabsList>
-        <TabsTrigger value="bcorp">B Corp Data</TabsTrigger>
-        <TabsTrigger value="plan">Plan ({plan?.length ?? 0})</TabsTrigger>
-      </TabsList>
-      <TabsContent value="bcorp" className="mt-6">
-        {bcorpData !== null && (
-          <BcorpDataForm orgId={orgId} initialData={bcorpData} initialReasoning={initialReasoning} />
-        )}
-      </TabsContent>
-      <TabsContent value="plan" className="mt-6">
-        <PlanView plan={plan ?? []} />
-      </TabsContent>
-    </Tabs>
+    <>
+      {hasPopulated && (
+        <div
+          className="fixed top-12 left-0 right-0 z-20 pointer-events-none"
+          style={{ height: "3px", opacity: populateState === "populating" ? 1 : 0, transition: "opacity 1s ease" }}
+        >
+          <style>{`@keyframes rainbow-slide { 0% { background-position: 0% 0% } 50% { background-position: 150% 0% } 100% { background-position: 300% 0% } }`}</style>
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(90deg, #a855f7, #6366f1, #3b82f6, #06b6d4, #a855f7, #6366f1, #a855f7)",
+              backgroundSize: "300% 100%",
+              animation: "rainbow-slide 12s ease-in-out infinite",
+              opacity: 0.8
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(90deg, #a855f7, #6366f1, #3b82f6, #06b6d4, #a855f7, #6366f1, #a855f7)",
+              backgroundSize: "300% 100%",
+              animation: "rainbow-slide 12s ease-in-out infinite",
+              filter: "blur(6px)",
+              transform: "scaleY(3)",
+              opacity: 0.2
+            }}
+          />
+        </div>
+      )}
+
+      <Tabs defaultValue="bcorp">
+        <TabsList>
+          <TabsTrigger value="bcorp">B Corp Data</TabsTrigger>
+          <TabsTrigger value="plan">Plan ({plan?.length ?? 0})</TabsTrigger>
+        </TabsList>
+        <TabsContent value="bcorp" className="mt-6">
+          {bcorpData !== null && (
+            <BcorpDataForm orgId={orgId} initialData={bcorpData} initialReasoning={initialReasoning} />
+          )}
+        </TabsContent>
+        <TabsContent value="plan" className="mt-6">
+          <PlanView plan={plan ?? []} />
+        </TabsContent>
+      </Tabs>
+    </>
   );
 }
