@@ -16,13 +16,13 @@ pnpm install
 pnpm run dev
 ```
 
-The dev server runs at [http://localhost:3020](http://localhost:3020).
+The dev server runs at [http://localhost:3112](http://localhost:3112).
 
 ## Commands
 
 | Command                 | Description                  |
 | ----------------------- | ---------------------------- |
-| `pnpm run dev`          | Start dev server (port 3020) |
+| `pnpm run dev`          | Start dev server (port 3112) |
 | `pnpm run build`        | Production build             |
 | `pnpm run lint`         | Run ESLint                   |
 | `pnpm run format`       | Format with Prettier         |
