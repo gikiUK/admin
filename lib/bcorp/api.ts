@@ -1,0 +1,48 @@
+import { getApiUrl } from "@/lib/api/config";
+import type { BcorpData, Organization, Plan } from "./types";
+
+class BcorpApiError extends Error {
+  constructor(
+    public status: number,
+    message?: string
+  ) {
+    super(message ?? `API error ${status}`);
+    this.name = "BcorpApiError";
+  }
+}
+
+async function bcorpApi<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(getApiUrl(path), {
+    credentials: "include",
+    headers: { "Content-Type": "application/json", Accept: "application/json", ...options?.headers },
+    ...options
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new BcorpApiError(res.status, body.error?.message);
+  }
+  return res.json();
+}
+
+export async function fetchOrganizations(): Promise<Organization[]> {
+  const res = await bcorpApi<{ data: Organization[] }>("/admin/legacy/organizations");
+  return res.data;
+}
+
+export async function fetchPlan(orgId: string): Promise<Plan> {
+  const res = await bcorpApi<{ data: Plan } | Plan>(`/admin/legacy/organizations/${orgId}/plan`);
+  return Array.isArray(res) ? res : ((res as { data: Plan }).data ?? []);
+}
+
+export async function fetchBcorpData(orgId: string): Promise<BcorpData> {
+  const res = await bcorpApi<{ bcorp_data: BcorpData }>(`/admin/legacy/organizations/${orgId}/bcorp_data`);
+  return res.bcorp_data;
+}
+
+export async function patchBcorpData(orgId: string, data: BcorpData): Promise<BcorpData> {
+  const res = await bcorpApi<{ bcorp_data: BcorpData }>(`/admin/legacy/organizations/${orgId}/bcorp_data`, {
+    method: "PATCH",
+    body: JSON.stringify({ bcorp_data: data })
+  });
+  return res.bcorp_data;
+}

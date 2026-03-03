@@ -16,6 +16,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@sentry/nextjs": "^10",
     "@tanstack/react-virtual": "^3.13.18",
     "class-variance-authority": "^0.7.1",

@@ -2,12 +2,19 @@
 
 import { usePathname } from "next/navigation";
 import { AnalysisIndicator } from "@/components/analysis/analysis-indicator";
+import { BcorpHeader } from "@/components/bcorps/bcorp-header";
 import { DatasetHeader } from "@/components/dataset/dataset-header";
 import { HeaderSaveStatus } from "@/components/dataset/header-save-status";
 import { Separator } from "@/components/ui/separator";
 
 export function FactsEngineHeader() {
   const pathname = usePathname();
+
+  const bcorpMatch = pathname.match(/^\/bcorps\/([^/]+)$/);
+  if (bcorpMatch) {
+    return <BcorpHeader orgId={bcorpMatch[1]} />;
+  }
+
   if (!pathname.startsWith("/data") && !pathname.startsWith("/docs")) return null;
 
   return (
