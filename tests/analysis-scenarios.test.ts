@@ -189,6 +189,32 @@ const impossibleConditionData: DatasetData = {
 };
 
 /**
+ * SCENARIO: Dead fact referenced via any_of inside an any condition
+ *
+ *   fact: active_fact (set by question)
+ *   fact: any_of_fact (referenced only via { any: [{ any_of: ["any_of_fact"] }] } in a rule)
+ *   Expected: 0 dead-facts warnings (any_of_fact is referenced).
+ */
+const deadFactAnyOfData: DatasetData = {
+  facts: {
+    active_fact: { type: "boolean_state", core: true, enabled: true },
+    any_of_fact: { type: "boolean_state", core: true, enabled: true }
+  },
+  constants: {},
+  questions: [{ type: "boolean_state", label: "Q", fact: "active_fact", enabled: true }],
+  rules: [
+    {
+      sets: "active_fact",
+      value: true,
+      source: "general",
+      when: { any: [{ any_of: ["any_of_fact"] }] },
+      enabled: true
+    }
+  ],
+  action_conditions: {}
+};
+
+/**
  * SCENARIO: Dead fact — defined but never referenced anywhere
  *
  *   fact: legacy_metric (boolean, enabled, no questions/rules/action_conditions reference it)
@@ -293,6 +319,11 @@ describe("analysis scenario: dead facts", () => {
     const found = issues(deadFactData, "dead-facts");
     expect(found.some((i) => i.refs.some((r) => r.id === "legacy_metric"))).toBe(true);
     expect(found.some((i) => i.refs.some((r) => r.id === "active_fact"))).toBe(false);
+  });
+
+  it("does not flag a fact referenced via any_of inside an any condition", () => {
+    const found = issues(deadFactAnyOfData, "dead-facts");
+    expect(found.some((i) => i.refs.some((r) => r.id === "any_of_fact"))).toBe(false);
   });
 });
 

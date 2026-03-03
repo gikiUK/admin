@@ -3,9 +3,16 @@ import type { AnyCondition, BlobCondition, DatasetData, SimpleCondition } from "
 /** Extract all fact IDs referenced in a condition */
 export function extractConditionFacts(condition: BlobCondition): string[] {
   if ("any" in condition) {
-    return (condition as AnyCondition).any.flatMap((c) => Object.keys(c));
+    return (condition as AnyCondition).any.flatMap((c) =>
+      Object.entries(c).flatMap(([key, value]) =>
+        key === "any_of" && Array.isArray(value) ? (value as string[]) : [key]
+      )
+    );
   }
-  return Object.keys(condition as SimpleCondition).filter((k) => k !== "any_of");
+  const simple = condition as SimpleCondition;
+  return Object.entries(simple).flatMap(([key, value]) =>
+    key === "any_of" && Array.isArray(value) ? (value as string[]) : [key]
+  );
 }
 
 /** Return fact IDs that have no source — no enabled question or rule sets them */

@@ -156,6 +156,28 @@ describe("checkUndefinedRefs", () => {
   });
 });
 
+// ── checkUndefinedRefs: any + any_of combination ──────────
+
+describe("checkUndefinedRefs — any containing any_of", () => {
+  it("flags undefined fact inside any_of nested within any", () => {
+    const data = makeData({
+      facts: { heat_pump: { type: "boolean_state", core: true, enabled: true } },
+      rules: [
+        {
+          sets: "heat_pump",
+          value: true,
+          source: "general",
+          when: { any: [{ any_of: ["heat_pump", "ghost_fact"] }] },
+          enabled: true
+        }
+      ]
+    });
+    const result = checkUndefinedRefs(data);
+    expect(result.issues.some((i) => i.message.includes("ghost_fact"))).toBe(true);
+    expect(result.issues.some((i) => i.message.includes("heat_pump"))).toBe(false);
+  });
+});
+
 // ── SAT model: any_of variable registration ───────────────
 
 describe("buildSatModel — any_of vars registration", () => {

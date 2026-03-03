@@ -43,11 +43,11 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
   const runNow = useCallback(() => {
     if (!blob) return;
     setRunning(true);
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       const result = runAnalysis(blob);
       setReport(result);
       setRunning(false);
-    });
+    }, 0);
   }, [blob]);
 
   // Auto-run with debounce when blob changes

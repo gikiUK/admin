@@ -5,7 +5,13 @@ function collectConditionKeys(condition: BlobCondition): Set<string> {
   const keys = new Set<string>();
   if ("any" in condition) {
     for (const sub of (condition as AnyCondition).any) {
-      for (const k of Object.keys(sub)) keys.add(k);
+      for (const [key, value] of Object.entries(sub)) {
+        if (key === "any_of" && Array.isArray(value)) {
+          for (const f of value as string[]) keys.add(f);
+        } else {
+          keys.add(key);
+        }
+      }
     }
   } else {
     const simple = condition as SimpleCondition;
