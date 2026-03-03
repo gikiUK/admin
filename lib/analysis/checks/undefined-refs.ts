@@ -84,7 +84,7 @@ export function checkUndefinedRefs(data: DatasetData): CheckResult {
         const validValues = getFactValues(entry.key, data);
         if (validValues && validValues.size > 0) {
           for (const v of entry.value) {
-            const name = typeof v === "number" ? String(v) : String(v);
+            const name = String(v);
             if (!validValues.has(name)) {
               issues.push({
                 severity: "error",

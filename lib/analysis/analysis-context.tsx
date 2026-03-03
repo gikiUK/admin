@@ -58,9 +58,11 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
 
     debounceRef.current = setTimeout(() => {
       setRunning(true);
-      const result = runAnalysis(blob);
-      setReport(result);
-      setRunning(false);
+      setTimeout(() => {
+        const result = runAnalysis(blob);
+        setReport(result);
+        setRunning(false);
+      }, 0);
     }, 300);
 
     return () => {

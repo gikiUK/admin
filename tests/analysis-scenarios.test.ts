@@ -275,6 +275,67 @@ const includeExcludeOverlapData: DatasetData = {
   }
 };
 
+/**
+ * SCENARIO: Unreachable question — show_when requires a fact with no source
+ *
+ *   fact: gating_fact  (boolean, no question, no rule that sets it true — always false)
+ *   fact: answer_fact  (boolean, set by the question below)
+ *   question: show_when = { gating_fact: true }
+ *
+ *   gating_fact can never become true → the SAT model forbids fact:gating_fact:true.
+ *   solveAssuming(gating_fact=true) returns null → question is unreachable.
+ *   Expected: 1 unreachable-questions warning.
+ */
+const unreachableQuestionShowWhenData: DatasetData = {
+  facts: {
+    gating_fact: { type: "boolean_state", core: false, enabled: true },
+    answer_fact: { type: "boolean_state", core: true, enabled: true }
+  },
+  constants: {},
+  questions: [
+    {
+      type: "boolean_state",
+      label: "Are you satisfied with your solar setup?",
+      fact: "answer_fact",
+      enabled: true,
+      show_when: { gating_fact: true }
+    }
+  ],
+  rules: [],
+  action_conditions: {}
+};
+
+/**
+ * SCENARIO: Unreachable question — hide_when is always true (question is always hidden)
+ *
+ *   fact: ghost_fact (boolean, no source — fact:ghost_fact:true is forbidden by SAT model)
+ *   fact: answer_fact (boolean, set by the question)
+ *   question: hide_when = { ghost_fact: false }
+ *
+ *   ghost_fact is always false (no source sets it true). So hide_when = { ghost_fact: false }
+ *   is always satisfied. The check tests NOT(hide_when) = (ghost_fact=true), which is
+ *   forbidden → solution null → fires "always hidden" warning.
+ *   Expected: 1 unreachable-questions warning.
+ */
+const alwaysHiddenQuestionData: DatasetData = {
+  facts: {
+    ghost_fact: { type: "boolean_state", core: false, enabled: true },
+    answer_fact: { type: "boolean_state", core: true, enabled: true }
+  },
+  constants: {},
+  questions: [
+    {
+      type: "boolean_state",
+      label: "A question that is always hidden",
+      fact: "answer_fact",
+      enabled: true,
+      hide_when: { ghost_fact: false }
+    }
+  ],
+  rules: [],
+  action_conditions: {}
+};
+
 // ── Scenario assertions ───────────────────────────────────
 
 describe("analysis scenario: contradictory rules", () => {
@@ -340,5 +401,21 @@ describe("analysis scenario: include/exclude overlap", () => {
     const found = issues(includeExcludeOverlapData, "include-exclude-overlap");
     expect(found).toHaveLength(1);
     expect(found[0].refs.some((r) => r.id === "action_fleet")).toBe(true);
+  });
+});
+
+describe("analysis scenario: unreachable questions", () => {
+  it("flags a question whose show_when requires a fact that can never be set", () => {
+    const found = issues(unreachableQuestionShowWhenData, "unreachable-questions");
+    expect(found).toHaveLength(1);
+    expect(found[0].message).toContain("show_when");
+    expect(found[0].refs[0].label).toBe("Are you satisfied with your solar setup?");
+  });
+
+  it("flags a question whose hide_when is always satisfied (question is always hidden)", () => {
+    const found = issues(alwaysHiddenQuestionData, "unreachable-questions");
+    expect(found).toHaveLength(1);
+    expect(found[0].message).toContain("always hidden");
+    expect(found[0].refs[0].label).toBe("A question that is always hidden");
   });
 });
