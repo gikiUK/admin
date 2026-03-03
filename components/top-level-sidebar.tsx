@@ -36,10 +36,7 @@ export function TopLevelSidebar({ pathname, logout }: TopLevelSidebarProps) {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname.startsWith("/data") || pathname.startsWith("/docs")}
-            >
+            <SidebarMenuButton asChild isActive={pathname.startsWith("/data") || pathname.startsWith("/docs")}>
               <Link href="/data/facts">
                 <Zap />
                 <span>Facts Engine</span>

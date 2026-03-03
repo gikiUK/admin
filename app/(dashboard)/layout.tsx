@@ -1,6 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar";
-import { FactsEngineHeader } from "@/components/facts-engine-header";
 import { DatasetShell } from "@/components/dataset/dataset-shell";
+import { FactsEngineHeader } from "@/components/facts-engine-header";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AnalysisProvider } from "@/lib/analysis/analysis-context";
 import { AuthProvider } from "@/lib/auth/auth-context";
