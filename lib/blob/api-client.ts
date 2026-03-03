@@ -1,8 +1,5 @@
+import { getApiUrl } from "@/lib/api/config";
 import type { Action, Dataset, DatasetBlob } from "./types";
-
-// Requests go through Next.js rewrites (/api/* → Rails API) to avoid CORS.
-// In the browser this is same-origin; no cross-origin headers needed.
-const API_URL = "/api";
 
 // ── Error type ──────────────────────────────────────────
 
@@ -28,7 +25,7 @@ export class ApiError extends Error {
 // ── Base fetch wrapper ──────────────────────────────────
 
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(getApiUrl(path), {
     credentials: "include",
     headers: { "Content-Type": "application/json", Accept: "application/json", ...options?.headers },
     ...options
