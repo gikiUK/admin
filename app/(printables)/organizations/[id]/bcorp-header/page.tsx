@@ -47,7 +47,9 @@ export default function BcorpHeaderPage() {
             </div>
           </div>
 
-          <div className="title-page-footer">Prepared using <a href="https://gikiactions.com/">Giki Actions</a> | Confidential</div>
+          <div className="title-page-footer">
+            Prepared using <a href="https://gikiactions.com/">Giki Actions</a> | Confidential
+          </div>
         </div>
       )}
     </BcorpPrintablePage>

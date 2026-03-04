@@ -12,7 +12,8 @@ export default function BcorpFooterPage() {
           <div className="company-name">{props.data.name || "Company Name"}</div>
           <p>Certified B Corporation</p>
           <div className="page-footer">
-            {props.data.name || "Company Name"} | B Corp Climate Action Plan 2025 | Prepared using <a href="https://gikiactions.com/">Giki Actions</a>
+            {props.data.name || "Company Name"} | B Corp Climate Action Plan 2025 | Prepared using{" "}
+            <a href="https://gikiactions.com/">Giki Actions</a>
           </div>
         </div>
       )}

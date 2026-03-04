@@ -25,7 +25,9 @@ export function Certifications({ data }: { data: BcorpData }) {
       <h3>Certifications</h3>
       <ul>
         {certifications.map(([key, text]) => (
-          <li key={key}><MarkdownContent content={text} /></li>
+          <li key={key}>
+            <MarkdownContent content={text} />
+          </li>
         ))}
       </ul>
     </>

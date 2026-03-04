@@ -4,18 +4,23 @@ import { DocHeader } from "@/components/printables/doc-header";
 export function TableOfContents({ data, plan }: BcorpPageProps) {
   const hasEngagement = data.engagement && data.engagement.trim() !== "";
   const hasGovernment = data.government && data.government.trim() !== "";
-  const hasDisclosure = plan.some((a) =>
-    (a.tal_action.themes ?? []).includes("Governance disclosure and reporting")
-  );
+  const hasDisclosure = plan.some((a) => (a.tal_action.themes ?? []).includes("Governance disclosure and reporting"));
   const hasCerts =
-    data.cert_bcorp === "yes" || data.cert_iso14001 === "yes" ||
-    data.initiative_smech === "yes" || data.initiative_sbti === "yes";
+    data.cert_bcorp === "yes" ||
+    data.cert_iso14001 === "yes" ||
+    data.initiative_smech === "yes" ||
+    data.initiative_sbti === "yes";
   const hasPolicies =
-    data.policy_procurement === "yes" || data.policy_supplier_code === "yes" ||
-    data.policy_travel === "yes" || data.policy_environment === "yes";
+    data.policy_procurement === "yes" ||
+    data.policy_supplier_code === "yes" ||
+    data.policy_travel === "yes" ||
+    data.policy_environment === "yes";
   const hasTargets =
-    data.initiative_smech === "yes" || data.initiative_sbti === "yes" ||
-    !!data.target_scope12_interim?.trim() || !!data.target_scope3_interim?.trim() || !!data.target_longterm?.trim();
+    data.initiative_smech === "yes" ||
+    data.initiative_sbti === "yes" ||
+    !!data.target_scope12_interim?.trim() ||
+    !!data.target_scope3_interim?.trim() ||
+    !!data.target_longterm?.trim();
 
   return (
     <div className="ui-page">

@@ -5,7 +5,6 @@ import { ProseEditor } from "@/components/bcorps/prose-editor";
 import { GOVERNANCE_CATEGORIES } from "@/components/bcorps/use-bcorp-form";
 import type { PlanAction } from "@/lib/bcorp/types";
 
-
 export function GovernanceSection({
   get,
   set,

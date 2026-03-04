@@ -30,7 +30,9 @@ export function Policies({ data }: { data: BcorpData }) {
       <p>We have implemented the following policies to help us achieve our environmental goals:</p>
       <ul>
         {policies.map(([key, text]) => (
-          <li key={key}><MarkdownContent content={text} /></li>
+          <li key={key}>
+            <MarkdownContent content={text} />
+          </li>
         ))}
       </ul>
     </>

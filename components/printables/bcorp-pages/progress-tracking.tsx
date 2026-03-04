@@ -53,7 +53,9 @@ export function ProgressTracking({ data, plan }: BcorpPageProps) {
               {notStartedActions.map((a) => (
                 <tr key={a.external_action_id}>
                   <td>{a.tal_action.title}</td>
-                  <td><ScopeLabels ghgScope={a.tal_action.ghg_scope ?? []} /></td>
+                  <td>
+                    <ScopeLabels ghgScope={a.tal_action.ghg_scope ?? []} />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -76,7 +78,9 @@ export function ProgressTracking({ data, plan }: BcorpPageProps) {
               {completedActions.map((a) => (
                 <tr key={a.external_action_id}>
                   <td>{a.tal_action.title}</td>
-                  <td><ScopeLabels ghgScope={a.tal_action.ghg_scope ?? []} /></td>
+                  <td>
+                    <ScopeLabels ghgScope={a.tal_action.ghg_scope ?? []} />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -101,7 +105,9 @@ export function ProgressTracking({ data, plan }: BcorpPageProps) {
                 {alreadyDoingActions.map((a) => (
                   <tr key={a.external_action_id}>
                     <td>{a.tal_action.title}</td>
-                    <td><ScopeLabels ghgScope={a.tal_action.ghg_scope ?? []} /></td>
+                    <td>
+                      <ScopeLabels ghgScope={a.tal_action.ghg_scope ?? []} />
+                    </td>
                   </tr>
                 ))}
               </tbody>

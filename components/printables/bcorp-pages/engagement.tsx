@@ -2,7 +2,7 @@ import { GOVERNANCE_CATEGORIES } from "@/components/bcorps/use-bcorp-form";
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
 
 export function Engagement({ data, plan }: BcorpPageProps) {
-  console.log(data)
+  console.log(data);
   const hasEngagement = data.engagement && data.engagement.trim() !== "";
   const hasGovernment = data.government && data.government.trim() !== "";
 
