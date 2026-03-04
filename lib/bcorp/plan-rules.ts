@@ -26,10 +26,10 @@ export function deriveFromPlan(plan: Plan): RuleResult {
   const reasoning: Record<string, string> = {};
 
   for (const rule of RULES) {
-    const match = plan.find((a) => a.state === "completed" && rule.match(a.action_data.title));
+    const match = plan.find((a) => a.state === "completed" && rule.match(a.tal_action.title));
     if (match) {
       data[rule.field] = "yes";
-      reasoning[rule.field] = `Derived from completed plan action: "${match.action_data.title}"`;
+      reasoning[rule.field] = `Derived from completed plan action: "${match.tal_action.title}"`;
     }
   }
 

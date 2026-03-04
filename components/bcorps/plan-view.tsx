@@ -14,20 +14,12 @@ const STATE_CONFIG: Record<string, { label: string; variant: "default" | "second
   not_started: { label: "Not started", variant: "outline" }
 };
 
-const IMPACT_ORDER = ["Transformative", "Large", "Medium", "Small", "Enabling action"];
-
 const ALL_STATES = ["completed", "in_progress", "not_started"];
-const ALL_IMPACTS = ["Transformative", "Large", "Medium", "Small", "Enabling action"];
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 function themes(action: PlanAction): string[] {
-  return action.action_data.groups?.themes ?? ["Other"];
-}
-
-function impactOrder(impact: string | undefined): number {
-  const i = IMPACT_ORDER.indexOf(impact ?? "");
-  return i === -1 ? 99 : i;
+  return action.tal_action.themes ?? ["Other"];
 }
 
 function chip(label: string, value: string | undefined) {
@@ -43,9 +35,9 @@ function chip(label: string, value: string | undefined) {
 
 function ActionCard({ action }: { action: PlanAction }) {
   const [open, setOpen] = useState(false);
-  const d = action.action_data;
+  const d = action.tal_action;
   const state = STATE_CONFIG[action.state] ?? { label: action.state, variant: "outline" as const };
-  const ghgCats = d.groups?.ghg_categories ?? [];
+  const ghgCats = d.ghg_category ?? [];
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -63,43 +55,18 @@ function ActionCard({ action }: { action: PlanAction }) {
                 </div>
               </div>
               {d.summary && <p className="text-sm text-muted-foreground line-clamp-2">{d.summary}</p>}
-              <div className="flex flex-wrap gap-x-4 gap-y-0.5">
-                {chip("Impact", d.impact)}
-                {chip("Time", d.implementation_time)}
-                {chip("Complexity", d.complexity)}
-                {chip("Cost saving", d.cost_saving)}
-              </div>
             </div>
           </div>
         </CollapsibleTrigger>
 
         <CollapsibleContent>
           <div className="px-4 pb-4 space-y-4 border-t pt-4">
-            {d.overview && (
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Overview</p>
-                <p className="text-sm text-muted-foreground whitespace-pre-line">{d.overview}</p>
-              </div>
-            )}
             {d.benefits && (
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Benefits</p>
                 <p className="text-sm text-muted-foreground whitespace-pre-line">{d.benefits}</p>
               </div>
             )}
-            {d.business_rationale && (
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Business rationale
-                </p>
-                <p className="text-sm text-muted-foreground whitespace-pre-line">{d.business_rationale}</p>
-              </div>
-            )}
-            <div className="flex flex-wrap gap-x-6 gap-y-1">
-              {chip("Investment", d.investment_requirement)}
-              {chip("Growth potential", d.growth_potential)}
-              {d.scopes && d.scopes.length > 0 && chip("Scopes", d.scopes.join(", "))}
-            </div>
             {ghgCats.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {ghgCats.map((cat) => (
@@ -135,10 +102,7 @@ function ThemeGroup({ theme, actions }: { theme: string; actions: PlanAction[] }
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="mt-2 space-y-2 pl-6">
-          {actions
-            .slice()
-            .sort((a, b) => impactOrder(a.action_data.impact) - impactOrder(b.action_data.impact))
-            .map((action) => (
+          {actions.map((action) => (
               <ActionCard key={action.external_action_id} action={action} />
             ))}
         </div>
@@ -169,7 +133,6 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
 
 export function PlanView({ plan }: { plan: Plan }) {
   const [stateFilter, setStateFilter] = useState<Set<string>>(new Set());
-  const [impactFilter, setImpactFilter] = useState<Set<string>>(new Set());
 
   if (plan.length === 0) {
     return <p className="text-sm text-muted-foreground">No actions in plan.</p>;
@@ -183,17 +146,8 @@ export function PlanView({ plan }: { plan: Plan }) {
     });
   }
 
-  function toggleImpact(i: string) {
-    setImpactFilter((prev) => {
-      const next = new Set(prev);
-      next.has(i) ? next.delete(i) : next.add(i);
-      return next;
-    });
-  }
-
-  const filtered = plan.filter((a) => {
+const filtered = plan.filter((a) => {
     if (stateFilter.size > 0 && !stateFilter.has(a.state)) return false;
-    if (impactFilter.size > 0 && !impactFilter.has(a.action_data.impact ?? "")) return false;
     return true;
   });
 
@@ -225,24 +179,16 @@ export function PlanView({ plan }: { plan: Plan }) {
             );
           })}
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {ALL_IMPACTS.filter((i) => plan.some((a) => a.action_data.impact === i)).map((i) => (
-            <FilterChip key={i} label={i} active={impactFilter.has(i)} onClick={() => toggleImpact(i)} />
-          ))}
-        </div>
       </div>
 
       {/* Results summary */}
-      {(stateFilter.size > 0 || impactFilter.size > 0) && (
+      {stateFilter.size > 0 && (
         <p className="text-xs text-muted-foreground">
           Showing {filtered.length} of {plan.length} actions
           <button
             type="button"
             className="ml-2 underline hover:no-underline"
-            onClick={() => {
-              setStateFilter(new Set());
-              setImpactFilter(new Set());
-            }}
+            onClick={() => setStateFilter(new Set())}
           >
             Clear filters
           </button>

@@ -26,11 +26,11 @@ export async function runProgressSummaries(
   const notStarted = plan.filter((a) => a.state === "not_started");
 
   const inProgressList = inProgress
-    .map((a) => `- ${a.action_data.title} (${a.action_data.groups?.themes?.join(", ") ?? "general"})`)
+    .map((a) => `- ${a.tal_action.title} (${a.tal_action.themes?.join(", ") ?? "general"})`)
     .join("\n");
 
   const addedList = notStarted
-    .map((a) => `- ${a.action_data.title} (${a.action_data.groups?.themes?.join(", ") ?? "general"})`)
+    .map((a) => `- ${a.tal_action.title} (${a.tal_action.themes?.join(", ") ?? "general"})`)
     .join("\n");
 
   const msg = await client.messages.create({

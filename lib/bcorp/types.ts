@@ -7,26 +7,14 @@ export type Organization = {
 export type PlanAction = {
   state: string;
   external_action_id: string;
-  action_data: {
+  tal_action: {
+    id: string;
     title: string;
     summary?: string;
-    overview?: string;
     benefits?: string;
-    business_rationale?: string;
-    impact?: string;
-    implementation_time?: string;
-    cost_saving?: string;
-    complexity?: string;
-    investment_requirement?: string;
-    growth_potential?: string;
-    scopes?: string[];
-    groups?: {
-      themes?: string[];
-      ghg_categories?: string[];
-      impact?: string[];
-      timeline?: string[];
-      [key: string]: unknown;
-    };
+    ghg_scope?: string[];
+    ghg_category?: string[];
+    themes?: string[];
     [key: string]: unknown;
   };
 };

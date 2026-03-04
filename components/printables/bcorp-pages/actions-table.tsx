@@ -3,9 +3,9 @@ import { ScopeLabel } from "@/components/printables/scope-labels";
 import type { PlanAction } from "@/lib/bcorp/types";
 
 function getScopeNumbers(action: PlanAction): (1 | 2 | 3)[] {
-  return (action.action_data.scopes ?? [])
+  return (action.tal_action.ghg_scope ?? [])
     .map((s) => {
-      const match = s.match(/^Scope (\d)$/);
+      const match = s.match(/^Scope (\d)/);
       return match ? (Number.parseInt(match[1]) as 1 | 2 | 3) : null;
     })
     .filter((n): n is 1 | 2 | 3 => n !== null);
@@ -34,11 +34,11 @@ function ghgDisplayName(category: string): string {
 
 function ActionRow({ action }: { action: PlanAction }) {
   const scopes = getScopeNumbers(action);
-  const ghgCategories = action.action_data.groups?.ghg_categories ?? [];
+  const ghgCategories = action.tal_action.ghg_category ?? [];
 
   return (
     <tr>
-      <td>{action.action_data.title}</td>
+      <td>{action.tal_action.title}</td>
       <td>
         {scopes.map((s) => (
           <ScopeLabel key={s} scope={s} />
@@ -57,9 +57,9 @@ function ActionRow({ action }: { action: PlanAction }) {
 
 export function ActionsTable({ plan }: BcorpPageProps) {
   const scope12Actions = plan.filter((a) =>
-    (a.action_data.scopes ?? []).some((s) => s === "Scope 1" || s === "Scope 2")
+    (a.tal_action.ghg_scope ?? []).some((s) => s.startsWith("Scope 1") || s.startsWith("Scope 2"))
   );
-  const scope3Actions = plan.filter((a) => (a.action_data.scopes ?? []).some((s) => s === "Scope 3"));
+  const scope3Actions = plan.filter((a) => (a.tal_action.ghg_scope ?? []).some((s) => s.startsWith("Scope 3")));
 
   return (
     <div className="ui-page">

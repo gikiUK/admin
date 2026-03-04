@@ -45,7 +45,8 @@ export async function fetchOrganizations(): Promise<Organization[]> {
 
 export async function fetchPlan(orgId: string): Promise<Plan> {
   const res = await bcorpApi<{ data: Plan } | Plan>(`/admin/legacy/organizations/${orgId}/plan`);
-  return Array.isArray(res) ? res : ((res as { data: Plan }).data ?? []);
+  const raw = Array.isArray(res) ? res : ((res as { data: Plan }).data ?? []);
+  return raw.filter((a) => a.tal_action !== null);
 }
 
 export async function fetchBcorpData(orgId: string): Promise<BcorpData> {

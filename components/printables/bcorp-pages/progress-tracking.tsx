@@ -28,8 +28,8 @@ export function ProgressTracking({ data, plan }: BcorpPageProps) {
             <tbody>
               {inProgressActions.map((a) => (
                 <tr key={a.external_action_id}>
-                  <td>{a.action_data.title}</td>
-                  <td>{a.action_data.groups?.themes?.join(", ") ?? ""}</td>
+                  <td>{a.tal_action.title}</td>
+                  <td>{a.tal_action.themes?.join(", ") ?? ""}</td>
                 </tr>
               ))}
             </tbody>
@@ -55,8 +55,8 @@ export function ProgressTracking({ data, plan }: BcorpPageProps) {
             <tbody>
               {completedActions.map((a) => (
                 <tr key={a.external_action_id}>
-                  <td>{a.action_data.title}</td>
-                  <td>{a.action_data.scopes?.join(", ") ?? ""}</td>
+                  <td>{a.tal_action.title}</td>
+                  <td>{a.tal_action.ghg_scope?.join(", ") ?? ""}</td>
                 </tr>
               ))}
             </tbody>

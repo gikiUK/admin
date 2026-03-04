@@ -1,12 +1,10 @@
 import type { Plan, PlanAction } from "@/lib/bcorp/types";
 
 function formatActionBlock(a: PlanAction): string {
-  const parts = [`- Title: ${a.action_data.title}`];
-  if (a.action_data.impact) parts.push(`  Impact: ${a.action_data.impact}`);
-  if (a.action_data.groups?.themes?.length) parts.push(`  Themes: ${a.action_data.groups.themes.join(", ")}`);
-  if (a.action_data.groups?.ghg_categories?.length)
-    parts.push(`  GHG Categories: ${a.action_data.groups.ghg_categories.join(", ")}`);
-  if (a.action_data.benefits) parts.push(`  Benefits: ${a.action_data.benefits}`);
+  const parts = [`- Title: ${a.tal_action.title}`];
+  if (a.tal_action.themes?.length) parts.push(`  Themes: ${a.tal_action.themes.join(", ")}`);
+  if (a.tal_action.ghg_category?.length) parts.push(`  GHG Categories: ${a.tal_action.ghg_category.join(", ")}`);
+  if (a.tal_action.benefits) parts.push(`  Benefits: ${a.tal_action.benefits}`);
   return parts.join("\n");
 }
 
@@ -15,7 +13,7 @@ export function buildActionsOverviewContext(plan: Plan): string {
   const scope3: PlanAction[] = [];
 
   for (const a of plan) {
-    const scopes = a.action_data.scopes ?? [];
+    const scopes = a.tal_action.ghg_scope ?? [];
     if (scopes.some((s) => s.startsWith("Scope 1") || s.startsWith("Scope 2"))) scope12.push(a);
     if (scopes.some((s) => s.startsWith("Scope 3"))) scope3.push(a);
   }
