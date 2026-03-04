@@ -1,6 +1,6 @@
 import { GOVERNANCE_CATEGORIES } from "@/components/bcorps/use-bcorp-form";
-import { MarkdownContent } from "@/components/printables/markdown-content";
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
+import { MarkdownContent } from "@/components/printables/markdown-content";
 
 export function EngagementAndGovernance({ data, plan }: BcorpPageProps) {
   const hasEngagement = data.engagement && data.engagement.trim() !== "";

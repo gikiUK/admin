@@ -1,5 +1,5 @@
-import { MarkdownContent } from "@/components/printables/markdown-content";
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
+import { MarkdownContent } from "@/components/printables/markdown-content";
 
 export function ImplementationPlan({ data }: BcorpPageProps) {
   return (
