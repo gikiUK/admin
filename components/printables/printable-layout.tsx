@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-
 const PRINTABLE_CSS = `
 :root {
   --page-width: 210mm;
@@ -104,32 +102,7 @@ tr { break-inside: avoid; }
 const FONTS_URL =
   "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Literata:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap";
 
-function padSectionsToPageHeight() {
-  const pageHeightStr = getComputedStyle(document.documentElement).getPropertyValue("--page-height").trim();
-  const pageHeightCm = pageHeightStr ? Number.parseFloat(pageHeightStr) / 10 : 21.0;
-
-  const ref = document.createElement("div");
-  ref.style.cssText = "width:1cm;height:1cm;position:absolute;visibility:hidden";
-  document.body.appendChild(ref);
-  const pxPerCm = ref.offsetWidth;
-  ref.remove();
-
-  const sections = document.body.querySelectorAll(":scope > section, :scope > div");
-  for (const section of sections) {
-    if (section.getAttribute("aria-live")) continue;
-    const style = getComputedStyle(section);
-    if (style.position === "fixed") continue;
-    const heightCm = section.getBoundingClientRect().height / pxPerCm;
-    const pages = Math.ceil(heightCm / pageHeightCm);
-    (section as HTMLElement).style.minHeight = `${pages * pageHeightCm}cm`;
-  }
-}
-
 export function PrintableLayout({ children }: { children: React.ReactNode }) {
-  // useEffect(() => {
-  //   requestAnimationFrame(padSectionsToPageHeight);
-  // }, []);
-
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />

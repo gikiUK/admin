@@ -29,7 +29,7 @@ export function getScopeNumbers(ghgScope: string[]): (1 | 2 | 3)[] {
   return ghgScope
     .map((s) => {
       const match = s.match(/^Scope (\d)/);
-      return match ? (Number.parseInt(match[1]) as 1 | 2 | 3) : null;
+      return match ? (Number.parseInt(match[1], 10) as 1 | 2 | 3) : null;
     })
     .filter((n): n is 1 | 2 | 3 => n !== null);
 }
@@ -40,7 +40,7 @@ export function ScopeLabels({ ghgScope }: { ghgScope: string[] }) {
       {ghgScope.map((s) => {
         const match = s.match(/^Scope (\d)/);
         if (match) {
-          return <ScopeLabel key={s} scope={Number.parseInt(match[1]) as 1 | 2 | 3} />;
+          return <ScopeLabel key={s} scope={Number.parseInt(match[1], 10) as 1 | 2 | 3} />;
         }
         return (
           <span key={s} className="scope-label sl-other">

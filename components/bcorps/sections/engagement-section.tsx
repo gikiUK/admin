@@ -2,7 +2,6 @@
 
 import type { FieldGetter, FieldSetter } from "@/components/bcorps/form-types";
 import { ProseEditor } from "@/components/bcorps/prose-editor";
-import { Badge } from "@/components/ui/badge";
 import type { PlanAction } from "@/lib/bcorp/types";
 
 export function EngagementSection({

@@ -22,15 +22,6 @@ function themes(action: PlanAction): string[] {
   return action.tal_action.themes ?? ["Other"];
 }
 
-function chip(label: string, value: string | undefined) {
-  if (!value || value === "Not applicable") return null;
-  return (
-    <span key={label} className="text-xs text-muted-foreground">
-      {label}: <span className="text-foreground font-medium">{value}</span>
-    </span>
-  );
-}
-
 // ─── ActionCard ──────────────────────────────────────────────────────────────
 
 function ActionCard({ action }: { action: PlanAction }) {
