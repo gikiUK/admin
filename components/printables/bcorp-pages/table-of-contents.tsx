@@ -52,12 +52,16 @@ export function TableOfContents({ data, plan }: BcorpPageProps) {
           <strong>Governance</strong>
         </div>
       )}
-      <div className="toc-item">
-        <strong>Commitments &amp; Standards</strong>
-      </div>
-      {hasCerts && <div className="toc-item toc-sub">Certifications</div>}
-      {hasPolicies && <div className="toc-item toc-sub">Policies</div>}
-      {hasTargets && <div className="toc-item toc-sub">Metrics &amp; Targets</div>}
+      {(hasCerts || hasPolicies || hasTargets) && (
+        <>
+          <div className="toc-item">
+            <strong>Commitments &amp; Standards</strong>
+          </div>
+          {hasCerts && <div className="toc-item toc-sub">Certifications</div>}
+          {hasPolicies && <div className="toc-item toc-sub">Policies</div>}
+          {hasTargets && <div className="toc-item toc-sub">Metrics &amp; Targets</div>}
+        </>
+      )}
       <div className="toc-item">
         <strong>Progress Tracking</strong>
       </div>
