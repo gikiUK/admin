@@ -45,19 +45,19 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
       if (isDirty) {
         await saveRef.current?.();
       }
-      const jitRes = await fetch(getApiUrl("/internal/jit_token"), {
+      const jwtRes = await fetch(getApiUrl("/internal/jwt_token"), {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ valid_endpoints: "admin/legacy/*" })
       });
-      if (!jitRes.ok) throw new Error("Failed to get JIT token");
-      const { token: jit } = await jitRes.json();
+      if (!jwtRes.ok) throw new Error("Failed to get JWT token");
+      const { token: jwt } = await jwtRes.json();
 
       const res = await fetch("/api/bcorp/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orgId, jit })
+        body: JSON.stringify({ orgId, jwt })
       });
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();

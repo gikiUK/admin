@@ -18,13 +18,13 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { orgId, jit } = await req.json();
+    const { orgId, jwt } = await req.json();
 
     if (typeof orgId !== "string" || !/^[\w-]+$/.test(orgId)) {
       return new Response("Invalid orgId", { status: 400 });
     }
-    if (typeof jit !== "string" || !jit) {
-      return new Response("Missing jit token", { status: 400 });
+    if (typeof jwt !== "string" || !jwt) {
+      return new Response("Missing JWT token", { status: 400 });
     }
 
     const orgBase = `${baseUrl}/organizations/${orgId}`;
@@ -32,9 +32,9 @@ export async function POST(req: Request) {
 
     // Fetch all three PDFs in parallel (matches Ruby's threaded approach)
     const [headerBytes, contentBytes, footerBytes] = await Promise.all([
-      fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-header?print&jit=${encodeURIComponent(jit)}`, ZERO_MARGIN),
-      fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-content?print&jit=${encodeURIComponent(jit)}`, CONTENT_MARGIN),
-      fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-footer?print&jit=${encodeURIComponent(jit)}`, ZERO_MARGIN)
+      fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-header?print&jwt=${encodeURIComponent(jwt)}`, ZERO_MARGIN),
+      fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-content?print&jwt=${encodeURIComponent(jwt)}`, CONTENT_MARGIN),
+      fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-footer?print&jwt=${encodeURIComponent(jwt)}`, ZERO_MARGIN)
     ]);
 
     // Add page numbers to content PDF (starting at page 2)
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     // Combine all three PDFs
     const combined = await combinePdfs(headerBytes, numberedContent, footerBytes);
 
-    // const combined = await fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-content?print&jit=${encodeURIComponent(jit)}`, CONTENT_MARGIN);
+    // const combined = await fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-content?print&jwt=${encodeURIComponent(jwt)}`, CONTENT_MARGIN);
 
     return new Response(combined as unknown as BodyInit, {
       headers: {

@@ -11,9 +11,9 @@ class BcorpApiError extends Error {
   }
 }
 
-function getJitToken(): string | null {
+function getJwtToken(): string | null {
   if (typeof window === "undefined") return null;
-  return new URLSearchParams(window.location.search).get("jit");
+  return new URLSearchParams(window.location.search).get("jwt");
 }
 
 async function bcorpApi<T>(path: string, options?: RequestInit): Promise<T> {
@@ -22,9 +22,9 @@ async function bcorpApi<T>(path: string, options?: RequestInit): Promise<T> {
     Accept: "application/json",
     ...(options?.headers as Record<string, string>)
   };
-  const jit = getJitToken();
-  if (jit) {
-    headers["X-JIT-Token"] = jit;
+  const jwt = getJwtToken();
+  if (jwt) {
+    headers.Authorization = `Bearer ${jwt}`;
   }
   const res = await fetch(getApiUrl(path), {
     credentials: "include",
