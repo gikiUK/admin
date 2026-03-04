@@ -1,0 +1,100 @@
+@page {
+	size: A4;
+	margin: 0;
+}
+
+html,
+body {
+	width: auto;
+	margin: 0;
+	padding: 0;
+}
+
+.ui-page-first {
+	width: 210mm;
+	min-height: 297mm;
+	background: #0f1b3d;
+	color: #fff;
+	display: flex;
+	flex-direction: column;
+	padding: 25mm 30mm;
+	font-family: "Inter", system-ui, -apple-system, sans-serif;
+	box-sizing: border-box;
+}
+
+.title-page-top {
+	display: flex;
+	align-items: center;
+	gap: 3mm;
+}
+
+.title-page-top .brand-name {
+	font-size: 18pt;
+	font-weight: 700;
+	color: #fff;
+	letter-spacing: -0.02em;
+}
+
+.title-page-top .brand-name span {
+	color: #60a5fa;
+}
+
+.title-page-body {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.title-page-accent {
+	width: 60mm;
+	height: 1.5mm;
+	background: #3b82f6;
+	border-radius: 1mm;
+	margin-bottom: 8mm;
+}
+
+.title-page-body h1 {
+	font-size: 36pt;
+	font-weight: 800;
+	line-height: 1.15;
+	color: #fff;
+	margin: 0 0 6mm;
+}
+
+.title-page-body .subtitle {
+	font-size: 16pt;
+	font-weight: 400;
+	color: #93c5fd;
+	margin: 0 0 12mm;
+}
+
+.title-page-meta {
+	display: flex;
+	flex-direction: column;
+	gap: 2mm;
+}
+
+.title-page-meta p {
+	font-size: 11pt;
+	color: #cbd5e1;
+	margin: 0;
+}
+
+.title-page-meta strong {
+	color: #fff;
+	font-weight: 600;
+}
+
+.title-page-footer {
+	font-size: 9pt;
+	color: #94a3b8;
+	text-align: center;
+	padding-top: 8mm;
+	border-top: 0.25mm solid #334155;
+}
+
+.title-page-footer a {
+	color: #93c5fd;
+	text-decoration: none;
+}

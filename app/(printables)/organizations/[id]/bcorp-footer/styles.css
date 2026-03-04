@@ -1,0 +1,59 @@
+@page {
+	size: A4;
+	margin: 0;
+}
+
+html,
+body {
+	width: auto;
+	margin: 0;
+	padding: 0;
+}
+
+.ui-page-final {
+	width: 210mm;
+	min-height: 297mm;
+	background: #0f1b3d;
+	color: #fff;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	padding: 25mm 30mm;
+	font-family: "Inter", system-ui, -apple-system, sans-serif;
+	box-sizing: border-box;
+}
+
+.ui-page-final .company-name {
+	font-size: 24pt;
+	font-weight: 700;
+	color: #fff;
+	margin-bottom: 4mm;
+}
+
+.ui-page-final p {
+	color: #93c5fd;
+	font-size: 13pt;
+}
+
+.ui-page-final .page-footer {
+	margin-top: auto;
+	padding-top: 3.5mm;
+	border-top: 0.25mm solid #334155;
+	font-size: 9pt;
+	color: #94a3b8;
+	width: 100%;
+}
+
+.ui-page-final a {
+	color: #93c5fd;
+	text-decoration: none;
+}
+
+@media print {
+	.ui-page-final {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+}

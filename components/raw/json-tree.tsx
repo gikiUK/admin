@@ -176,7 +176,7 @@ function JsonRow({ line }: { line: JsonLine }) {
 
   if (line.type === "value") {
     return (
-      <div className="whitespace-pre" style={{ height: ROW_HEIGHT }}>
+      <div className="whitespace-pre-wrap" style={{ minHeight: ROW_HEIGHT }}>
         {pad}
         {keyPrefix}
         <InlineValue value={line.value} />
@@ -187,7 +187,7 @@ function JsonRow({ line }: { line: JsonLine }) {
 
   if (line.type === "inline-array") {
     return (
-      <div className="whitespace-pre" style={{ height: ROW_HEIGHT }}>
+      <div className="whitespace-pre" style={{ minHeight: ROW_HEIGHT }}>
         {pad}
         {keyPrefix}[
         {line.items.map((item, i) => (
@@ -204,7 +204,7 @@ function JsonRow({ line }: { line: JsonLine }) {
 
   if (line.type === "close") {
     return (
-      <div className="whitespace-pre" style={{ height: ROW_HEIGHT }}>
+      <div className="whitespace-pre" style={{ minHeight: ROW_HEIGHT }}>
         {pad}
         {line.bracket}
         {line.comma ? "," : ""}
@@ -265,9 +265,10 @@ type JsonTreeProps = {
   data: unknown;
   collapseAllSignal: number;
   expandAllSignal: number;
+  virtual?: boolean;
 };
 
-export function JsonTree({ data, collapseAllSignal, expandAllSignal }: JsonTreeProps) {
+export function JsonTree({ data, collapseAllSignal, expandAllSignal, virtual = true }: JsonTreeProps) {
   const [expanded, setExpanded] = useState(() => defaultExpanded(data));
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -287,7 +288,7 @@ export function JsonTree({ data, collapseAllSignal, expandAllSignal }: JsonTreeP
   const lines = useMemo(() => flattenJson(data, expanded), [data, expanded]);
 
   const virtualizer = useVirtualizer({
-    count: lines.length,
+    count: virtual ? lines.length : 0,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan: 30
@@ -305,6 +306,33 @@ export function JsonTree({ data, collapseAllSignal, expandAllSignal }: JsonTreeP
     });
   }, []);
 
+  function renderLine(line: JsonLine) {
+    return line.type === "open-object" || line.type === "open-array" ? (
+      <JsonOpenRow
+        line={line as JsonLine & { type: "open-object" | "open-array" }}
+        isExpanded={expanded.has(line.id)}
+        onToggle={handleToggle}
+      />
+    ) : (
+      <JsonRow line={line} />
+    );
+  }
+
+  if (!virtual) {
+    return (
+      <div
+        className="overflow-auto rounded-lg border bg-muted/50 p-4 font-mono text-xs leading-relaxed"
+        style={{ height: "calc(100vh - 235px)" }}
+      >
+        <div className="p-4">
+          {lines.map((line) => (
+            <div key={line.id}>{renderLine(line)}</div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={parentRef}
@@ -320,15 +348,7 @@ export function JsonTree({ data, collapseAllSignal, expandAllSignal }: JsonTreeP
               className="absolute left-0 top-0 w-full px-4"
               style={{ height: ROW_HEIGHT, transform: `translateY(${virtualRow.start}px)` }}
             >
-              {line.type === "open-object" || line.type === "open-array" ? (
-                <JsonOpenRow
-                  line={line as JsonLine & { type: "open-object" | "open-array" }}
-                  isExpanded={expanded.has(line.id)}
-                  onToggle={handleToggle}
-                />
-              ) : (
-                <JsonRow line={line} />
-              )}
+              {renderLine(line)}
             </div>
           );
         })}

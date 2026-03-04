@@ -27,10 +27,7 @@ export function HistorySidebar() {
   return (
     <div data-state={open ? "expanded" : "collapsed"}>
       {/* Backdrop — mobile only, closes panel on tap */}
-      {open && (
-        // biome-ignore lint/a11y/useKeyWithClickEvents: backdrop dismiss doesn't need keyboard handling
-        <div className="fixed inset-0 z-10 bg-black/50 md:hidden" role="none" onClick={() => setOpen(false)} />
-      )}
+      {open && <div className="fixed inset-0 z-10 bg-black/50 md:hidden" role="none" onClick={() => setOpen(false)} />}
 
       {/* Gap — takes up space in the flex row so SidebarInset shrinks (desktop only) */}
       <div

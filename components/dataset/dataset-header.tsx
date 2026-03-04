@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SaveStatus } from "@/lib/blob/dataset-reducer";
-import { useDataset } from "@/lib/blob/use-dataset";
+import { useDataset, useDatasetSafe } from "@/lib/blob/use-dataset";
 import { useHistorySidebar } from "@/lib/history-sidebar-context";
 import { ReviewDialog } from "./review-dialog";
 
@@ -83,6 +83,12 @@ function SavedTimeAgo({ lastSavedAt, saveStatus }: { lastSavedAt: number | null;
 }
 
 export function DatasetHeader() {
+  const ctx = useDatasetSafe();
+  if (!ctx) return null;
+  return <DatasetHeaderInner />;
+}
+
+function DatasetHeaderInner() {
   const { isEditing, saving, deleteDraft, loading, history } = useDataset();
   const { toggleOpen: toggleHistory } = useHistorySidebar();
   const [reviewOpen, setReviewOpen] = useState(false);
