@@ -1,6 +1,6 @@
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
 
-export function Introduction(props: BcorpPageProps) {
+export function Introduction({ data }: BcorpPageProps) {
   return (
     <div className="ui-page">
       <div className="plan-title">
@@ -8,7 +8,8 @@ export function Introduction(props: BcorpPageProps) {
       </div>
       <div className="ui-section">
         <h2>Introduction</h2>
-        <p>{props.data.company_description}</p>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: content is admin-authored HTML */}
+        {data.company_description ? <div dangerouslySetInnerHTML={{ __html: data.company_description }} /> : null}
         <p>
           This Climate Action Plan outlines our strategic approach to reducing greenhouse gas emissions across our
           operations and value chain. The plan demonstrates our commitment to limiting global warming to 1.5&deg;C
