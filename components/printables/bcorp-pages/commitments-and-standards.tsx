@@ -4,8 +4,7 @@ import { Policies } from "@/components/printables/bcorp-pages/policies";
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
 
 export function CommitmentsAndStandards({ data }: BcorpPageProps) {
-  const hasCerts =
-    data.cert_bcorp === "yes" || data.cert_iso14001 === "yes" || data.initiative_sbti === "yes";
+  const hasCerts = data.cert_bcorp === "yes" || data.cert_iso14001 === "yes" || data.initiative_sbti === "yes";
   const hasPolicies =
     data.policy_procurement === "yes" ||
     data.policy_supplier_code === "yes" ||
