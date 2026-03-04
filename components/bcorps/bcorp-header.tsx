@@ -42,6 +42,9 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
   async function handleGeneratePdf() {
     setPdfState("generating");
     try {
+      if (isDirty) {
+        await saveRef.current?.();
+      }
       const jitRes = await fetch(getApiUrl("/internal/jit_token"), {
         method: "POST",
         credentials: "include",
