@@ -16,7 +16,13 @@ export async function POST(req: Request) {
   const [companyDesc, actionsOverview, progressSummaries] = await Promise.all([
     runCompanyDescription(client, orgName, existingData.company_description ?? ""),
     runActionsOverview(client, orgName, plan, existingData.actions_overview ?? ""),
-    runProgressSummaries(client, orgName, plan, existingData.actions_in_progress ?? "", existingData.actions_added ?? "")
+    runProgressSummaries(
+      client,
+      orgName,
+      plan,
+      existingData.actions_in_progress ?? "",
+      existingData.actions_added ?? ""
+    )
   ]);
 
   const data = { ...companyDesc.data, ...actionsOverview.data, ...progressSummaries.data };
