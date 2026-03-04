@@ -103,8 +103,8 @@ function ThemeGroup({ theme, actions }: { theme: string; actions: PlanAction[] }
       <CollapsibleContent>
         <div className="mt-2 space-y-2 pl-6">
           {actions.map((action) => (
-              <ActionCard key={action.external_action_id} action={action} />
-            ))}
+            <ActionCard key={action.external_action_id} action={action} />
+          ))}
         </div>
       </CollapsibleContent>
     </Collapsible>
@@ -146,7 +146,7 @@ export function PlanView({ plan }: { plan: Plan }) {
     });
   }
 
-const filtered = plan.filter((a) => {
+  const filtered = plan.filter((a) => {
     if (stateFilter.size > 0 && !stateFilter.has(a.state)) return false;
     return true;
   });
@@ -185,11 +185,7 @@ const filtered = plan.filter((a) => {
       {stateFilter.size > 0 && (
         <p className="text-xs text-muted-foreground">
           Showing {filtered.length} of {plan.length} actions
-          <button
-            type="button"
-            className="ml-2 underline hover:no-underline"
-            onClick={() => setStateFilter(new Set())}
-          >
+          <button type="button" className="ml-2 underline hover:no-underline" onClick={() => setStateFilter(new Set())}>
             Clear filters
           </button>
         </p>
