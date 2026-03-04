@@ -22,10 +22,10 @@ export function Engagement(_props: BcorpPageProps) {
       <div className="ui-section ui-break-before">
         <h2>Governance</h2>
         <p>
-          We recognise that delivering our climate ambitions requires robust governance structures, clear accountability,
-          and aligned organisational culture. That&rsquo;s why we are committed to embedding our transition plan across
-          all levels of our organisation, from Board oversight to day-to-day operations. Our plan contains the following
-          Governance actions:
+          We recognise that delivering our climate ambitions requires robust governance structures, clear
+          accountability, and aligned organisational culture. That&rsquo;s why we are committed to embedding our
+          transition plan across all levels of our organisation, from Board oversight to day-to-day operations. Our plan
+          contains the following Governance actions:
         </p>
         <h3>Management and Board</h3>
         <ul>

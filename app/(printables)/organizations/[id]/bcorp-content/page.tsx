@@ -1,6 +1,5 @@
 "use client";
 
-import { BcorpPrintablePage } from "@/components/printables/bcorp-printable-page";
 import { ActionsTable } from "@/components/printables/bcorp-pages/actions-table";
 import { Engagement } from "@/components/printables/bcorp-pages/engagement";
 import { Foundations } from "@/components/printables/bcorp-pages/foundations";
@@ -10,6 +9,7 @@ import { Overview } from "@/components/printables/bcorp-pages/overview";
 import { PerformanceReporting } from "@/components/printables/bcorp-pages/performance-reporting";
 import { ProgressTracking } from "@/components/printables/bcorp-pages/progress-tracking";
 import { TableOfContents } from "@/components/printables/bcorp-pages/table-of-contents";
+import { BcorpPrintablePage } from "@/components/printables/bcorp-printable-page";
 
 import "./styles.css";
 

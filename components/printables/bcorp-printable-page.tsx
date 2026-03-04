@@ -11,9 +11,7 @@ export type BcorpPageProps = {
   plan: Plan;
 };
 
-export function BcorpPrintablePage({
-  children,
-}: { children: (props: BcorpPageProps) => React.ReactNode }) {
+export function BcorpPrintablePage({ children }: { children: (props: BcorpPageProps) => React.ReactNode }) {
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<BcorpData | null>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
@@ -26,7 +24,7 @@ export function BcorpPrintablePage({
         if (err instanceof Error && "status" in err && (err as { status: number }).status === 404) return {};
         throw err;
       }),
-      fetchPlan(id),
+      fetchPlan(id)
     ])
       .then(([bcorpData, planData]) => {
         setData(bcorpData as BcorpData);

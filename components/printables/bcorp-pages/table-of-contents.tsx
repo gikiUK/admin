@@ -1,5 +1,5 @@
-import { DocHeader } from "@/components/printables/doc-header";
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
+import { DocHeader } from "@/components/printables/doc-header";
 
 export function TableOfContents(_props: BcorpPageProps) {
   return (

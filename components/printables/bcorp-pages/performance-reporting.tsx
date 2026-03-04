@@ -6,8 +6,9 @@ export function PerformanceReporting(_props: BcorpPageProps) {
       <div className="ui-section">
         <h2>Performance Reporting &amp; Public Disclosure</h2>
         <p>
-          We are committed to comprehensive public reporting on our plan, creating accountability to our stakeholders and
-          demonstrating the integrity of our commitments. We have the following disclosure related actions on our plan:
+          We are committed to comprehensive public reporting on our plan, creating accountability to our stakeholders
+          and demonstrating the integrity of our commitments. We have the following disclosure related actions on our
+          plan:
         </p>
         <ul>
           <li>Report publicly on sustainability performance and progress</li>

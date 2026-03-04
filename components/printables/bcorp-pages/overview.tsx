@@ -1,7 +1,7 @@
 "use client";
 
-import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
 import { useEffect, useRef } from "react";
+import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
 
 const CHART_COLORS = {
   blue: "#1D4ED8",
@@ -9,7 +9,7 @@ const CHART_COLORS = {
   purple: "#9333ea",
   blueMid: "#60a5fa",
   greenMid: "#4ade80",
-  purpleMid: "#c084fc",
+  purpleMid: "#c084fc"
 };
 
 function initCharts(breakdownCanvas: HTMLCanvasElement, impactCanvas: HTMLCanvasElement) {
@@ -35,11 +35,11 @@ function initCharts(breakdownCanvas: HTMLCanvasElement, impactCanvas: HTMLCanvas
             CHART_COLORS.purple,
             CHART_COLORS.blueMid,
             CHART_COLORS.greenMid,
-            CHART_COLORS.purpleMid,
+            CHART_COLORS.purpleMid
           ],
-          borderRadius: 4,
-        },
-      ],
+          borderRadius: 4
+        }
+      ]
     },
     options: {
       indexAxis: "y",
@@ -51,14 +51,14 @@ function initCharts(breakdownCanvas: HTMLCanvasElement, impactCanvas: HTMLCanvas
         x: {
           title: { display: true, text: "Number of Actions", font: { size: 13, weight: "600" }, color: "#71717A" },
           grid: { color: "#f0f0f0" },
-          ticks: { font: { size: 13 }, color: "#71717A" },
+          ticks: { font: { size: 13 }, color: "#71717A" }
         },
         y: {
           grid: { display: false },
-          ticks: { font: { size: 14, weight: "500" }, color: "#71717A" },
-        },
-      },
-    },
+          ticks: { font: { size: 14, weight: "500" }, color: "#71717A" }
+        }
+      }
+    }
   });
 
   new Chart(impactCanvas, {
@@ -74,12 +74,12 @@ function initCharts(breakdownCanvas: HTMLCanvasElement, impactCanvas: HTMLCanvas
             CHART_COLORS.purple,
             CHART_COLORS.blueMid,
             CHART_COLORS.greenMid,
-            CHART_COLORS.purpleMid,
+            CHART_COLORS.purpleMid
           ],
           borderColor: "#ffffff",
-          borderWidth: 2,
-        },
-      ],
+          borderWidth: 2
+        }
+      ]
     },
     options: {
       responsive: true,
@@ -95,11 +95,11 @@ function initCharts(breakdownCanvas: HTMLCanvasElement, impactCanvas: HTMLCanvas
             padding: 8,
             usePointStyle: true,
             pointStyle: "circle",
-            boxWidth: 8,
-          },
-        },
-      },
-    },
+            boxWidth: 8
+          }
+        }
+      }
+    }
   });
 }
 
@@ -133,9 +133,9 @@ export function Overview(_props: BcorpPageProps) {
         <h2>Overview</h2>
         <p>
           The following charts provide an initial overview of our climate action strategy illustrating how our actions
-          are distributed across key areas and the potential impact these actions can deliver. However, climate action is
-          a long-term endeavour, and this plan will evolve over time as we learn, adapt, and respond to new challenges
-          and opportunities.
+          are distributed across key areas and the potential impact these actions can deliver. However, climate action
+          is a long-term endeavour, and this plan will evolve over time as we learn, adapt, and respond to new
+          challenges and opportunities.
         </p>
         <div className="chart-block no-break">
           <h3>Actions Breakdown by Group</h3>
