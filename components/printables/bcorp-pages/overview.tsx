@@ -4,7 +4,15 @@ import { useEffect, useRef } from "react";
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
 import type { Plan } from "@/lib/bcorp/types";
 
-const CHART_COLORS = ["#1D4ED8", "#16a34a", "#9333ea", "#60a5fa", "#4ade80", "#c084fc", "#71717A"];
+const CHART_COLORS = {
+  blue: "#1D4ED8",
+  green: "#16a34a",
+  purple: "#9333ea",
+  blueMid: "#60a5fa",
+  greenMid: "#4ade80",
+  purpleMid: "#c084fc",
+  gray: "#71717A"
+};
 
 function buildScopeBreakdown(plan: Plan): { labels: string[]; data: number[] } {
   const counts: Record<string, number> = {};
@@ -53,7 +61,7 @@ function initCharts(Chart: any, breakdownCanvas: HTMLCanvasElement, impactCanvas
       datasets: [
         {
           data: breakdown.data,
-          backgroundColor: CHART_COLORS.slice(0, breakdown.labels.length),
+          backgroundColor: Object.values(CHART_COLORS).slice(0, breakdown.labels.length),
           borderRadius: 4
         }
       ]
