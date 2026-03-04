@@ -1,7 +1,5 @@
 import { PDFDocument, rgb } from "pdf-lib";
 
-export const runtime = "edge";
-
 const ZERO_MARGIN = { top: "0", right: "0", bottom: "0", left: "0" };
 const CONTENT_MARGIN = { top: "15mm", right: "20mm", bottom: "15mm", left: "20mm" };
 

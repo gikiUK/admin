@@ -4,8 +4,6 @@ import { runCompanyDescription } from "@/lib/bcorp/populate/runners/company-desc
 import { runProgressSummaries } from "@/lib/bcorp/populate/runners/progress-summaries";
 import type { PopulateRequest } from "@/lib/bcorp/populate/types";
 
-export const runtime = "edge";
-
 export async function POST(req: Request) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return Response.json({ error: "ANTHROPIC_API_KEY not configured" }, { status: 500 });
