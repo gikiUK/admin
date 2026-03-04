@@ -11,6 +11,7 @@ import { PoliciesSection } from "@/components/bcorps/sections/policies-section";
 import { ProgressTrackingSection } from "@/components/bcorps/sections/progress-tracking-section";
 import { SignOffSection } from "@/components/bcorps/sections/sign-off-section";
 import { useBcorpForm } from "@/components/bcorps/use-bcorp-form";
+import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
 import type { BcorpData } from "@/lib/bcorp/types";
 
 export type SaveState = "idle" | "saving" | "saved" | "error";
@@ -23,14 +24,18 @@ type BcorpDataFormProps = {
 
 export function BcorpDataForm({ orgId, initialData, initialReasoning = {} }: BcorpDataFormProps) {
   const { get, set, hint } = useBcorpForm(orgId, initialData, initialReasoning);
+  const { plan } = useBcorpHeader();
+
+  const engagementActions = plan.filter((a) => a.tal_action.ghg_scope?.includes("Engagement"));
+  const governanceActions = plan.filter((a) => a.tal_action.ghg_scope?.includes("Governance"));
 
   return (
     <div className="space-y-6">
       <IntroductionSection get={get} set={set} hint={hint} />
       <FoundationsSection get={get} set={set} hint={hint} />
       <ImplementationPlanSection get={get} set={set} hint={hint} />
-      <EngagementSection get={get} set={set} />
-      <GovernanceSection get={get} set={set} />
+      <EngagementSection get={get} set={set} actions={engagementActions} />
+      <GovernanceSection get={get} set={set} actions={governanceActions} />
       <ProgressTrackingSection get={get} set={set} hint={hint} />
       <EmissionTargetsSection get={get} set={set} hint={hint} />
       <CertificationsSection get={get} set={set} hint={hint} />

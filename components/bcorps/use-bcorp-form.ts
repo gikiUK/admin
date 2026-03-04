@@ -5,19 +5,36 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { patchBcorpData } from "@/lib/bcorp/api";
 import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
-import type { BcorpData } from "@/lib/bcorp/types";
+import type { BcorpData, Plan } from "@/lib/bcorp/types";
 
-export const DEFAULTS: Partial<BcorpData> = {
+export const STATIC_DEFAULTS: Omit<Partial<BcorpData>, "engagement" | "government"> = {
   our_commitment: "<p>We are committed to supporting the global ambition to limit global warming to 1.5°C.</p>",
   why_planet:
-    "<p>Climate change poses an urgent threat to Earth's ecosystems and communities. Limiting warming to 1.5°C is critical to protect coral reefs, reduce extreme heatwaves, floods and droughts, and prevent biodiversity collapse.</p><p>Every fraction of a degree matters for people around the world who are already facing the impacts of extreme weather, food insecurity, and rising sea levels. The scientific consensus is clear: decisive action today is essential to avoid irreversible consequences and safeguard a liveable planet for current and future generations.</p>",
+    "<p>Climate change poses an urgent threat to Earth’s ecosystems and communities. Limiting warming to 1.5°C is critical to protect coral reefs, reduce extreme heatwaves, floods and droughts, and prevent biodiversity collapse.</p><p>Every fraction of a degree matters for people around the world who are already facing the impacts of extreme weather, food insecurity, and rising sea levels. The scientific consensus is clear: decisive action today is essential to avoid irreversible consequences and safeguard a liveable planet for current and future generations.</p>",
   why_business:
-    "<p>The transition to a low-carbon economy creates significant business opportunities. Companies taking early action can gain competitive advantages through innovation, operational efficiencies, and access to growing sustainable markets.</p><p>Climate change also represents a risk to business continuity. Unchecked warming threatens supply chain resilience, increases operational disruptions and poses direct physical risks including damage to assets from extreme weather. Limiting warming to 1.5°C helps protect physical assets and employees while reducing long-term business uncertainty.</p>",
-  engagement:
-    "<p>We recognise that achieving our climate ambitions requires working alongside our customers and industry peers — that's why we are committed to engaging in collaborative initiatives where our participation can contribute to collective progress.</p>",
-  government:
-    "<p>We recognise that delivering our climate ambitions requires robust governance structures, clear accountability, and aligned organisational culture. That's why we are committed to embedding our transition plan across all levels of our organisation, from Board oversight to day-to-day operations.</p>"
+    "<p>The transition to a low-carbon economy creates significant business opportunities. Companies taking early action can gain competitive advantages through innovation, operational efficiencies, and access to growing sustainable markets.</p><p>Climate change also represents a risk to business continuity. Unchecked warming threatens supply chain resilience, increases operational disruptions and poses direct physical risks including damage to assets from extreme weather. Limiting warming to 1.5°C helps protect physical assets and employees while reducing long-term business uncertainty.</p>"
 };
+
+export const GOVERNANCE_CATEGORIES = [
+  "Risk Management",
+  "Strategic Planning",
+  "Management and Board",
+  "Culture",
+  "Learning and Development",
+  "Policies"
+];
+
+function buildEngagementDefault(plan: Plan): string {
+  const actions = plan.filter((a) => a.tal_action.ghg_scope?.includes("Engagement"));
+  if (actions.length === 0) return "";
+  return "<p>We recognise that achieving our climate ambitions requires working alongside our customers and industry peers that’s why we are committed to engaging in collaborative initiatives where our participation can contribute to collective progress. Our plan contains the following Engagement actions: </p>";
+}
+
+function buildGovernanceDefault(plan: Plan): string {
+  const govActions = plan.filter((a) => a.tal_action.ghg_scope?.includes("Governance"));
+  if (govActions.length === 0) return "";
+  return "<p>We recognise that delivering our climate ambitions requires robust governance structures, clear accountability, and aligned organizational culture. That’s why we are committed to embedding our transition plan across all levels of our organization, from Board oversight to day-to-day operations. Our plan contains the following Governance actions:</p>";
+}
 
 const AI_FIELDS = ["company_description", "actions_overview", "actions_in_progress", "actions_added"];
 
@@ -25,7 +42,12 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
   const { saveRef, setSaveState, populateRef, setPopulateState, setDirty, plan } = useBcorpHeader();
   const orgName = useSearchParams().get("name") ?? orgId;
 
-  const [data, setData] = useState<BcorpData>({ ...DEFAULTS, ...initialData });
+  const defaults: Partial<BcorpData> = {
+    ...STATIC_DEFAULTS,
+    engagement: buildEngagementDefault(plan),
+    government: buildGovernanceDefault(plan)
+  };
+  const [data, setData] = useState<BcorpData>({ ...defaults, ...initialData });
   const [reasoning, setReasoning] = useState<Record<string, string>>(initialReasoning);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
@@ -55,7 +77,7 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
     setSaveState("saving", "");
     try {
       const saved = await patchBcorpData(orgId, data);
-      setData({ ...DEFAULTS, ...saved });
+      setData({ ...defaults, ...saved });
       setDirty(false);
       setSaveState("saved", "");
       timerRef.current = setTimeout(() => setSaveState("idle", ""), 2000);

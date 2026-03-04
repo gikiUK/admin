@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BcorpDataForm } from "@/components/bcorps/bcorp-data-form";
+import { PlanJsonExplorer } from "@/components/bcorps/plan-json-explorer";
 import { PlanView } from "@/components/bcorps/plan-view";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchBcorpData, fetchPlan } from "@/lib/bcorp/api";
@@ -103,6 +104,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         <TabsList>
           <TabsTrigger value="bcorp">B Corp Data</TabsTrigger>
           <TabsTrigger value="plan">Plan ({plan?.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="json">JSON</TabsTrigger>
         </TabsList>
         <TabsContent value="bcorp" className="mt-6">
           {bcorpData !== null && (
@@ -111,6 +113,9 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         </TabsContent>
         <TabsContent value="plan" className="mt-6">
           <PlanView plan={plan ?? []} />
+        </TabsContent>
+        <TabsContent value="json" className="mt-6">
+          <PlanJsonExplorer plan={plan ?? []} />
         </TabsContent>
       </Tabs>
     </>
