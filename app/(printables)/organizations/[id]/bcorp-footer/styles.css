@@ -1,92 +1,58 @@
-/* ============================================================
-    Portrait A4 Overrides
-    ============================================================ */
 @page {
 	size: A4;
-	margin: 15mm 18mm;
+	margin: 0;
 }
 
-/* ============================================================
-    Typography
-    ============================================================ */
 html,
 body {
 	width: auto;
-}
-body {
-	font-family: "Inter", system-ui, -apple-system, sans-serif;
-	font-size: 11pt;
-	line-height: 1.6;
-	color: #71717a;
+	margin: 0;
+	padding: 0;
 }
 
-h1,
-h2,
-h3,
-h4 {
-	font-family: "Inter", system-ui, sans-serif;
-}
-
-/* ============================================================
-    Last Page
-    ============================================================ */
 .ui-page-final {
-	break-before: page;
+	width: 210mm;
+	min-height: 297mm;
+	background: #0f1b3d;
+	color: #fff;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	text-align: center;
-	padding: 13mm 20mm;
-	background: linear-gradient(0deg, rgba(29, 78, 216, 0.1) 0%, rgba(29, 78, 216, 0.03) 50%, transparent 100%);
+	padding: 25mm 30mm;
+	font-family: "Inter", system-ui, -apple-system, sans-serif;
+	box-sizing: border-box;
 }
+
 .ui-page-final .company-name {
-	font-size: 18pt;
+	font-size: 24pt;
 	font-weight: 700;
-	color: #000;
-	margin-bottom: 3mm;
+	color: #fff;
+	margin-bottom: 4mm;
 }
+
 .ui-page-final p {
-	color: #71717a;
-	font-size: 11pt;
+	color: #93c5fd;
+	font-size: 13pt;
 }
+
 .ui-page-final .page-footer {
 	margin-top: auto;
 	padding-top: 3.5mm;
-	border-top: 0.25mm solid #e5e7eb;
-	font-size: 10pt;
-	color: #a1a1aa;
+	border-top: 0.25mm solid #334155;
+	font-size: 9pt;
+	color: #94a3b8;
 	width: 100%;
 }
 
-/* ============================================================
-    Screen Preview
-    ============================================================ */
-@media screen {
-	body {
-		max-width: 210mm;
-	}
-	.ui-page {
-		padding: 15mm 18mm;
-		border-bottom: 0.5mm solid #ddd;
-	}
+.ui-page-final a {
+	color: #93c5fd;
+	text-decoration: none;
 }
 
-/* ============================================================
-    Print Color Overrides
-    ============================================================ */
 @media print {
-	.ui-page-first,
-	.ui-page-final,
-	.plan-title,
-	thead th,
-	tbody tr:nth-child(even),
-	li::before,
-	.title-page-accent,
-	.scope-label,
-	.cat,
-	.chart-container,
-	.sign-off-box {
+	.ui-page-final {
 		-webkit-print-color-adjust: exact;
 		print-color-adjust: exact;
 	}

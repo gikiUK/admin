@@ -2,20 +2,17 @@
 
 import { BcorpPrintablePage } from "@/components/printables/bcorp-printable-page";
 
+import "./styles.css";
+
 export default function BcorpFooterPage() {
   return (
     <BcorpPrintablePage>
-      {(_props) => (
+      {(props) => (
         <div className="ui-page ui-page-final">
-          <div className="company-name">Your Company Name</div>
+          <div className="company-name">{props.data.name || "Company Name"}</div>
           <p>Certified B Corporation</p>
-          <p style={{ marginTop: "2em" }}>
-            www.yourcompany.com
-            <br />
-            hello@yourcompany.com
-          </p>
           <div className="page-footer">
-            Your Company Name | B Corp Climate Action Plan 2025 | Prepared using giki actions
+            {props.data.name || "Company Name"} | B Corp Climate Action Plan 2025 | Prepared using <a href="https://gikiactions.com/">Giki Actions</a>
           </div>
         </div>
       )}

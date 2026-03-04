@@ -1,3 +1,4 @@
+import { MarkdownContent } from "@/components/printables/markdown-content";
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
 
 export function ImplementationPlan({ data }: BcorpPageProps) {
@@ -7,8 +8,7 @@ export function ImplementationPlan({ data }: BcorpPageProps) {
         <h2>Implementation Plan</h2>
         <h3>Actions Overview</h3>
         {data.actions_overview ? (
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: content is admin-authored HTML
-          <div dangerouslySetInnerHTML={{ __html: data.actions_overview }} />
+          <MarkdownContent content={data.actions_overview} />
         ) : (
           <p>[Actions overview to be generated]</p>
         )}

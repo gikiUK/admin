@@ -2,7 +2,6 @@ import type { FieldGetter, FieldHint, FieldSetter } from "@/components/bcorps/fo
 import { FieldGroup } from "@/components/bcorps/ui/field-group";
 import { SectionCard } from "@/components/bcorps/ui/section-card";
 import { YesNoSelect, yesNo } from "@/components/bcorps/ui/yes-no-select";
-import { Input } from "@/components/ui/input";
 
 export function CertificationsSection({ get, set, hint }: { get: FieldGetter; set: FieldSetter; hint: FieldHint }) {
   return (
@@ -19,17 +18,6 @@ export function CertificationsSection({ get, set, hint }: { get: FieldGetter; se
       <FieldGroup label="Has a Science Based Target (SBTi)" {...hint("initiative_sbti")}>
         <YesNoSelect value={yesNo(get("initiative_sbti"))} onChange={(v) => set("initiative_sbti", v)} />
       </FieldGroup>
-      <FieldGroup label="Reports through CDP" {...hint("reporting_cdp")}>
-        <YesNoSelect value={yesNo(get("reporting_cdp"))} onChange={(v) => set("reporting_cdp", v)} />
-      </FieldGroup>
-      <FieldGroup label="Has an Ecovadis Rating" {...hint("rating_ecovadis")}>
-        <YesNoSelect value={yesNo(get("rating_ecovadis"))} onChange={(v) => set("rating_ecovadis", v)} />
-      </FieldGroup>
-      {get("rating_ecovadis") === "yes" && (
-        <FieldGroup label="Ecovadis Rating Level" {...hint("rating_ecovadis_level")}>
-          <Input value={get("rating_ecovadis_level")} onChange={(e) => set("rating_ecovadis_level", e.target.value)} />
-        </FieldGroup>
-      )}
     </SectionCard>
   );
 }

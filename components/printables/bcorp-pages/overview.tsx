@@ -2,41 +2,66 @@
 
 import { useEffect, useRef } from "react";
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
+import type { Plan } from "@/lib/bcorp/types";
 
-const CHART_COLORS = {
-  blue: "#1D4ED8",
-  green: "#16a34a",
-  purple: "#9333ea",
-  blueMid: "#60a5fa",
-  greenMid: "#4ade80",
-  purpleMid: "#c084fc"
-};
+const CHART_COLORS = [
+  "#1D4ED8",
+  "#16a34a",
+  "#9333ea",
+  "#60a5fa",
+  "#4ade80",
+  "#c084fc",
+  "#71717A"
+];
 
-function initCharts(breakdownCanvas: HTMLCanvasElement, impactCanvas: HTMLCanvasElement) {
-  // biome-ignore lint/suspicious/noExplicitAny: Chart.js loaded from CDN
-  const Chart = (window as any).Chart;
-  if (!Chart) return;
+function buildScopeBreakdown(plan: Plan): { labels: string[]; data: number[] } {
+  const counts: Record<string, number> = {};
+  for (const action of plan) {
+    const scopes = action.tal_action.ghg_scope ?? [];
+    const normalised = new Set<string>();
+    for (const s of scopes) {
+      if (s.startsWith("Scope 1") || s.startsWith("Scope 2")) {
+        normalised.add("Scope 1 & 2");
+      } else if (s.startsWith("Scope 3")) {
+        normalised.add("Scope 3");
+      } else {
+        normalised.add(s);
+      }
+    }
+    for (const cat of normalised) {
+      counts[cat] = (counts[cat] ?? 0) + 1;
+    }
+  }
 
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  if (sorted.length <= 7) {
+    return { labels: sorted.map(([l]) => l), data: sorted.map(([, v]) => v) };
+  }
+  const top = sorted.slice(0, 6);
+  const otherTotal = sorted.slice(6).reduce((sum, [, v]) => sum + v, 0);
+  return {
+    labels: [...top.map(([l]) => l), "Other"],
+    data: [...top.map(([, v]) => v), otherTotal]
+  };
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: Chart.js loaded from CDN
+function initCharts(Chart: any, breakdownCanvas: HTMLCanvasElement, impactCanvas: HTMLCanvasElement, plan: Plan) {
   Chart.defaults.font.family = "'Inter', sans-serif";
   Chart.defaults.font.size = 14;
   Chart.defaults.font.weight = "400";
   Chart.defaults.color = "#71717A";
 
+  const breakdown = buildScopeBreakdown(plan);
+
   new Chart(breakdownCanvas, {
     type: "bar",
     data: {
-      labels: ["Energy", "Transport", "Supply Chain", "Waste", "Buildings", "Other"],
+      labels: breakdown.labels,
       datasets: [
         {
-          data: [30, 22, 18, 15, 10, 5],
-          backgroundColor: [
-            CHART_COLORS.blue,
-            CHART_COLORS.green,
-            CHART_COLORS.purple,
-            CHART_COLORS.blueMid,
-            CHART_COLORS.greenMid,
-            CHART_COLORS.purpleMid
-          ],
+          data: breakdown.data,
+          backgroundColor: CHART_COLORS.slice(0, breakdown.labels.length),
           borderRadius: 4
         }
       ]
@@ -103,7 +128,7 @@ function initCharts(breakdownCanvas: HTMLCanvasElement, impactCanvas: HTMLCanvas
   });
 }
 
-export function Overview(_props: BcorpPageProps) {
+export function Overview({ plan }: BcorpPageProps) {
   const breakdownRef = useRef<HTMLCanvasElement>(null);
   const impactRef = useRef<HTMLCanvasElement>(null);
 
@@ -112,20 +137,23 @@ export function Overview(_props: BcorpPageProps) {
     const impact = impactRef.current;
     if (!breakdown || !impact) return;
 
+    // biome-ignore lint/suspicious/noExplicitAny: Chart.js loaded from CDN
+    const run = (C: any) => document.fonts.ready.then(() => initCharts(C, breakdown, impact, plan));
+
     // Load Chart.js from CDN if not already loaded
     // biome-ignore lint/suspicious/noExplicitAny: Chart.js loaded from CDN
     if ((window as any).Chart) {
-      document.fonts.ready.then(() => initCharts(breakdown, impact));
+      // biome-ignore lint/suspicious/noExplicitAny: Chart.js loaded from CDN
+      run((window as any).Chart);
       return;
     }
 
     const script = document.createElement("script");
     script.src = "https://cdn.jsdelivr.net/npm/chart.js@4";
-    script.onload = () => {
-      document.fonts.ready.then(() => initCharts(breakdown, impact));
-    };
+    // biome-ignore lint/suspicious/noExplicitAny: Chart.js loaded from CDN
+    script.onload = () => run((window as any).Chart);
     document.head.appendChild(script);
-  }, []);
+  }, [plan]);
 
   return (
     <div className="ui-page">

@@ -3,8 +3,8 @@
 import type { FieldGetter, FieldSetter } from "@/components/bcorps/form-types";
 import { ProseEditor } from "@/components/bcorps/prose-editor";
 import { GOVERNANCE_CATEGORIES } from "@/components/bcorps/use-bcorp-form";
-import { Badge } from "@/components/ui/badge";
 import type { PlanAction } from "@/lib/bcorp/types";
+
 
 export function GovernanceSection({
   get,
@@ -39,14 +39,12 @@ export function GovernanceSection({
         <div className="space-y-3 pt-1">
           {orderedCats.map((cat) => (
             <div key={cat} className="space-y-1.5">
-              <span className="text-xs font-medium text-muted-foreground">{cat}</span>
-              <div className="flex flex-wrap gap-1.5">
+              <h4 className="text-sm font-semibold">{cat} Actions</h4>
+              <ul className="bcorp-list">
                 {byCategory[cat].map((a) => (
-                  <Badge key={a.external_action_id} variant="secondary">
-                    {a.tal_action.title}
-                  </Badge>
+                  <li key={a.external_action_id}>{a.tal_action.title}</li>
                 ))}
-              </div>
+              </ul>
             </div>
           ))}
         </div>

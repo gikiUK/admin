@@ -23,6 +23,12 @@ export function EmissionTargetsSection({ get, set, hint }: { get: FieldGetter; s
       <FieldGroup label="Long-term Target" description='e.g. "Net zero by 2050"' {...hint("target_longterm")}>
         <Input value={get("target_longterm")} onChange={(e) => set("target_longterm", e.target.value)} />
       </FieldGroup>
+      <FieldGroup label="Baseline Year" description='e.g. "2023"' {...hint("baseline_year")}>
+        <Input value={get("baseline_year")} onChange={(e) => set("baseline_year", e.target.value)} />
+      </FieldGroup>
+      <FieldGroup label="Baseline Emissions (tCO2e)" description='e.g. "1250"' {...hint("baseline_emissions")}>
+        <Input value={get("baseline_emissions")} onChange={(e) => set("baseline_emissions", e.target.value)} />
+      </FieldGroup>
     </SectionCard>
   );
 }

@@ -29,7 +29,7 @@ h4 {
 h1 {
 	font-size: 30pt;
 	font-weight: 700;
-	color: #000;
+	color: #222;
 	line-height: 1.2;
 	margin-top: 0;
 	margin-bottom: 6mm;
@@ -37,7 +37,7 @@ h1 {
 h2 {
 	font-size: 24pt;
 	font-weight: 700;
-	color: #000;
+	color: #222;
 	line-height: 1.2;
 	margin-top: 9.5mm;
 	margin-bottom: 4mm;
@@ -45,7 +45,7 @@ h2 {
 h3 {
 	font-size: 14pt;
 	font-weight: 600;
-	color: #000;
+	color: #222;
 	line-height: 1.4;
 	margin-top: 7mm;
 	margin-bottom: 2.5mm;
@@ -62,7 +62,7 @@ p {
 	margin-bottom: 3.5mm;
 }
 strong {
-	color: #000;
+	color: #222;
 	font-weight: 700;
 }
 a {
@@ -146,6 +146,10 @@ tr {
 	break-inside: avoid;
 }
 
+.body-table {
+	font-size: var(--font-size-body);
+}
+
 .action-table {
 	table-layout: fixed;
 }
@@ -174,10 +178,10 @@ tr {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.75mm;
-	padding: 0.5mm 1.5mm 0.5mm 1mm;
+	padding: 0.5mm 2mm;
 	border-radius: 2.5mm;
-	font-size: 8pt;
-	font-weight: 600;
+	font-size: 9pt;
+	font-weight: 400;
 	white-space: nowrap;
 	vertical-align: middle;
 	margin: 0.25mm 0.5mm;
@@ -201,6 +205,10 @@ tr {
 	background: #16a34a;
 	color: #fff;
 }
+.sl-other {
+	background: #6b7280;
+	color: #fff;
+}
 
 /* ============================================================
     Category Badges
@@ -209,11 +217,11 @@ tr {
 	display: inline-block;
 	padding: 0.5mm 1.5mm;
 	border-radius: 2.5mm;
-	font-size: 8pt;
+	font-size: 9pt;
 	font-weight: 600;
 	white-space: nowrap;
 	vertical-align: middle;
-	margin: 0.25mm 0.5mm;
+	margin: 0 1.5mm 1.5mm 0;
 }
 
 .cat-mobile {
@@ -314,10 +322,11 @@ li::before {
 .toc-item {
 	padding: 1.25mm 0;
 	border-bottom: 0.25mm solid #e5e7eb;
-	font-size: 11pt;
+	font-size: 12pt;
 }
 .toc-item strong {
-	color: #000;
+	color: #222;
+	font-weight: 600;
 }
 .toc-item.toc-sub {
 	padding-left: 1.5em;
@@ -368,7 +377,7 @@ li::before {
 .title-page-top .brand-name {
 	font-size: 18pt;
 	font-weight: 700;
-	color: #000;
+	color: #222;
 	letter-spacing: -0.02em;
 }
 .title-page-top .brand-name span {
@@ -384,7 +393,7 @@ li::before {
 .title-page-body h1 {
 	font-size: 36pt;
 	font-weight: 700;
-	color: #000;
+	color: #222;
 	line-height: 1.1;
 	margin-bottom: 5mm;
 }
@@ -408,7 +417,7 @@ li::before {
 	line-height: 1.8;
 }
 .title-page-meta strong {
-	color: #000;
+	color: #222;
 }
 .title-page-footer {
 	border-top: 0.25mm solid #e5e7eb;

@@ -23,13 +23,11 @@ export function EngagementSection({
       </p>
       <ProseEditor rows={3} value={get("engagement")} onChange={(v) => set("engagement", v)} />
       {actions.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-1">
+        <ul className="bcorp-list">
           {actions.map((a) => (
-            <Badge key={a.external_action_id} variant="secondary">
-              {a.tal_action.title}
-            </Badge>
+            <li key={a.tal_action.title}>{a.tal_action.title}</li>
           ))}
-        </div>
+        </ul>
       )}
     </section>
   );

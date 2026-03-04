@@ -1,15 +1,6 @@
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
-import { ScopeLabel } from "@/components/printables/scope-labels";
+import { ScopeLabels } from "@/components/printables/scope-labels";
 import type { PlanAction } from "@/lib/bcorp/types";
-
-function getScopeNumbers(action: PlanAction): (1 | 2 | 3)[] {
-  return (action.tal_action.ghg_scope ?? [])
-    .map((s) => {
-      const match = s.match(/^Scope (\d)/);
-      return match ? (Number.parseInt(match[1]) as 1 | 2 | 3) : null;
-    })
-    .filter((n): n is 1 | 2 | 3 => n !== null);
-}
 
 function ghgCategoryClass(category: string): string {
   const lower = category.toLowerCase();
@@ -33,16 +24,13 @@ function ghgDisplayName(category: string): string {
 }
 
 function ActionRow({ action }: { action: PlanAction }) {
-  const scopes = getScopeNumbers(action);
   const ghgCategories = action.tal_action.ghg_category ?? [];
 
   return (
     <tr>
       <td>{action.tal_action.title}</td>
       <td>
-        {scopes.map((s) => (
-          <ScopeLabel key={s} scope={s} />
-        ))}
+        <ScopeLabels ghgScope={action.tal_action.ghg_scope ?? []} />
       </td>
       <td>
         {ghgCategories.map((cat) => (

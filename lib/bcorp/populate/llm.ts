@@ -2,10 +2,10 @@ import type Anthropic from "@anthropic-ai/sdk";
 import type { LlmResult } from "./types";
 
 export const SHARED_OUTPUT_RULES = `Return ONLY a JSON object with two keys:
-- "data": object with HTML string values for fields you are populating (omit unchanged fields)
+- "data": object with plain text string values for fields you are populating (omit unchanged fields). Use double newlines to separate paragraphs. No HTML tags.
 - "reasoning": object with a 1-sentence explanation for EVERY field listed
 
-No markdown, no explanation outside the JSON. HTML values must use only <p> and <br> tags — no other HTML.`;
+No markdown formatting, no explanation outside the JSON.`;
 
 export function extractText(msg: Anthropic.Message): string {
   return msg.content[0].type === "text" ? msg.content[0].text : "";

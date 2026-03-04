@@ -30,9 +30,11 @@ export type BcorpData = {
   why_business?: string;
   // Implementation Plan
   actions_overview?: string;
-  // Engagement & Governance (omit from PDF if empty)
+  // Engagement, Governance & Disclosure (omit from PDF if empty)
   engagement?: string;
   government?: string;
+  disclosure_intro?: string;
+  disclosure_closing?: string;
   // Progress Tracking
   actions_in_progress?: string;
   actions_added?: string;
@@ -40,6 +42,8 @@ export type BcorpData = {
   target_scope12_interim?: string;
   target_scope3_interim?: string;
   target_longterm?: string;
+  baseline_year?: string;
+  baseline_emissions?: string;
   // Certifications & Initiatives
   cert_bcorp?: string;
   cert_iso14001?: string;

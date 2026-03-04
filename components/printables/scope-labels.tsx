@@ -25,6 +25,33 @@ function Scope3Icon() {
   );
 }
 
+export function getScopeNumbers(ghgScope: string[]): (1 | 2 | 3)[] {
+  return ghgScope
+    .map((s) => {
+      const match = s.match(/^Scope (\d)/);
+      return match ? (Number.parseInt(match[1]) as 1 | 2 | 3) : null;
+    })
+    .filter((n): n is 1 | 2 | 3 => n !== null);
+}
+
+export function ScopeLabels({ ghgScope }: { ghgScope: string[] }) {
+  return (
+    <>
+      {ghgScope.map((s) => {
+        const match = s.match(/^Scope (\d)/);
+        if (match) {
+          return <ScopeLabel key={s} scope={Number.parseInt(match[1]) as 1 | 2 | 3} />;
+        }
+        return (
+          <span key={s} className="scope-label sl-other">
+            {s}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 export function ScopeLabel({ scope }: { scope: 1 | 2 | 3 }) {
   const cls = `scope-label sl-${scope}`;
   const icon = scope === 1 ? <Scope1Icon /> : scope === 2 ? <Scope2Icon /> : <Scope3Icon />;
