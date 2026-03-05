@@ -15,6 +15,7 @@ export type PlanAction = {
     ghg_scope?: string[];
     ghg_category?: string[];
     themes?: string[];
+    impact_opportunity?: string;
     [key: string]: unknown;
   };
 };
