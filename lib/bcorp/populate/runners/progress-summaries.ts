@@ -9,11 +9,12 @@ export async function runProgressSummaries(
   orgName: string,
   plan: Plan,
   existingInProgress: string,
-  existingAdded: string
+  existingAdded: string,
+  skipFields: string[] = []
 ): Promise<LlmResult> {
   const fieldsNeeded: string[] = [];
-  if (!existingInProgress) fieldsNeeded.push("actions_in_progress");
-  if (!existingAdded) fieldsNeeded.push("actions_added");
+  if (!existingInProgress && !skipFields.includes("actions_in_progress")) fieldsNeeded.push("actions_in_progress");
+  if (!existingAdded && !skipFields.includes("actions_added")) fieldsNeeded.push("actions_added");
 
   if (fieldsNeeded.length === 0) {
     return {

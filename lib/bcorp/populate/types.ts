@@ -5,6 +5,7 @@ export type PopulateRequest = {
   orgName: string;
   plan: Plan;
   existingData: Record<string, string>;
+  fieldsToPopulate?: string[];
 };
 
 export type LlmResult = {

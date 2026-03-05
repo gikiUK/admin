@@ -109,16 +109,10 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
     setPopulatingField(key);
     setPopulateState("populating", "");
     try {
-      const fakeExisting = { ...data };
-      for (const f of AI_FIELDS) {
-        if (f !== (key as string) && !fakeExisting[f as keyof BcorpData]) {
-          (fakeExisting as Record<string, string>)[f] = "skip";
-        }
-      }
       const res = await fetch("/api/bcorp/populate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orgId, orgName, plan, existingData: fakeExisting })
+        body: JSON.stringify({ orgId, orgName, plan, existingData: data, fieldsToPopulate: [key] })
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -139,7 +133,8 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
       else toast.info("AI populate", { description: "No content generated" });
     } catch (err) {
       setPopulatingField(null);
-      setPopulateState("error", err instanceof Error ? err.message : "Populate failed");
+      setPopulateState("idle", "");
+      toast.error(err instanceof Error ? err.message : "Populate failed");
     }
   }
 
