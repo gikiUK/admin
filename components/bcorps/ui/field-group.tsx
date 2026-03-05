@@ -80,7 +80,7 @@ export function FieldGroup({
           className={`rounded-[9px] p-px transition-all duration-500 ${
             isPopulating
               ? "shadow-[0_0_8px_2px_rgba(139,92,246,0.4)]"
-              : "hover:shadow-[0_0_4px_1px_rgba(139,92,246,0.2)]"
+              : "hover:shadow-[0_0_4px_1px_rgba(139,92,246,0.25)] focus-within:shadow-[0_0_0_2px_rgba(139,92,246,0.7)] focus-within:hover:shadow-[0_0_0_2px_rgba(139,92,246,0.7)]"
           }`}
           style={{
             background: isPopulating
@@ -99,7 +99,7 @@ export function FieldGroup({
               </div>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-[8px] bg-background [&_textarea]:rounded-[8px] [&_textarea]:border-0">
+            <div className="overflow-hidden rounded-[8px] bg-background [&_textarea]:rounded-[8px] [&_textarea]:border-0 [&_textarea]:focus:ring-0">
               {children}
             </div>
           )}

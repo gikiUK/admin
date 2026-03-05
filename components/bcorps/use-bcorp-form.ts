@@ -39,12 +39,9 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
 
   function set(key: keyof BcorpData, value: string) {
     setDirty(true);
-    setData((prev) => {
-      const next = { ...prev, [key]: value };
-      const allFilled = AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== "");
-      setAllAiFilled(allFilled);
-      return next;
-    });
+    setData((prev) => ({ ...prev, [key]: value }));
+    const next = { ...data, [key]: value };
+    setAllAiFilled(AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== ""));
     setReasoning((prev) => {
       if (!prev[key]) return prev;
       const next = { ...prev };
@@ -59,7 +56,13 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
       isAI && ((populateState === "populating" && populatingField === null) || populatingField === key);
     const r = reasoning[key as string];
     return {
-      ...(isAI ? { isAI: true, aiHasData: get(key) !== "", onAiGenerate: () => handlePopulateField(key) } : {}),
+      ...(isAI
+        ? {
+            isAI: true,
+            aiHasData: get(key) !== "" || populateState === "populating",
+            onAiGenerate: () => handlePopulateField(key)
+          }
+        : {}),
       ...(isPopulating ? { isPopulating: true } : {}),
       ...(r ? { hint: r, filled: get(key) !== "" } : {})
     };
@@ -92,12 +95,9 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
         throw new Error(body.error ?? `Request failed (${res.status})`);
       }
       const { data: llmData, reasoning: llmReasoning } = await res.json();
-      setData((prev) => {
-        const next = { ...prev, ...llmData };
-        const allFilled = AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== "");
-        setAllAiFilled(allFilled);
-        return next;
-      });
+      const next = { ...data, ...llmData };
+      setData(next);
+      setAllAiFilled(AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== ""));
       setReasoning((prev) => ({ ...(llmReasoning ?? {}), ...prev }));
       setDirty(true);
       setPopulateState("idle", "");
@@ -131,13 +131,11 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
       }
       const { data: llmData, reasoning: llmReasoning } = await res.json();
       const fieldValue = llmData[key as string];
-      setData((prev) => {
-        if (!fieldValue) return prev;
-        const next = { ...prev, [key]: fieldValue };
-        const allFilled = AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== "");
-        setAllAiFilled(allFilled);
-        return next;
-      });
+      if (fieldValue) {
+        const next = { ...data, [key]: fieldValue };
+        setData(next);
+        setAllAiFilled(AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== ""));
+      }
       if (llmReasoning?.[key as string]) {
         setReasoning((prev) => ({ ...prev, [key as string]: llmReasoning[key as string] }));
       }
