@@ -49,7 +49,7 @@ describe("findSourcelessFacts", () => {
       facts: { heat_pump: { type: "boolean_state", core: true, enabled: true } },
       rules: [{ sets: "heat_pump", value: "not_applicable", source: "general", when: {}, enabled: true }]
     });
-    // not_applicable is not a real positive source — consistent with sat-encoding.ts
+    // not_applicable is not a real positive source - consistent with sat-encoding.ts
     expect(findSourcelessFacts(["heat_pump"], data)).toEqual(["heat_pump"]);
   });
 
@@ -158,7 +158,7 @@ describe("checkUndefinedRefs", () => {
 
 // ── checkUndefinedRefs: any + any_of combination ──────────
 
-describe("checkUndefinedRefs — any containing any_of", () => {
+describe("checkUndefinedRefs - any containing any_of", () => {
   it("flags undefined fact inside any_of nested within any", () => {
     const data = makeData({
       facts: { heat_pump: { type: "boolean_state", core: true, enabled: true } },
@@ -180,7 +180,7 @@ describe("checkUndefinedRefs — any containing any_of", () => {
 
 // ── SAT model: any_of variable registration ───────────────
 
-describe("buildSatModel — any_of vars registration", () => {
+describe("buildSatModel - any_of vars registration", () => {
   it("registers any_of fact variables in vars Set", () => {
     const data = makeData({
       facts: {

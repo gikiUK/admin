@@ -229,7 +229,7 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
 
     case "DRAFT_DELETED": {
       // If the cursor already points at a discard entry (e.g. we redo'd to it),
-      // the auto-drop is just a side effect of history traversal — don't duplicate.
+      // the auto-drop is just a side effect of history traversal - don't duplicate.
       const currentEntry = state.history.entries[state.history.cursor];
       const alreadyAtDiscard = currentEntry?.isDiscard === true;
       const hist = alreadyAtDiscard
@@ -297,7 +297,7 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
       return { ...state, saveStatus: action.status };
 
     case "AUTO_SAVED": {
-      // Keep local data — server response is stale if edits happened during save.
+      // Keep local data - server response is stale if edits happened during save.
       // Only adopt server metadata (id, status) and mark the saved version.
       const localData = state.dataset?.data ?? action.payload.data;
       const merged: Dataset = { ...action.payload, data: localData };
@@ -379,7 +379,7 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
       if (!state.dataset || !state.live) return state;
       const mutation = buildRevertMutation(target(action), state.dataset.data, state.live.data);
       if (!mutation) return state;
-      // Treat the revert as a normal mutation — append to history, truncate future
+      // Treat the revert as a normal mutation - append to history, truncate future
       const entry = buildChangeEntry(mutation, state.dataset.data);
       entry.isRevert = true;
       const data = applyAction(state.dataset.data, mutation);

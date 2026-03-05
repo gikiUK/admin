@@ -34,7 +34,7 @@ export function checkContradictoryRules(data: DatasetData, conditionModel: SatMo
         // Same value → not a contradiction
         if (a.rule.value === b.rule.value) continue;
 
-        // not_applicable is a suppression, not an assertion — it intentionally
+        // not_applicable is a suppression, not an assertion - it intentionally
         // co-exists with true/false rules (e.g. hotspot overrides). Not a contradiction.
         if (a.rule.value === "not_applicable" || b.rule.value === "not_applicable") continue;
 

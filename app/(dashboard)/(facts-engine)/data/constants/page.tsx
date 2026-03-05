@@ -43,7 +43,7 @@ function EditConstantDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {editState.isNew ? "Add value" : "Edit value"} — {editState.group}
+              {editState.isNew ? "Add value" : "Edit value"} - {editState.group}
             </DialogTitle>
           </DialogHeader>
 

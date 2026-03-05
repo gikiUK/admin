@@ -5,26 +5,26 @@
 |------|---------|
 | `lib/blob/dataset-context.tsx` | React Context + Provider, loads live/draft on mount |
 | `lib/blob/dataset-reducer.ts` | Reducer with all state transitions |
-| `lib/blob/use-dataset.ts` | Public hook — smart dispatch, publish, deleteDraft |
+| `lib/blob/use-dataset.ts` | Public hook - smart dispatch, publish, deleteDraft |
 | `lib/blob/use-auto-save.ts` | Debounced auto-save (80ms batch window) |
 | `lib/blob/api-client.ts` | API wrapper (fetch → Rails via Next.js rewrites) |
-| `lib/blob/dataset-mutations.ts` | Pure `applyAction()` — immutable data transforms |
+| `lib/blob/dataset-mutations.ts` | Pure `applyAction()` - immutable data transforms |
 | `lib/blob/change-log.ts` | `buildChangeEntry()`, `replayChanges()` for undo |
 | `lib/blob/dataset-diff.ts` | `computeDatasetDiff()` + word-level LCS for review UI |
 
 ## State Shape (`DatasetState`)
 ```
-live/draft/dataset  — Dataset objects (draft is active when editing)
-original            — snapshot of live.data when editing started (for undo replay)
-isEditing           — true when draft exists
-isDirty             — true when dataset differs from original
-changeLog           — ChangeEntry[] for undo/history
-mutationVersion     — increments on every data change
-savedVersion        — set to mutationVersion after successful auto-save
-saveStatus          — "idle" | "saving" | "saved" | "error"
-lastSavedAt         — timestamp (ms)
-pendingMutations    — queued while draft is being created
-draftCreating       — true during POST /draft
+live/draft/dataset  - Dataset objects (draft is active when editing)
+original            - snapshot of live.data when editing started (for undo replay)
+isEditing           - true when draft exists
+isDirty             - true when dataset differs from original
+changeLog           - ChangeEntry[] for undo/history
+mutationVersion     - increments on every data change
+savedVersion        - set to mutationVersion after successful auto-save
+saveStatus          - "idle" | "saving" | "saved" | "error"
+lastSavedAt         - timestamp (ms)
+pendingMutations    - queued while draft is being created
+draftCreating       - true during POST /draft
 ```
 
 ## Lifecycles

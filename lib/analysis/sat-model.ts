@@ -60,7 +60,7 @@ function forbidSourcelessFacts(data: DatasetData, factsWithSource: Set<string>, 
 }
 
 /**
- * Build a model encoding only fact type constraints and sourceless forbids — no rule implications.
+ * Build a model encoding only fact type constraints and sourceless forbids - no rule implications.
  * Used by the contradictory-rules check to test whether two conditions can overlap without the
  * rule effects poisoning satisfiability (contradictory rules make the full model unsatisfiable,
  * which would prevent the check from ever firing).

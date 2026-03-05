@@ -8,7 +8,7 @@ function ActionRow({ action }: { action: PlanAction }) {
   return (
     <tr className="border-t">
       <td className="py-2 pr-4 text-sm align-top">{action.tal_action.title}</td>
-      <td className="py-2 text-sm align-top text-muted-foreground">{ghgCategories.join(", ") || "—"}</td>
+      <td className="py-2 text-sm align-top text-muted-foreground">{ghgCategories.join(", ") || "-"}</td>
     </tr>
   );
 }
@@ -51,8 +51,8 @@ export function PlanActionsTables() {
 
   return (
     <div className="rounded-md border p-4 space-y-6">
-      <ActionsTable actions={scope12} title="Scope 1 & 2 — Direct Emissions & Electricity" />
-      <ActionsTable actions={scope3} title="Scope 3 — Value Chain" />
+      <ActionsTable actions={scope12} title="Scope 1 & 2 - Direct Emissions & Electricity" />
+      <ActionsTable actions={scope3} title="Scope 3 - Value Chain" />
     </div>
   );
 }

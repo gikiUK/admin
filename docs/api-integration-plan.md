@@ -1,4 +1,4 @@
-# API Integration Plan — Facts Datasets
+# API Integration Plan - Facts Datasets
 
 ## Context
 
@@ -73,15 +73,15 @@ The FE already has the right architecture: load blob → edit locally → save f
 ### What changes, what stays
 
 **Changes:**
-1. `lib/blob/api-client.ts` — real `fetch()` calls instead of server action wrappers
-2. `lib/blob/actions.ts` — remove or gut (no longer needed as server action layer)
-3. `lib/blob/types.ts` — adapt to match API blob structure (`enabled` instead of `discarded`, add `constants`)
-4. `lib/blob/dataset-context.tsx` — draft/live awareness (load draft if exists, else live)
-5. `lib/blob/dataset-mutations.ts` — use `enabled` flag instead of `discarded`
-6. `lib/blob/seed.ts` + `lib/blob/mock-store.ts` — delete (no longer needed)
-7. `lib/data/constants.ts` — delete or repurpose (constants come from blob)
-8. Constants page — rewrite to read/edit constants from blob, not separate file
-9. Components referencing `discarded` — update to use `enabled`
+1. `lib/blob/api-client.ts` - real `fetch()` calls instead of server action wrappers
+2. `lib/blob/actions.ts` - remove or gut (no longer needed as server action layer)
+3. `lib/blob/types.ts` - adapt to match API blob structure (`enabled` instead of `discarded`, add `constants`)
+4. `lib/blob/dataset-context.tsx` - draft/live awareness (load draft if exists, else live)
+5. `lib/blob/dataset-mutations.ts` - use `enabled` flag instead of `discarded`
+6. `lib/blob/seed.ts` + `lib/blob/mock-store.ts` - delete (no longer needed)
+7. `lib/data/constants.ts` - delete or repurpose (constants come from blob)
+8. Constants page - rewrite to read/edit constants from blob, not separate file
+9. Components referencing `discarded` - update to use `enabled`
 10. New: draft/live workflow UI (create draft, publish, delete draft)
 11. New: Auth layer (login, session management)
 
@@ -139,9 +139,9 @@ export type DatasetMeta = {
 };
 ```
 
-(Drop `created_at` / `updated_at` — API serializer doesn't send them. Add back if serializer is updated.)
+(Drop `created_at` / `updated_at` - API serializer doesn't send them. Add back if serializer is updated.)
 
-**Condition types — add numeric array support:**
+**Condition types - add numeric array support:**
 ```ts
 export type SimpleCondition = Record<string, string | boolean | number | number[] | string[]>;
 ```
@@ -205,7 +205,7 @@ case "DISCARD_FACT": {
 export type DatasetState = {
   live: Dataset | null;        // the live dataset (read-only baseline)
   draft: Dataset | null;       // the working draft (editable)
-  dataset: Dataset | null;     // currently active — either draft or live
+  dataset: Dataset | null;     // currently active - either draft or live
   original: DatasetData | null;
   changeLog: ChangeEntry[];
   isDirty: boolean;
@@ -255,21 +255,21 @@ return {
 Remove:
 - `lib/blob/mock-store.ts`
 - `lib/blob/seed.ts`
-- `lib/blob/actions.ts` (the server actions file — not to be confused with action_conditions)
+- `lib/blob/actions.ts` (the server actions file - not to be confused with action_conditions)
 - `lib/data/constants.ts` (constants now come from blob)
 - `lib/data/facts.ts`, `lib/data/questions.ts`, `lib/data/rules.ts` (if they exist and are unused)
-- `lib/data/fact-categories.ts` (category assignment — may keep if FE still computes categories)
+- `lib/data/fact-categories.ts` (category assignment - may keep if FE still computes categories)
 
 Audit: check what `lib/data/` files are still imported anywhere. Some may be used by derived.ts or enrichment logic.
 
 ### Step 7: Update all UI references from `discarded` to `enabled`
 
 **Components to update** (grep for `discarded`):
-- `components/facts/fact-card.tsx` — `fact.discarded` → `!fact.enabled`
-- `components/questions/question-card.tsx` — `q.discarded` → `!q.enabled`
-- `components/dataset/review-dialog.tsx` — diff kind `discarded` → `disabled` (semantic only)
-- `lib/blob/dataset-diff.ts` — diff detection logic
-- `lib/blob/change-log.ts` — description generation
+- `components/facts/fact-card.tsx` - `fact.discarded` → `!fact.enabled`
+- `components/questions/question-card.tsx` - `q.discarded` → `!q.enabled`
+- `components/dataset/review-dialog.tsx` - diff kind `discarded` → `disabled` (semantic only)
+- `lib/blob/dataset-diff.ts` - diff detection logic
+- `lib/blob/change-log.ts` - description generation
 - Any editor components that set `discarded`
 
 ### Step 8: Update constants page
@@ -401,25 +401,25 @@ class ApiError extends Error {
 
 ## Suggested implementation order
 
-1. **Types first** (Step 1) — align types, fix all compile errors from `discarded` → `enabled`
-2. **API client** (Step 2) — build the real fetch layer
-3. **Delete mock layer** (Step 6) — remove seed, mock-store, server actions
-4. **Update mutations + reducer** (Steps 3-4) — adapt state management
-5. **Update hook** (Step 5) — expose new operations
-6. **UI field updates** (Step 7) — grep and fix all `discarded` references
-7. **Constants migration** (Step 8) — move constants into blob flow
-8. **Draft/live UI** (Step 9) — workflow buttons and status indicators
-9. **Auth** (Step 10) — login page, proxy, session management
-10. **Error handling** (Step 11) — proper error states and toasts
-11. **Tests** (Step 12) — clean up and add new
+1. **Types first** (Step 1) - align types, fix all compile errors from `discarded` → `enabled`
+2. **API client** (Step 2) - build the real fetch layer
+3. **Delete mock layer** (Step 6) - remove seed, mock-store, server actions
+4. **Update mutations + reducer** (Steps 3-4) - adapt state management
+5. **Update hook** (Step 5) - expose new operations
+6. **UI field updates** (Step 7) - grep and fix all `discarded` references
+7. **Constants migration** (Step 8) - move constants into blob flow
+8. **Draft/live UI** (Step 9) - workflow buttons and status indicators
+9. **Auth** (Step 10) - login page, proxy, session management
+10. **Error handling** (Step 11) - proper error states and toasts
+11. **Tests** (Step 12) - clean up and add new
 
 Steps 1-6 can be done in a single pass (they're tightly coupled). Steps 7-8 are medium effort. Steps 9-11 are the meatiest new feature work.
 
 ## Open questions
 
-1. **Auth approach** — Proxy (Option A) vs direct CORS (Option B)? Proxy is simpler to start but adds a dependency.
-2. **Category field** — The FE currently computes `category` for facts via `assignCategory()`. The API seed adds it to some facts but not consistently. Should categories live in the blob or stay FE-computed?
-3. **Timestamps** — The API serializer doesn't return `created_at`/`updated_at`. Should it? The FE type currently expects them.
-4. **`dismiss_options`** — The API blob includes `dismiss_options` on action conditions. The FE type doesn't have this field. Add it now or when we build the actions editor?
-5. **API port** — Rails defaults to 3000, admin is on 3020. Confirm this setup.
-6. **Read-only live view** — Should the admin be able to browse live data without creating a draft? Current mock always loads as live/editable. The real workflow has distinct live (read-only) and draft (editable) states.
+1. **Auth approach** - Proxy (Option A) vs direct CORS (Option B)? Proxy is simpler to start but adds a dependency.
+2. **Category field** - The FE currently computes `category` for facts via `assignCategory()`. The API seed adds it to some facts but not consistently. Should categories live in the blob or stay FE-computed?
+3. **Timestamps** - The API serializer doesn't return `created_at`/`updated_at`. Should it? The FE type currently expects them.
+4. **`dismiss_options`** - The API blob includes `dismiss_options` on action conditions. The FE type doesn't have this field. Add it now or when we build the actions editor?
+5. **API port** - Rails defaults to 3000, admin is on 3020. Confirm this setup.
+6. **Read-only live view** - Should the admin be able to browse live data without creating a draft? Current mock always loads as live/editable. The real workflow has distinct live (read-only) and draft (editable) states.

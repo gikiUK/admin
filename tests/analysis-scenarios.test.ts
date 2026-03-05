@@ -17,7 +17,7 @@ function issues(data: DatasetData, checkId: string) {
 // ── Scenario helpers ──────────────────────────────────────
 
 /**
- * SCENARIO: Contradictory rules — overlapping conditions, different values
+ * SCENARIO: Contradictory rules - overlapping conditions, different values
  *
  *   fact: heating_type (enum: gas | heat_pump)
  *   rule A: if has_gas_boiler=true  → heating_type = "gas"
@@ -50,12 +50,12 @@ const contradictoryRulesData: DatasetData = {
 };
 
 /**
- * SCENARIO: Non-contradictory rules — hotspot suppression overlapping with general rule
+ * SCENARIO: Non-contradictory rules - hotspot suppression overlapping with general rule
  *
  *   General rule: if has_significant_investments=true → cat_15_relevant = true
  *   Hotspot rule: if industries includes "Advertising" → cat_15_relevant = not_applicable
  *
- *   A company in Advertising can also have significant investments — both conditions overlap.
+ *   A company in Advertising can also have significant investments - both conditions overlap.
  *   But this is intentional: not_applicable is a suppression, not an assertion. The hotspot
  *   overrides the general rule for that industry. This is NOT a contradiction.
  *   Expected: 0 contradictory-rules errors.
@@ -95,7 +95,7 @@ const hotspotSuppressionData: DatasetData = {
 };
 
 /**
- * SCENARIO: Non-contradictory rules — mutually exclusive conditions
+ * SCENARIO: Non-contradictory rules - mutually exclusive conditions
  *
  *   Same facts and rules as the contradictory scenario, but each rule requires the other
  *   condition to be false. A user cannot satisfy both simultaneously.
@@ -122,7 +122,7 @@ const exclusiveRulesData: DatasetData = {
 };
 
 /**
- * SCENARIO: Unreachable action — include_when requires a fact with no source
+ * SCENARIO: Unreachable action - include_when requires a fact with no source
  *
  *   fact: uses_solar (boolean, no question, no rule that sets it true)
  *   action_1: include_when = { uses_solar: true }
@@ -147,7 +147,7 @@ const unreachableActionData: DatasetData = {
 };
 
 /**
- * SCENARIO: Reachable action — same setup, but with a question that sets the fact
+ * SCENARIO: Reachable action - same setup, but with a question that sets the fact
  *
  *   Expected: 0 unreachable-actions warnings.
  */
@@ -157,18 +157,18 @@ const reachableActionData: DatasetData = {
 };
 
 /**
- * SCENARIO: Unreachable action — logically impossible condition (requires A=true AND A=false)
+ * SCENARIO: Unreachable action - logically impossible condition (requires A=true AND A=false)
  *
  *   fact: has_office (boolean, set by question)
  *   action_2: include_when = { has_office: true, has_office: false }
  *
- *   No user state can satisfy this — the last key wins in JSON, so in practice this
+ *   No user state can satisfy this - the last key wins in JSON, so in practice this
  *   degenerates to a single condition, but the intent is to document an impossible AND.
  *   This tests that the SAT solver correctly reports unsatisfiability.
  *
  *   NOTE: Because JS objects deduplicate keys, has_office: false wins.
  *   The action requires has_office=false, which IS satisfiable (user doesn't have an office).
- *   So this is actually reachable — the scenario documents the JS key-dedup gotcha.
+ *   So this is actually reachable - the scenario documents the JS key-dedup gotcha.
  *   Expected: 0 issues (the condition collapses to has_office: false).
  */
 const impossibleConditionData: DatasetData = {
@@ -215,7 +215,7 @@ const deadFactAnyOfData: DatasetData = {
 };
 
 /**
- * SCENARIO: Dead fact — defined but never referenced anywhere
+ * SCENARIO: Dead fact - defined but never referenced anywhere
  *
  *   fact: legacy_metric (boolean, enabled, no questions/rules/action_conditions reference it)
  *   Expected: 1 dead-facts warning on legacy_metric.
@@ -234,7 +234,7 @@ const deadFactData: DatasetData = {
 };
 
 /**
- * SCENARIO: Undefined reference — rule's when condition references a non-existent fact
+ * SCENARIO: Undefined reference - rule's when condition references a non-existent fact
  *
  *   rule: sets active_fact=true when { typo_fact: true }
  *   typo_fact doesn't exist.
@@ -251,7 +251,7 @@ const undefinedRefData: DatasetData = {
 };
 
 /**
- * SCENARIO: Include/exclude overlap — same condition in both include_when and exclude_when
+ * SCENARIO: Include/exclude overlap - same condition in both include_when and exclude_when
  *
  *   fact: has_fleet (boolean, set by question)
  *   action_fleet: include_when = { has_fleet: true }, exclude_when = { has_fleet: true }
@@ -276,9 +276,9 @@ const includeExcludeOverlapData: DatasetData = {
 };
 
 /**
- * SCENARIO: Unreachable question — show_when requires a fact with no source
+ * SCENARIO: Unreachable question - show_when requires a fact with no source
  *
- *   fact: gating_fact  (boolean, no question, no rule that sets it true — always false)
+ *   fact: gating_fact  (boolean, no question, no rule that sets it true - always false)
  *   fact: answer_fact  (boolean, set by the question below)
  *   question: show_when = { gating_fact: true }
  *
@@ -306,9 +306,9 @@ const unreachableQuestionShowWhenData: DatasetData = {
 };
 
 /**
- * SCENARIO: Unreachable question — hide_when is always true (question is always hidden)
+ * SCENARIO: Unreachable question - hide_when is always true (question is always hidden)
  *
- *   fact: ghost_fact (boolean, no source — fact:ghost_fact:true is forbidden by SAT model)
+ *   fact: ghost_fact (boolean, no source - fact:ghost_fact:true is forbidden by SAT model)
  *   fact: answer_fact (boolean, set by the question)
  *   question: hide_when = { ghost_fact: false }
  *

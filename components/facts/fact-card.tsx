@@ -30,7 +30,7 @@ export function FactCard({ fact }: FactCardProps) {
 
   return (
     // biome-ignore lint/a11y/useKeyWithClickEvents: card is supplemental click target, inner links are keyboard-accessible
-    // biome-ignore lint/a11y/noStaticElementInteractions: intentional — card wraps interactive children
+    // biome-ignore lint/a11y/noStaticElementInteractions: intentional - card wraps interactive children
     <div onClick={handleClick} className="cursor-pointer">
       <Card className={`gap-0 py-0 transition-colors hover:border-primary/50${!fact.enabled ? " opacity-50" : ""}`}>
         <CardHeader className="gap-0 px-4 py-3">

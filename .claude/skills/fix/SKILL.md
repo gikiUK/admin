@@ -1,6 +1,6 @@
 ---
 name: fix
-description: Fix a GitHub issue end-to-end — fetches issue, creates worktree, plans and implements fix, runs validation, opens PR, cleans up.
+description: Fix a GitHub issue end-to-end - fetches issue, creates worktree, plans and implements fix, runs validation, opens PR, cleans up.
 argument-hint: [issue-number-or-url]
 disable-model-invocation: true
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
@@ -76,7 +76,7 @@ After creating the worktree, symlink `node_modules` from the main repo so that J
 ln -s /Users/iHiD/Code/giki/admin/node_modules node_modules
 ```
 
-**CRITICAL:** You MUST `cd` into the worktree immediately after creating it. All subsequent work — file reads, edits, bash commands, tests — MUST happen from inside the worktree directory using `cd worktrees/fix-<issue-number> && <command>` on every Bash call. Do NOT use absolute paths to the worktree from the main repo. The main repo stays untouched on its current branch.
+**CRITICAL:** You MUST `cd` into the worktree immediately after creating it. All subsequent work - file reads, edits, bash commands, tests - MUST happen from inside the worktree directory using `cd worktrees/fix-<issue-number> && <command>` on every Bash call. Do NOT use absolute paths to the worktree from the main repo. The main repo stays untouched on its current branch.
 
 ### Step 4: Implement the fix
 
@@ -97,7 +97,7 @@ npx tsc --noEmit
 pnpm run test
 ```
 
-Lint-staged and husky will run automatically when you commit — you do not need to run them manually.
+Lint-staged and husky will run automatically when you commit - you do not need to run them manually.
 
 ### Step 6: Commit the changes
 

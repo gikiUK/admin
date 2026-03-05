@@ -44,7 +44,7 @@ export function ConditionDisplay({ condition, highlightFacts }: Props) {
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-xs">
                 <p className="text-xs">
-                  {isHighlighted && <span className="font-medium">No source — </span>}
+                  {isHighlighted && <span className="font-medium">No source - </span>}
                   {labels.join(", ")}
                 </p>
               </TooltipContent>

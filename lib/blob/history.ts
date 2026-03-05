@@ -23,7 +23,7 @@ export function saveHistory(history: HistoryState): void {
     const data: PersistedHistory = { entries: history.entries, cursor: history.cursor, base: history.base };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch {
-    // Quota exceeded or unavailable — silently ignore
+    // Quota exceeded or unavailable - silently ignore
   }
 }
 

@@ -109,7 +109,7 @@ export function buildChangeEntry(action: MutationAction, dataBefore: DatasetData
   };
 }
 
-/** For ADD actions, the entityRef index is -1 at creation time — resolve to actual index after apply. */
+/** For ADD actions, the entityRef index is -1 at creation time - resolve to actual index after apply. */
 function resolveAfterRef(
   action: MutationAction,
   ref: EntityRef | undefined,

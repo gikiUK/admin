@@ -21,7 +21,7 @@ export function checkUnreachableQuestions(data: DatasetData, model: SatModel): C
           const sourceless = findSourcelessFacts(condFacts, data);
           const suggestion =
             sourceless.length > 0
-              ? `The show_when depends on ${sourceless.map((f) => `"${f}"`).join(", ")} which ${sourceless.length === 1 ? "has" : "have"} no source — no enabled question or rule sets ${sourceless.length === 1 ? "it" : "them"}. Enable the relevant question or update the condition.`
+              ? `The show_when depends on ${sourceless.map((f) => `"${f}"`).join(", ")} which ${sourceless.length === 1 ? "has" : "have"} no source - no enabled question or rule sets ${sourceless.length === 1 ? "it" : "them"}. Enable the relevant question or update the condition.`
               : `The combination of conditions in show_when is impossible given the current rules and constraints. Review the condition or disable this question.`;
 
           issues.push({
@@ -47,7 +47,7 @@ export function checkUnreachableQuestions(data: DatasetData, model: SatModel): C
 
           issues.push({
             severity: "warning",
-            message: `hide_when condition is always true — question is always hidden`,
+            message: `hide_when condition is always true - question is always hidden`,
             suggestion: `The hide_when condition is satisfied for every possible state. Either update the condition or disable this question.`,
             refs: [{ type: "question", id: String(i), label: q.label }],
             conditions: [{ tag: "hide_when", condition: q.hide_when, sourcelessFacts: sourceless }]

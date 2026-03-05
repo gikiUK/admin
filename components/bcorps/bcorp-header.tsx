@@ -159,7 +159,7 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
                 {pdfState === "generating" ? "Generating..." : "PDF Report"}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>{pdfState === "error" ? "Failed — try again" : "Generate PDF report"}</TooltipContent>
+            <TooltipContent>{pdfState === "error" ? "Failed - try again" : "Generate PDF report"}</TooltipContent>
           </Tooltip>
 
           <Tooltip>
@@ -199,7 +199,7 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              {saveState === "error" ? "Save failed — try again" : isDirty ? "Unsaved changes" : "Save"}
+              {saveState === "error" ? "Save failed - try again" : isDirty ? "Unsaved changes" : "Save"}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
