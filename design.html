@@ -1,0 +1,2575 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Giki Admin</title>
+    <meta name="description" content="Giki administration dashboard" />
+    <style>
+      @font-face {
+        font-family: "__nextjs-Geist";
+        font-style: normal;
+        font-weight: 400 600;
+        font-display: swap;
+        src: url(/__nextjs_font/geist-latin-ext.woff2) format("woff2");
+        unicode-range:
+          U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+          U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+          U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+      @font-face {
+        font-family: "__nextjs-Geist Mono";
+        font-style: normal;
+        font-weight: 400 600;
+        font-display: swap;
+        src: url(/__nextjs_font/geist-mono-latin-ext.woff2) format("woff2");
+        unicode-range:
+          U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+          U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+          U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+      @font-face {
+        font-family: "__nextjs-Geist";
+        font-style: normal;
+        font-weight: 400 600;
+        font-display: swap;
+        src: url(/__nextjs_font/geist-latin.woff2) format("woff2");
+        unicode-range:
+          U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+          U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+          U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: "__nextjs-Geist Mono";
+        font-style: normal;
+        font-weight: 400 600;
+        font-display: swap;
+        src: url(/__nextjs_font/geist-mono-latin.woff2) format("woff2");
+        unicode-range:
+          U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+          U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+          U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+    </style>
+    <style type="text/css">
+      [data-sonner-toaster][dir="ltr"],
+      html[dir="ltr"] {
+        --toast-icon-margin-start: -3px;
+        --toast-icon-margin-end: 4px;
+        --toast-svg-margin-start: -1px;
+        --toast-svg-margin-end: 0px;
+        --toast-button-margin-start: auto;
+        --toast-button-margin-end: 0;
+        --toast-close-button-start: 0;
+        --toast-close-button-end: unset;
+        --toast-close-button-transform: translate(-35%, -35%);
+      }
+      [data-sonner-toaster][dir="rtl"],
+      html[dir="rtl"] {
+        --toast-icon-margin-start: 4px;
+        --toast-icon-margin-end: -3px;
+        --toast-svg-margin-start: 0px;
+        --toast-svg-margin-end: -1px;
+        --toast-button-margin-start: 0;
+        --toast-button-margin-end: auto;
+        --toast-close-button-start: unset;
+        --toast-close-button-end: 0;
+        --toast-close-button-transform: translate(35%, -35%);
+      }
+      [data-sonner-toaster] {
+        position: fixed;
+        width: var(--width);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          Segoe UI,
+          Roboto,
+          Helvetica Neue,
+          Arial,
+          Noto Sans,
+          sans-serif,
+          Apple Color Emoji,
+          Segoe UI Emoji,
+          Segoe UI Symbol,
+          Noto Color Emoji;
+        --gray1: hsl(0, 0%, 99%);
+        --gray2: hsl(0, 0%, 97.3%);
+        --gray3: hsl(0, 0%, 95.1%);
+        --gray4: hsl(0, 0%, 93%);
+        --gray5: hsl(0, 0%, 90.9%);
+        --gray6: hsl(0, 0%, 88.7%);
+        --gray7: hsl(0, 0%, 85.8%);
+        --gray8: hsl(0, 0%, 78%);
+        --gray9: hsl(0, 0%, 56.1%);
+        --gray10: hsl(0, 0%, 52.3%);
+        --gray11: hsl(0, 0%, 43.5%);
+        --gray12: hsl(0, 0%, 9%);
+        --border-radius: 8px;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        outline: 0;
+        z-index: 999999999;
+        transition: transform 0.4s ease;
+      }
+      @media (hover: none) and (pointer: coarse) {
+        [data-sonner-toaster][data-lifted="true"] {
+          transform: none;
+        }
+      }
+      [data-sonner-toaster][data-x-position="right"] {
+        right: var(--offset-right);
+      }
+      [data-sonner-toaster][data-x-position="left"] {
+        left: var(--offset-left);
+      }
+      [data-sonner-toaster][data-x-position="center"] {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      [data-sonner-toaster][data-y-position="top"] {
+        top: var(--offset-top);
+      }
+      [data-sonner-toaster][data-y-position="bottom"] {
+        bottom: var(--offset-bottom);
+      }
+      [data-sonner-toast] {
+        --y: translateY(100%);
+        --lift-amount: calc(var(--lift) * var(--gap));
+        z-index: var(--z-index);
+        position: absolute;
+        opacity: 0;
+        transform: var(--y);
+        touch-action: none;
+        transition:
+          transform 0.4s,
+          opacity 0.4s,
+          height 0.4s,
+          box-shadow 0.2s;
+        box-sizing: border-box;
+        outline: 0;
+        overflow-wrap: anywhere;
+      }
+      [data-sonner-toast][data-styled="true"] {
+        padding: 16px;
+        background: var(--normal-bg);
+        border: 1px solid var(--normal-border);
+        color: var(--normal-text);
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: var(--width);
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      [data-sonner-toast]:focus-visible {
+        box-shadow:
+          0 4px 12px rgba(0, 0, 0, 0.1),
+          0 0 0 2px rgba(0, 0, 0, 0.2);
+      }
+      [data-sonner-toast][data-y-position="top"] {
+        top: 0;
+        --y: translateY(-100%);
+        --lift: 1;
+        --lift-amount: calc(1 * var(--gap));
+      }
+      [data-sonner-toast][data-y-position="bottom"] {
+        bottom: 0;
+        --y: translateY(100%);
+        --lift: -1;
+        --lift-amount: calc(var(--lift) * var(--gap));
+      }
+      [data-sonner-toast][data-styled="true"] [data-description] {
+        font-weight: 400;
+        line-height: 1.4;
+        color: #3f3f3f;
+      }
+      [data-rich-colors="true"][data-sonner-toast][data-styled="true"]
+        [data-description] {
+        color: inherit;
+      }
+      [data-sonner-toaster][data-sonner-theme="dark"] [data-description] {
+        color: #e8e8e8;
+      }
+      [data-sonner-toast][data-styled="true"] [data-title] {
+        font-weight: 500;
+        line-height: 1.5;
+        color: inherit;
+      }
+      [data-sonner-toast][data-styled="true"] [data-icon] {
+        display: flex;
+        height: 16px;
+        width: 16px;
+        position: relative;
+        justify-content: flex-start;
+        align-items: center;
+        flex-shrink: 0;
+        margin-left: var(--toast-icon-margin-start);
+        margin-right: var(--toast-icon-margin-end);
+      }
+      [data-sonner-toast][data-promise="true"] [data-icon] > svg {
+        opacity: 0;
+        transform: scale(0.8);
+        transform-origin: center;
+        animation: sonner-fade-in 0.3s ease forwards;
+      }
+      [data-sonner-toast][data-styled="true"] [data-icon] > * {
+        flex-shrink: 0;
+      }
+      [data-sonner-toast][data-styled="true"] [data-icon] svg {
+        margin-left: var(--toast-svg-margin-start);
+        margin-right: var(--toast-svg-margin-end);
+      }
+      [data-sonner-toast][data-styled="true"] [data-content] {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      [data-sonner-toast][data-styled="true"] [data-button] {
+        border-radius: 4px;
+        padding-left: 8px;
+        padding-right: 8px;
+        height: 24px;
+        font-size: 12px;
+        color: var(--normal-bg);
+        background: var(--normal-text);
+        margin-left: var(--toast-button-margin-start);
+        margin-right: var(--toast-button-margin-end);
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        outline: 0;
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        transition:
+          opacity 0.4s,
+          box-shadow 0.2s;
+      }
+      [data-sonner-toast][data-styled="true"] [data-button]:focus-visible {
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
+      }
+      [data-sonner-toast][data-styled="true"] [data-button]:first-of-type {
+        margin-left: var(--toast-button-margin-start);
+        margin-right: var(--toast-button-margin-end);
+      }
+      [data-sonner-toast][data-styled="true"] [data-cancel] {
+        color: var(--normal-text);
+        background: rgba(0, 0, 0, 0.08);
+      }
+      [data-sonner-toaster][data-sonner-theme="dark"]
+        [data-sonner-toast][data-styled="true"]
+        [data-cancel] {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      [data-sonner-toast][data-styled="true"] [data-close-button] {
+        position: absolute;
+        left: var(--toast-close-button-start);
+        right: var(--toast-close-button-end);
+        top: 0;
+        height: 20px;
+        width: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        color: var(--gray12);
+        background: var(--normal-bg);
+        border: 1px solid var(--gray4);
+        transform: var(--toast-close-button-transform);
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 1;
+        transition:
+          opacity 0.1s,
+          background 0.2s,
+          border-color 0.2s;
+      }
+      [data-sonner-toast][data-styled="true"]
+        [data-close-button]:focus-visible {
+        box-shadow:
+          0 4px 12px rgba(0, 0, 0, 0.1),
+          0 0 0 2px rgba(0, 0, 0, 0.2);
+      }
+      [data-sonner-toast][data-styled="true"] [data-disabled="true"] {
+        cursor: not-allowed;
+      }
+      [data-sonner-toast][data-styled="true"]:hover [data-close-button]:hover {
+        background: var(--gray2);
+        border-color: var(--gray5);
+      }
+      [data-sonner-toast][data-swiping="true"]::before {
+        content: "";
+        position: absolute;
+        left: -100%;
+        right: -100%;
+        height: 100%;
+        z-index: -1;
+      }
+      [data-sonner-toast][data-y-position="top"][data-swiping="true"]::before {
+        bottom: 50%;
+        transform: scaleY(3) translateY(50%);
+      }
+      [data-sonner-toast][data-y-position="bottom"][data-swiping="true"]::before {
+        top: 50%;
+        transform: scaleY(3) translateY(-50%);
+      }
+      [data-sonner-toast][data-swiping="false"][data-removed="true"]::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: scaleY(2);
+      }
+      [data-sonner-toast][data-expanded="true"]::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        height: calc(var(--gap) + 1px);
+        bottom: 100%;
+        width: 100%;
+      }
+      [data-sonner-toast][data-mounted="true"] {
+        --y: translateY(0);
+        opacity: 1;
+      }
+      [data-sonner-toast][data-expanded="false"][data-front="false"] {
+        --scale: var(--toasts-before) * 0.05 + 1;
+        --y: translateY(calc(var(--lift-amount) * var(--toasts-before)))
+          scale(calc(-1 * var(--scale)));
+        height: var(--front-toast-height);
+      }
+      [data-sonner-toast] > * {
+        transition: opacity 0.4s;
+      }
+      [data-sonner-toast][data-x-position="right"] {
+        right: 0;
+      }
+      [data-sonner-toast][data-x-position="left"] {
+        left: 0;
+      }
+      [data-sonner-toast][data-expanded="false"][data-front="false"][data-styled="true"]
+        > * {
+        opacity: 0;
+      }
+      [data-sonner-toast][data-visible="false"] {
+        opacity: 0;
+        pointer-events: none;
+      }
+      [data-sonner-toast][data-mounted="true"][data-expanded="true"] {
+        --y: translateY(calc(var(--lift) * var(--offset)));
+        height: var(--initial-height);
+      }
+      [data-sonner-toast][data-removed="true"][data-front="true"][data-swipe-out="false"] {
+        --y: translateY(calc(var(--lift) * -100%));
+        opacity: 0;
+      }
+      [data-sonner-toast][data-removed="true"][data-front="false"][data-swipe-out="false"][data-expanded="true"] {
+        --y: translateY(
+          calc(var(--lift) * var(--offset) + var(--lift) * -100%)
+        );
+        opacity: 0;
+      }
+      [data-sonner-toast][data-removed="true"][data-front="false"][data-swipe-out="false"][data-expanded="false"] {
+        --y: translateY(40%);
+        opacity: 0;
+        transition:
+          transform 0.5s,
+          opacity 0.2s;
+      }
+      [data-sonner-toast][data-removed="true"][data-front="false"]::before {
+        height: calc(var(--initial-height) + 20%);
+      }
+      [data-sonner-toast][data-swiping="true"] {
+        transform: var(--y) translateY(var(--swipe-amount-y, 0))
+          translateX(var(--swipe-amount-x, 0));
+        transition: none;
+      }
+      [data-sonner-toast][data-swiped="true"] {
+        user-select: none;
+      }
+      [data-sonner-toast][data-swipe-out="true"][data-y-position="bottom"],
+      [data-sonner-toast][data-swipe-out="true"][data-y-position="top"] {
+        animation-duration: 0.2s;
+        animation-timing-function: ease-out;
+        animation-fill-mode: forwards;
+      }
+      [data-sonner-toast][data-swipe-out="true"][data-swipe-direction="left"] {
+        animation-name: swipe-out-left;
+      }
+      [data-sonner-toast][data-swipe-out="true"][data-swipe-direction="right"] {
+        animation-name: swipe-out-right;
+      }
+      [data-sonner-toast][data-swipe-out="true"][data-swipe-direction="up"] {
+        animation-name: swipe-out-up;
+      }
+      [data-sonner-toast][data-swipe-out="true"][data-swipe-direction="down"] {
+        animation-name: swipe-out-down;
+      }
+      @keyframes swipe-out-left {
+        from {
+          transform: var(--y) translateX(var(--swipe-amount-x));
+          opacity: 1;
+        }
+        to {
+          transform: var(--y) translateX(calc(var(--swipe-amount-x) - 100%));
+          opacity: 0;
+        }
+      }
+      @keyframes swipe-out-right {
+        from {
+          transform: var(--y) translateX(var(--swipe-amount-x));
+          opacity: 1;
+        }
+        to {
+          transform: var(--y) translateX(calc(var(--swipe-amount-x) + 100%));
+          opacity: 0;
+        }
+      }
+      @keyframes swipe-out-up {
+        from {
+          transform: var(--y) translateY(var(--swipe-amount-y));
+          opacity: 1;
+        }
+        to {
+          transform: var(--y) translateY(calc(var(--swipe-amount-y) - 100%));
+          opacity: 0;
+        }
+      }
+      @keyframes swipe-out-down {
+        from {
+          transform: var(--y) translateY(var(--swipe-amount-y));
+          opacity: 1;
+        }
+        to {
+          transform: var(--y) translateY(calc(var(--swipe-amount-y) + 100%));
+          opacity: 0;
+        }
+      }
+      @media (max-width: 600px) {
+        [data-sonner-toaster] {
+          position: fixed;
+          right: var(--mobile-offset-right);
+          left: var(--mobile-offset-left);
+          width: 100%;
+        }
+        [data-sonner-toaster][dir="rtl"] {
+          left: calc(var(--mobile-offset-left) * -1);
+        }
+        [data-sonner-toaster] [data-sonner-toast] {
+          left: 0;
+          right: 0;
+          width: calc(100% - var(--mobile-offset-left) * 2);
+        }
+        [data-sonner-toaster][data-x-position="left"] {
+          left: var(--mobile-offset-left);
+        }
+        [data-sonner-toaster][data-y-position="bottom"] {
+          bottom: var(--mobile-offset-bottom);
+        }
+        [data-sonner-toaster][data-y-position="top"] {
+          top: var(--mobile-offset-top);
+        }
+        [data-sonner-toaster][data-x-position="center"] {
+          left: var(--mobile-offset-left);
+          right: var(--mobile-offset-right);
+          transform: none;
+        }
+      }
+      [data-sonner-toaster][data-sonner-theme="light"] {
+        --normal-bg: #fff;
+        --normal-border: var(--gray4);
+        --normal-text: var(--gray12);
+        --success-bg: hsl(143, 85%, 96%);
+        --success-border: hsl(145, 92%, 87%);
+        --success-text: hsl(140, 100%, 27%);
+        --info-bg: hsl(208, 100%, 97%);
+        --info-border: hsl(221, 91%, 93%);
+        --info-text: hsl(210, 92%, 45%);
+        --warning-bg: hsl(49, 100%, 97%);
+        --warning-border: hsl(49, 91%, 84%);
+        --warning-text: hsl(31, 92%, 45%);
+        --error-bg: hsl(359, 100%, 97%);
+        --error-border: hsl(359, 100%, 94%);
+        --error-text: hsl(360, 100%, 45%);
+      }
+      [data-sonner-toaster][data-sonner-theme="light"]
+        [data-sonner-toast][data-invert="true"] {
+        --normal-bg: #000;
+        --normal-border: hsl(0, 0%, 20%);
+        --normal-text: var(--gray1);
+      }
+      [data-sonner-toaster][data-sonner-theme="dark"]
+        [data-sonner-toast][data-invert="true"] {
+        --normal-bg: #fff;
+        --normal-border: var(--gray3);
+        --normal-text: var(--gray12);
+      }
+      [data-sonner-toaster][data-sonner-theme="dark"] {
+        --normal-bg: #000;
+        --normal-bg-hover: hsl(0, 0%, 12%);
+        --normal-border: hsl(0, 0%, 20%);
+        --normal-border-hover: hsl(0, 0%, 25%);
+        --normal-text: var(--gray1);
+        --success-bg: hsl(150, 100%, 6%);
+        --success-border: hsl(147, 100%, 12%);
+        --success-text: hsl(150, 86%, 65%);
+        --info-bg: hsl(215, 100%, 6%);
+        --info-border: hsl(223, 43%, 17%);
+        --info-text: hsl(216, 87%, 65%);
+        --warning-bg: hsl(64, 100%, 6%);
+        --warning-border: hsl(60, 100%, 9%);
+        --warning-text: hsl(46, 87%, 65%);
+        --error-bg: hsl(358, 76%, 10%);
+        --error-border: hsl(357, 89%, 16%);
+        --error-text: hsl(358, 100%, 81%);
+      }
+      [data-sonner-toaster][data-sonner-theme="dark"]
+        [data-sonner-toast]
+        [data-close-button] {
+        background: var(--normal-bg);
+        border-color: var(--normal-border);
+        color: var(--normal-text);
+      }
+      [data-sonner-toaster][data-sonner-theme="dark"]
+        [data-sonner-toast]
+        [data-close-button]:hover {
+        background: var(--normal-bg-hover);
+        border-color: var(--normal-border-hover);
+      }
+      [data-rich-colors="true"][data-sonner-toast][data-type="success"] {
+        background: var(--success-bg);
+        border-color: var(--success-border);
+        color: var(--success-text);
+      }
+      [data-rich-colors="true"][data-sonner-toast][data-type="success"]
+        [data-close-button] {
+        background: var(--success-bg);
+        border-color: var(--success-border);
+        color: var(--success-text);
+      }
+      [data-rich-colors="true"][data-sonner-toast][data-type="info"] {
+        background: var(--info-bg);
+        border-color: var(--info-border);
+        color: var(--info-text);
+      }
+      [data-rich-colors="true"][data-sonner-toast][data-type="info"]
+        [data-close-button] {
+        background: var(--info-bg);
+        border-color: var(--info-border);
+        color: var(--info-text);
+      }
+      [data-rich-colors="true"][data-sonner-toast][data-type="warning"] {
+        background: var(--warning-bg);
+        border-color: var(--warning-border);
+        color: var(--warning-text);
+      }
+      [data-rich-colors="true"][data-sonner-toast][data-type="warning"]
+        [data-close-button] {
+        background: var(--warning-bg);
+        border-color: var(--warning-border);
+        color: var(--warning-text);
+      }
+      [data-rich-colors="true"][data-sonner-toast][data-type="error"] {
+        background: var(--error-bg);
+        border-color: var(--error-border);
+        color: var(--error-text);
+      }
+      [data-rich-colors="true"][data-sonner-toast][data-type="error"]
+        [data-close-button] {
+        background: var(--error-bg);
+        border-color: var(--error-border);
+        color: var(--error-text);
+      }
+      .sonner-loading-wrapper {
+        --size: 16px;
+        height: var(--size);
+        width: var(--size);
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+      }
+      .sonner-loading-wrapper[data-visible="false"] {
+        transform-origin: center;
+        animation: sonner-fade-out 0.2s ease forwards;
+      }
+      .sonner-spinner {
+        position: relative;
+        top: 50%;
+        left: 50%;
+        height: var(--size);
+        width: var(--size);
+      }
+      .sonner-loading-bar {
+        animation: sonner-spin 1.2s linear infinite;
+        background: var(--gray11);
+        border-radius: 6px;
+        height: 8%;
+        left: -10%;
+        position: absolute;
+        top: -3.9%;
+        width: 24%;
+      }
+      .sonner-loading-bar:first-child {
+        animation-delay: -1.2s;
+        transform: rotate(0.0001deg) translate(146%);
+      }
+      .sonner-loading-bar:nth-child(2) {
+        animation-delay: -1.1s;
+        transform: rotate(30deg) translate(146%);
+      }
+      .sonner-loading-bar:nth-child(3) {
+        animation-delay: -1s;
+        transform: rotate(60deg) translate(146%);
+      }
+      .sonner-loading-bar:nth-child(4) {
+        animation-delay: -0.9s;
+        transform: rotate(90deg) translate(146%);
+      }
+      .sonner-loading-bar:nth-child(5) {
+        animation-delay: -0.8s;
+        transform: rotate(120deg) translate(146%);
+      }
+      .sonner-loading-bar:nth-child(6) {
+        animation-delay: -0.7s;
+        transform: rotate(150deg) translate(146%);
+      }
+      .sonner-loading-bar:nth-child(7) {
+        animation-delay: -0.6s;
+        transform: rotate(180deg) translate(146%);
+      }
+      .sonner-loading-bar:nth-child(8) {
+        animation-delay: -0.5s;
+        transform: rotate(210deg) translate(146%);
+      }
+      .sonner-loading-bar:nth-child(9) {
+        animation-delay: -0.4s;
+        transform: rotate(240deg) translate(146%);
+      }
+      .sonner-loading-bar:nth-child(10) {
+        animation-delay: -0.3s;
+        transform: rotate(270deg) translate(146%);
+      }
+      .sonner-loading-bar:nth-child(11) {
+        animation-delay: -0.2s;
+        transform: rotate(300deg) translate(146%);
+      }
+      .sonner-loading-bar:nth-child(12) {
+        animation-delay: -0.1s;
+        transform: rotate(330deg) translate(146%);
+      }
+      @keyframes sonner-fade-in {
+        0% {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @keyframes sonner-fade-out {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+      }
+      @keyframes sonner-spin {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.15;
+        }
+      }
+      @media (prefers-reduced-motion) {
+        .sonner-loading-bar,
+        [data-sonner-toast],
+        [data-sonner-toast] > * {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+      .sonner-loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transform-origin: center;
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+      }
+      .sonner-loader[data-visible="false"] {
+        opacity: 0;
+        transform: scale(0.8) translate(-50%, -50%);
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <html lang="en">
+      <head>
+        <style type="text/css">
+          [data-sonner-toaster][dir="ltr"],
+          html[dir="ltr"] {
+            --toast-icon-margin-start: -3px;
+            --toast-icon-margin-end: 4px;
+            --toast-svg-margin-start: -1px;
+            --toast-svg-margin-end: 0px;
+            --toast-button-margin-start: auto;
+            --toast-button-margin-end: 0;
+            --toast-close-button-start: 0;
+            --toast-close-button-end: unset;
+            --toast-close-button-transform: translate(-35%, -35%);
+          }
+          [data-sonner-toaster][dir="rtl"],
+          html[dir="rtl"] {
+            --toast-icon-margin-start: 4px;
+            --toast-icon-margin-end: -3px;
+            --toast-svg-margin-start: 0px;
+            --toast-svg-margin-end: -1px;
+            --toast-button-margin-start: 0;
+            --toast-button-margin-end: auto;
+            --toast-close-button-start: unset;
+            --toast-close-button-end: 0;
+            --toast-close-button-transform: translate(35%, -35%);
+          }
+          [data-sonner-toaster] {
+            position: fixed;
+            width: var(--width);
+            font-family:
+              ui-sans-serif,
+              system-ui,
+              -apple-system,
+              BlinkMacSystemFont,
+              Segoe UI,
+              Roboto,
+              Helvetica Neue,
+              Arial,
+              Noto Sans,
+              sans-serif,
+              Apple Color Emoji,
+              Segoe UI Emoji,
+              Segoe UI Symbol,
+              Noto Color Emoji;
+            --gray1: hsl(0, 0%, 99%);
+            --gray2: hsl(0, 0%, 97.3%);
+            --gray3: hsl(0, 0%, 95.1%);
+            --gray4: hsl(0, 0%, 93%);
+            --gray5: hsl(0, 0%, 90.9%);
+            --gray6: hsl(0, 0%, 88.7%);
+            --gray7: hsl(0, 0%, 85.8%);
+            --gray8: hsl(0, 0%, 78%);
+            --gray9: hsl(0, 0%, 56.1%);
+            --gray10: hsl(0, 0%, 52.3%);
+            --gray11: hsl(0, 0%, 43.5%);
+            --gray12: hsl(0, 0%, 9%);
+            --border-radius: 8px;
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            outline: 0;
+            z-index: 999999999;
+            transition: transform 0.4s ease;
+          }
+          @media (hover: none) and (pointer: coarse) {
+            [data-sonner-toaster][data-lifted="true"] {
+              transform: none;
+            }
+          }
+          [data-sonner-toaster][data-x-position="right"] {
+            right: var(--offset-right);
+          }
+          [data-sonner-toaster][data-x-position="left"] {
+            left: var(--offset-left);
+          }
+          [data-sonner-toaster][data-x-position="center"] {
+            left: 50%;
+            transform: translateX(-50%);
+          }
+          [data-sonner-toaster][data-y-position="top"] {
+            top: var(--offset-top);
+          }
+          [data-sonner-toaster][data-y-position="bottom"] {
+            bottom: var(--offset-bottom);
+          }
+          [data-sonner-toast] {
+            --y: translateY(100%);
+            --lift-amount: calc(var(--lift) * var(--gap));
+            z-index: var(--z-index);
+            position: absolute;
+            opacity: 0;
+            transform: var(--y);
+            touch-action: none;
+            transition:
+              transform 0.4s,
+              opacity 0.4s,
+              height 0.4s,
+              box-shadow 0.2s;
+            box-sizing: border-box;
+            outline: 0;
+            overflow-wrap: anywhere;
+          }
+          [data-sonner-toast][data-styled="true"] {
+            padding: 16px;
+            background: var(--normal-bg);
+            border: 1px solid var(--normal-border);
+            color: var(--normal-text);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: var(--width);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          }
+          [data-sonner-toast]:focus-visible {
+            box-shadow:
+              0 4px 12px rgba(0, 0, 0, 0.1),
+              0 0 0 2px rgba(0, 0, 0, 0.2);
+          }
+          [data-sonner-toast][data-y-position="top"] {
+            top: 0;
+            --y: translateY(-100%);
+            --lift: 1;
+            --lift-amount: calc(1 * var(--gap));
+          }
+          [data-sonner-toast][data-y-position="bottom"] {
+            bottom: 0;
+            --y: translateY(100%);
+            --lift: -1;
+            --lift-amount: calc(var(--lift) * var(--gap));
+          }
+          [data-sonner-toast][data-styled="true"] [data-description] {
+            font-weight: 400;
+            line-height: 1.4;
+            color: #3f3f3f;
+          }
+          [data-rich-colors="true"][data-sonner-toast][data-styled="true"]
+            [data-description] {
+            color: inherit;
+          }
+          [data-sonner-toaster][data-sonner-theme="dark"] [data-description] {
+            color: #e8e8e8;
+          }
+          [data-sonner-toast][data-styled="true"] [data-title] {
+            font-weight: 500;
+            line-height: 1.5;
+            color: inherit;
+          }
+          [data-sonner-toast][data-styled="true"] [data-icon] {
+            display: flex;
+            height: 16px;
+            width: 16px;
+            position: relative;
+            justify-content: flex-start;
+            align-items: center;
+            flex-shrink: 0;
+            margin-left: var(--toast-icon-margin-start);
+            margin-right: var(--toast-icon-margin-end);
+          }
+          [data-sonner-toast][data-promise="true"] [data-icon] > svg {
+            opacity: 0;
+            transform: scale(0.8);
+            transform-origin: center;
+            animation: sonner-fade-in 0.3s ease forwards;
+          }
+          [data-sonner-toast][data-styled="true"] [data-icon] > * {
+            flex-shrink: 0;
+          }
+          [data-sonner-toast][data-styled="true"] [data-icon] svg {
+            margin-left: var(--toast-svg-margin-start);
+            margin-right: var(--toast-svg-margin-end);
+          }
+          [data-sonner-toast][data-styled="true"] [data-content] {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+          }
+          [data-sonner-toast][data-styled="true"] [data-button] {
+            border-radius: 4px;
+            padding-left: 8px;
+            padding-right: 8px;
+            height: 24px;
+            font-size: 12px;
+            color: var(--normal-bg);
+            background: var(--normal-text);
+            margin-left: var(--toast-button-margin-start);
+            margin-right: var(--toast-button-margin-end);
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            outline: 0;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            transition:
+              opacity 0.4s,
+              box-shadow 0.2s;
+          }
+          [data-sonner-toast][data-styled="true"] [data-button]:focus-visible {
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
+          }
+          [data-sonner-toast][data-styled="true"] [data-button]:first-of-type {
+            margin-left: var(--toast-button-margin-start);
+            margin-right: var(--toast-button-margin-end);
+          }
+          [data-sonner-toast][data-styled="true"] [data-cancel] {
+            color: var(--normal-text);
+            background: rgba(0, 0, 0, 0.08);
+          }
+          [data-sonner-toaster][data-sonner-theme="dark"]
+            [data-sonner-toast][data-styled="true"]
+            [data-cancel] {
+            background: rgba(255, 255, 255, 0.3);
+          }
+          [data-sonner-toast][data-styled="true"] [data-close-button] {
+            position: absolute;
+            left: var(--toast-close-button-start);
+            right: var(--toast-close-button-end);
+            top: 0;
+            height: 20px;
+            width: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            color: var(--gray12);
+            background: var(--normal-bg);
+            border: 1px solid var(--gray4);
+            transform: var(--toast-close-button-transform);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1;
+            transition:
+              opacity 0.1s,
+              background 0.2s,
+              border-color 0.2s;
+          }
+          [data-sonner-toast][data-styled="true"]
+            [data-close-button]:focus-visible {
+            box-shadow:
+              0 4px 12px rgba(0, 0, 0, 0.1),
+              0 0 0 2px rgba(0, 0, 0, 0.2);
+          }
+          [data-sonner-toast][data-styled="true"] [data-disabled="true"] {
+            cursor: not-allowed;
+          }
+          [data-sonner-toast][data-styled="true"]:hover
+            [data-close-button]:hover {
+            background: var(--gray2);
+            border-color: var(--gray5);
+          }
+          [data-sonner-toast][data-swiping="true"]::before {
+            content: "";
+            position: absolute;
+            left: -100%;
+            right: -100%;
+            height: 100%;
+            z-index: -1;
+          }
+          [data-sonner-toast][data-y-position="top"][data-swiping="true"]::before {
+            bottom: 50%;
+            transform: scaleY(3) translateY(50%);
+          }
+          [data-sonner-toast][data-y-position="bottom"][data-swiping="true"]::before {
+            top: 50%;
+            transform: scaleY(3) translateY(-50%);
+          }
+          [data-sonner-toast][data-swiping="false"][data-removed="true"]::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            transform: scaleY(2);
+          }
+          [data-sonner-toast][data-expanded="true"]::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            height: calc(var(--gap) + 1px);
+            bottom: 100%;
+            width: 100%;
+          }
+          [data-sonner-toast][data-mounted="true"] {
+            --y: translateY(0);
+            opacity: 1;
+          }
+          [data-sonner-toast][data-expanded="false"][data-front="false"] {
+            --scale: var(--toasts-before) * 0.05 + 1;
+            --y: translateY(calc(var(--lift-amount) * var(--toasts-before)))
+              scale(calc(-1 * var(--scale)));
+            height: var(--front-toast-height);
+          }
+          [data-sonner-toast] > * {
+            transition: opacity 0.4s;
+          }
+          [data-sonner-toast][data-x-position="right"] {
+            right: 0;
+          }
+          [data-sonner-toast][data-x-position="left"] {
+            left: 0;
+          }
+          [data-sonner-toast][data-expanded="false"][data-front="false"][data-styled="true"]
+            > * {
+            opacity: 0;
+          }
+          [data-sonner-toast][data-visible="false"] {
+            opacity: 0;
+            pointer-events: none;
+          }
+          [data-sonner-toast][data-mounted="true"][data-expanded="true"] {
+            --y: translateY(calc(var(--lift) * var(--offset)));
+            height: var(--initial-height);
+          }
+          [data-sonner-toast][data-removed="true"][data-front="true"][data-swipe-out="false"] {
+            --y: translateY(calc(var(--lift) * -100%));
+            opacity: 0;
+          }
+          [data-sonner-toast][data-removed="true"][data-front="false"][data-swipe-out="false"][data-expanded="true"] {
+            --y: translateY(
+              calc(var(--lift) * var(--offset) + var(--lift) * -100%)
+            );
+            opacity: 0;
+          }
+          [data-sonner-toast][data-removed="true"][data-front="false"][data-swipe-out="false"][data-expanded="false"] {
+            --y: translateY(40%);
+            opacity: 0;
+            transition:
+              transform 0.5s,
+              opacity 0.2s;
+          }
+          [data-sonner-toast][data-removed="true"][data-front="false"]::before {
+            height: calc(var(--initial-height) + 20%);
+          }
+          [data-sonner-toast][data-swiping="true"] {
+            transform: var(--y) translateY(var(--swipe-amount-y, 0))
+              translateX(var(--swipe-amount-x, 0));
+            transition: none;
+          }
+          [data-sonner-toast][data-swiped="true"] {
+            user-select: none;
+          }
+          [data-sonner-toast][data-swipe-out="true"][data-y-position="bottom"],
+          [data-sonner-toast][data-swipe-out="true"][data-y-position="top"] {
+            animation-duration: 0.2s;
+            animation-timing-function: ease-out;
+            animation-fill-mode: forwards;
+          }
+          [data-sonner-toast][data-swipe-out="true"][data-swipe-direction="left"] {
+            animation-name: swipe-out-left;
+          }
+          [data-sonner-toast][data-swipe-out="true"][data-swipe-direction="right"] {
+            animation-name: swipe-out-right;
+          }
+          [data-sonner-toast][data-swipe-out="true"][data-swipe-direction="up"] {
+            animation-name: swipe-out-up;
+          }
+          [data-sonner-toast][data-swipe-out="true"][data-swipe-direction="down"] {
+            animation-name: swipe-out-down;
+          }
+          @keyframes swipe-out-left {
+            from {
+              transform: var(--y) translateX(var(--swipe-amount-x));
+              opacity: 1;
+            }
+            to {
+              transform: var(--y) translateX(calc(var(--swipe-amount-x) - 100%));
+              opacity: 0;
+            }
+          }
+          @keyframes swipe-out-right {
+            from {
+              transform: var(--y) translateX(var(--swipe-amount-x));
+              opacity: 1;
+            }
+            to {
+              transform: var(--y) translateX(calc(var(--swipe-amount-x) + 100%));
+              opacity: 0;
+            }
+          }
+          @keyframes swipe-out-up {
+            from {
+              transform: var(--y) translateY(var(--swipe-amount-y));
+              opacity: 1;
+            }
+            to {
+              transform: var(--y) translateY(calc(var(--swipe-amount-y) - 100%));
+              opacity: 0;
+            }
+          }
+          @keyframes swipe-out-down {
+            from {
+              transform: var(--y) translateY(var(--swipe-amount-y));
+              opacity: 1;
+            }
+            to {
+              transform: var(--y) translateY(calc(var(--swipe-amount-y) + 100%));
+              opacity: 0;
+            }
+          }
+          @media (max-width: 600px) {
+            [data-sonner-toaster] {
+              position: fixed;
+              right: var(--mobile-offset-right);
+              left: var(--mobile-offset-left);
+              width: 100%;
+            }
+            [data-sonner-toaster][dir="rtl"] {
+              left: calc(var(--mobile-offset-left) * -1);
+            }
+            [data-sonner-toaster] [data-sonner-toast] {
+              left: 0;
+              right: 0;
+              width: calc(100% - var(--mobile-offset-left) * 2);
+            }
+            [data-sonner-toaster][data-x-position="left"] {
+              left: var(--mobile-offset-left);
+            }
+            [data-sonner-toaster][data-y-position="bottom"] {
+              bottom: var(--mobile-offset-bottom);
+            }
+            [data-sonner-toaster][data-y-position="top"] {
+              top: var(--mobile-offset-top);
+            }
+            [data-sonner-toaster][data-x-position="center"] {
+              left: var(--mobile-offset-left);
+              right: var(--mobile-offset-right);
+              transform: none;
+            }
+          }
+          [data-sonner-toaster][data-sonner-theme="light"] {
+            --normal-bg: #fff;
+            --normal-border: var(--gray4);
+            --normal-text: var(--gray12);
+            --success-bg: hsl(143, 85%, 96%);
+            --success-border: hsl(145, 92%, 87%);
+            --success-text: hsl(140, 100%, 27%);
+            --info-bg: hsl(208, 100%, 97%);
+            --info-border: hsl(221, 91%, 93%);
+            --info-text: hsl(210, 92%, 45%);
+            --warning-bg: hsl(49, 100%, 97%);
+            --warning-border: hsl(49, 91%, 84%);
+            --warning-text: hsl(31, 92%, 45%);
+            --error-bg: hsl(359, 100%, 97%);
+            --error-border: hsl(359, 100%, 94%);
+            --error-text: hsl(360, 100%, 45%);
+          }
+          [data-sonner-toaster][data-sonner-theme="light"]
+            [data-sonner-toast][data-invert="true"] {
+            --normal-bg: #000;
+            --normal-border: hsl(0, 0%, 20%);
+            --normal-text: var(--gray1);
+          }
+          [data-sonner-toaster][data-sonner-theme="dark"]
+            [data-sonner-toast][data-invert="true"] {
+            --normal-bg: #fff;
+            --normal-border: var(--gray3);
+            --normal-text: var(--gray12);
+          }
+          [data-sonner-toaster][data-sonner-theme="dark"] {
+            --normal-bg: #000;
+            --normal-bg-hover: hsl(0, 0%, 12%);
+            --normal-border: hsl(0, 0%, 20%);
+            --normal-border-hover: hsl(0, 0%, 25%);
+            --normal-text: var(--gray1);
+            --success-bg: hsl(150, 100%, 6%);
+            --success-border: hsl(147, 100%, 12%);
+            --success-text: hsl(150, 86%, 65%);
+            --info-bg: hsl(215, 100%, 6%);
+            --info-border: hsl(223, 43%, 17%);
+            --info-text: hsl(216, 87%, 65%);
+            --warning-bg: hsl(64, 100%, 6%);
+            --warning-border: hsl(60, 100%, 9%);
+            --warning-text: hsl(46, 87%, 65%);
+            --error-bg: hsl(358, 76%, 10%);
+            --error-border: hsl(357, 89%, 16%);
+            --error-text: hsl(358, 100%, 81%);
+          }
+          [data-sonner-toaster][data-sonner-theme="dark"]
+            [data-sonner-toast]
+            [data-close-button] {
+            background: var(--normal-bg);
+            border-color: var(--normal-border);
+            color: var(--normal-text);
+          }
+          [data-sonner-toaster][data-sonner-theme="dark"]
+            [data-sonner-toast]
+            [data-close-button]:hover {
+            background: var(--normal-bg-hover);
+            border-color: var(--normal-border-hover);
+          }
+          [data-rich-colors="true"][data-sonner-toast][data-type="success"] {
+            background: var(--success-bg);
+            border-color: var(--success-border);
+            color: var(--success-text);
+          }
+          [data-rich-colors="true"][data-sonner-toast][data-type="success"]
+            [data-close-button] {
+            background: var(--success-bg);
+            border-color: var(--success-border);
+            color: var(--success-text);
+          }
+          [data-rich-colors="true"][data-sonner-toast][data-type="info"] {
+            background: var(--info-bg);
+            border-color: var(--info-border);
+            color: var(--info-text);
+          }
+          [data-rich-colors="true"][data-sonner-toast][data-type="info"]
+            [data-close-button] {
+            background: var(--info-bg);
+            border-color: var(--info-border);
+            color: var(--info-text);
+          }
+          [data-rich-colors="true"][data-sonner-toast][data-type="warning"] {
+            background: var(--warning-bg);
+            border-color: var(--warning-border);
+            color: var(--warning-text);
+          }
+          [data-rich-colors="true"][data-sonner-toast][data-type="warning"]
+            [data-close-button] {
+            background: var(--warning-bg);
+            border-color: var(--warning-border);
+            color: var(--warning-text);
+          }
+          [data-rich-colors="true"][data-sonner-toast][data-type="error"] {
+            background: var(--error-bg);
+            border-color: var(--error-border);
+            color: var(--error-text);
+          }
+          [data-rich-colors="true"][data-sonner-toast][data-type="error"]
+            [data-close-button] {
+            background: var(--error-bg);
+            border-color: var(--error-border);
+            color: var(--error-text);
+          }
+          .sonner-loading-wrapper {
+            --size: 16px;
+            height: var(--size);
+            width: var(--size);
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+          }
+          .sonner-loading-wrapper[data-visible="false"] {
+            transform-origin: center;
+            animation: sonner-fade-out 0.2s ease forwards;
+          }
+          .sonner-spinner {
+            position: relative;
+            top: 50%;
+            left: 50%;
+            height: var(--size);
+            width: var(--size);
+          }
+          .sonner-loading-bar {
+            animation: sonner-spin 1.2s linear infinite;
+            background: var(--gray11);
+            border-radius: 6px;
+            height: 8%;
+            left: -10%;
+            position: absolute;
+            top: -3.9%;
+            width: 24%;
+          }
+          .sonner-loading-bar:first-child {
+            animation-delay: -1.2s;
+            transform: rotate(0.0001deg) translate(146%);
+          }
+          .sonner-loading-bar:nth-child(2) {
+            animation-delay: -1.1s;
+            transform: rotate(30deg) translate(146%);
+          }
+          .sonner-loading-bar:nth-child(3) {
+            animation-delay: -1s;
+            transform: rotate(60deg) translate(146%);
+          }
+          .sonner-loading-bar:nth-child(4) {
+            animation-delay: -0.9s;
+            transform: rotate(90deg) translate(146%);
+          }
+          .sonner-loading-bar:nth-child(5) {
+            animation-delay: -0.8s;
+            transform: rotate(120deg) translate(146%);
+          }
+          .sonner-loading-bar:nth-child(6) {
+            animation-delay: -0.7s;
+            transform: rotate(150deg) translate(146%);
+          }
+          .sonner-loading-bar:nth-child(7) {
+            animation-delay: -0.6s;
+            transform: rotate(180deg) translate(146%);
+          }
+          .sonner-loading-bar:nth-child(8) {
+            animation-delay: -0.5s;
+            transform: rotate(210deg) translate(146%);
+          }
+          .sonner-loading-bar:nth-child(9) {
+            animation-delay: -0.4s;
+            transform: rotate(240deg) translate(146%);
+          }
+          .sonner-loading-bar:nth-child(10) {
+            animation-delay: -0.3s;
+            transform: rotate(270deg) translate(146%);
+          }
+          .sonner-loading-bar:nth-child(11) {
+            animation-delay: -0.2s;
+            transform: rotate(300deg) translate(146%);
+          }
+          .sonner-loading-bar:nth-child(12) {
+            animation-delay: -0.1s;
+            transform: rotate(330deg) translate(146%);
+          }
+          @keyframes sonner-fade-in {
+            0% {
+              opacity: 0;
+              transform: scale(0.8);
+            }
+            100% {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+          @keyframes sonner-fade-out {
+            0% {
+              opacity: 1;
+              transform: scale(1);
+            }
+            100% {
+              opacity: 0;
+              transform: scale(0.8);
+            }
+          }
+          @keyframes sonner-spin {
+            0% {
+              opacity: 1;
+            }
+            100% {
+              opacity: 0.15;
+            }
+          }
+          @media (prefers-reduced-motion) {
+            .sonner-loading-bar,
+            [data-sonner-toast],
+            [data-sonner-toast] > * {
+              transition: none !important;
+              animation: none !important;
+            }
+          }
+          .sonner-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transform-origin: center;
+            transition:
+              opacity 0.2s,
+              transform 0.2s;
+          }
+          .sonner-loader[data-visible="false"] {
+            opacity: 0;
+            transform: scale(0.8) translate(-50%, -50%);
+          }
+        </style>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Giki Admin</title>
+        <meta name="description" content="Giki administration dashboard" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"
+          rel="stylesheet"
+        />
+        <link rel="stylesheet" href="design.css" />
+      </head>
+
+      <body class="outfit_43d50961-module__KOAtAG__className">
+        <div hidden=""></div>
+        <div
+          data-slot="sidebar-wrapper"
+          class="group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full"
+          style="--sidebar-width: 16rem; --sidebar-width-icon: 3rem"
+        >
+          <div
+            class="group peer text-sidebar-foreground hidden md:block"
+            data-state="expanded"
+            data-collapsible=""
+            data-variant="sidebar"
+            data-side="left"
+            data-slot="sidebar"
+          >
+            <div
+              data-slot="sidebar-gap"
+              class="relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear group-data-[collapsible=offcanvas]:w-0 group-data-[side=right]:rotate-180 group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
+            ></div>
+            <div
+              data-slot="sidebar-container"
+              class="fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l"
+            >
+              <div
+                data-sidebar="sidebar"
+                data-slot="sidebar-inner"
+                class="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
+              >
+                <div
+                  data-slot="sidebar-header"
+                  data-sidebar="header"
+                  class="flex flex-col gap-2 p-2"
+                >
+                  <div class="flex items-center gap-2 px-2 py-1">
+                    <span class="text-lg font-semibold">Giki Admin</span>
+                  </div>
+                </div>
+                <div
+                  data-slot="sidebar-content"
+                  data-sidebar="content"
+                  class="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden"
+                >
+                  <ul
+                    data-slot="sidebar-menu"
+                    data-sidebar="menu"
+                    class="flex w-full min-w-0 flex-col gap-1"
+                  >
+                    <li
+                      data-slot="sidebar-menu-item"
+                      data-sidebar="menu-item"
+                      class="group/menu-item relative"
+                    >
+                      <a
+                        data-slot="sidebar-menu-button"
+                        data-sidebar="menu-button"
+                        data-size="default"
+                        data-active="true"
+                        class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left outline-hidden ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&amp;&gt;span:last-child]:truncate [&amp;&gt;svg]:size-4 [&amp;&gt;svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm"
+                        href="/bcorps"
+                        ><svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="lucide lucide-award"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"
+                          ></path>
+                          <circle cx="12" cy="8" r="6"></circle></svg
+                        ><span>BCorps</span></a
+                      >
+                    </li>
+                    <li
+                      data-slot="sidebar-menu-item"
+                      data-sidebar="menu-item"
+                      class="group/menu-item relative"
+                    >
+                      <a
+                        data-slot="sidebar-menu-button"
+                        data-sidebar="menu-button"
+                        data-size="default"
+                        data-active="false"
+                        class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left outline-hidden ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&amp;&gt;span:last-child]:truncate [&amp;&gt;svg]:size-4 [&amp;&gt;svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm"
+                        href="/data/facts"
+                        ><svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="lucide lucide-zap"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"
+                          ></path></svg
+                        ><span>Facts Engine</span></a
+                      >
+                    </li>
+                  </ul>
+                </div>
+                <div
+                  data-slot="sidebar-footer"
+                  data-sidebar="footer"
+                  class="flex flex-col gap-2 p-2"
+                >
+                  <ul
+                    data-slot="sidebar-menu"
+                    data-sidebar="menu"
+                    class="flex w-full min-w-0 flex-col gap-1"
+                  >
+                    <li
+                      data-slot="sidebar-menu-item"
+                      data-sidebar="menu-item"
+                      class="group/menu-item relative"
+                    >
+                      <button
+                        data-slot="sidebar-menu-button"
+                        data-sidebar="menu-button"
+                        data-size="default"
+                        data-active="false"
+                        class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left outline-hidden ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&amp;&gt;span:last-child]:truncate [&amp;&gt;svg]:size-4 [&amp;&gt;svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="lucide lucide-log-out"
+                          aria-hidden="true"
+                        >
+                          <path d="m16 17 5-5-5-5"></path>
+                          <path d="M21 12H9"></path>
+                          <path
+                            d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+                          ></path></svg
+                        ><span>Log out</span>
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <main
+            data-slot="sidebar-inset"
+            class="bg-background relative flex min-w-0 flex-1 flex-col md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2"
+          >
+            <header
+              class="bg-background sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 border-b px-4"
+            >
+              <button
+                data-slot="sidebar-trigger"
+                data-variant="ghost"
+                data-size="icon"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-7 -ml-1"
+                data-sidebar="trigger"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-panel-left"
+                  aria-hidden="true"
+                >
+                  <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                  <path d="M9 3v18"></path></svg
+                ><span class="sr-only">Toggle Sidebar</span>
+              </button>
+              <div
+                data-orientation="vertical"
+                role="none"
+                data-slot="separator"
+                class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px !h-4"
+              ></div>
+              <button
+                data-slot="button"
+                data-variant="ghost"
+                data-size="icon"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 -ml-1 size-7"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-arrow-left size-4"
+                  aria-hidden="true"
+                >
+                  <path d="m12 19-7-7 7-7"></path>
+                  <path d="M19 12H5"></path>
+                </svg></button
+              ><span class="text-sm font-medium">Net Natives</span>
+              <div class="ml-auto flex items-center gap-3">
+                <button
+                  data-slot="tooltip-trigger"
+                  data-variant="outline"
+                  data-size="sm"
+                  class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"
+                  data-state="closed"
+                >
+                  <span
+                    class="relative size-3.5 flex items-center justify-center"
+                    ><svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-sparkles absolute size-3.5 transition-all duration-300 opacity-100 scale-100"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"
+                      ></path>
+                      <path d="M20 2v4"></path>
+                      <path d="M22 4h-4"></path>
+                      <circle cx="4" cy="20" r="2"></circle></svg
+                    ><svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-loader-circle absolute size-3.5 transition-all duration-300 opacity-0 scale-50"
+                      aria-hidden="true"
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></span
+                  ><span class="relative overflow-hidden inline-flex"
+                    ><span aria-hidden="true" class="invisible"
+                      >Populating...</span
+                    ><span
+                      class="absolute inset-0 transition-all duration-300 opacity-100 translate-y-0"
+                      >Populate</span
+                    ><span
+                      class="absolute inset-0 transition-all duration-300 opacity-0 translate-y-2"
+                      >Populating...</span
+                    ></span
+                  ></button
+                ><button
+                  data-slot="tooltip-trigger"
+                  data-variant="outline"
+                  data-size="sm"
+                  class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"
+                  data-state="closed"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-file-text size-3.5"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                    ></path>
+                    <path d="M14 2v5a1 1 0 0 0 1 1h5"></path>
+                    <path d="M10 9H8"></path>
+                    <path d="M16 13H8"></path>
+                    <path d="M16 17H8"></path></svg
+                  >PDF Report</button
+                ><button
+                  data-slot="tooltip-trigger"
+                  data-variant="default"
+                  data-size="sm"
+                  class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 transition-colors duration-300"
+                  data-state="closed"
+                >
+                  <span
+                    class="relative size-3.5 flex items-center justify-center"
+                    ><svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-save absolute size-3.5 transition-all duration-300 opacity-100 scale-100"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
+                      ></path>
+                      <path
+                        d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"
+                      ></path>
+                      <path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg
+                    ><svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-loader-circle absolute size-3.5 transition-all duration-300 opacity-0"
+                      aria-hidden="true"
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg
+                    ><svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-check absolute size-3.5 transition-all duration-300 opacity-0 scale-50"
+                      aria-hidden="true"
+                    >
+                      <path d="M20 6 9 17l-5-5"></path></svg
+                    ><svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-circle-alert absolute size-3.5 transition-all duration-300 opacity-0 scale-50"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" x2="12" y1="8" y2="12"></line>
+                      <line x1="12" x2="12.01" y1="16" y2="16"></line></svg
+                    ><svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-pen-line absolute size-3.5 transition-all duration-300 opacity-0 scale-50"
+                      aria-hidden="true"
+                    >
+                      <path d="M13 21h8"></path>
+                      <path
+                        d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+                      ></path></svg></span
+                  >Save
+                </button>
+              </div>
+            </header>
+            <main class="flex-1 p-6">
+              <div
+                dir="ltr"
+                data-orientation="horizontal"
+                data-slot="tabs"
+                class="group/tabs flex gap-2 data-[orientation=horizontal]:flex-col"
+              >
+                <div
+                  role="tablist"
+                  aria-orientation="horizontal"
+                  data-slot="tabs-list"
+                  data-variant="default"
+                  class="group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-[orientation=horizontal]/tabs:h-9 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col data-[variant=line]:rounded-none bg-muted"
+                  tabindex="0"
+                  data-orientation="horizontal"
+                  style="outline: none"
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="radix-_r_11_-content-bcorp"
+                    data-state="active"
+                    id="radix-_r_11_-trigger-bcorp"
+                    data-slot="tabs-trigger"
+                    class="relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none dark:text-muted-foreground dark:hover:text-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100"
+                    tabindex="0"
+                    data-orientation="horizontal"
+                    data-radix-collection-item=""
+                  >
+                    B Corp Data</button
+                  ><button
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="radix-_r_11_-content-plan"
+                    data-state="inactive"
+                    id="radix-_r_11_-trigger-plan"
+                    data-slot="tabs-trigger"
+                    class="relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none dark:text-muted-foreground dark:hover:text-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100"
+                    tabindex="-1"
+                    data-orientation="horizontal"
+                    data-radix-collection-item=""
+                  >
+                    Plan (4)</button
+                  ><button
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="radix-_r_11_-content-json"
+                    data-state="inactive"
+                    id="radix-_r_11_-trigger-json"
+                    data-slot="tabs-trigger"
+                    class="relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none dark:text-muted-foreground dark:hover:text-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100"
+                    tabindex="-1"
+                    data-orientation="horizontal"
+                    data-radix-collection-item=""
+                  >
+                    JSON
+                  </button>
+                </div>
+                <div
+                  data-state="active"
+                  data-orientation="horizontal"
+                  role="tabpanel"
+                  aria-labelledby="radix-_r_11_-trigger-bcorp"
+                  id="radix-_r_11_-content-bcorp"
+                  tabindex="0"
+                  data-slot="tabs-content"
+                  class="flex-1 outline-none mt-6"
+                  style=""
+                >
+                  <div class="space-y-6">
+                    <section class="space-y-3">
+                      <h3 class="text-base font-semibold">Introduction</h3>
+                      <div class="rounded-md border p-4 space-y-4">
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Company Description</label
+                            >
+                          </div>
+                          <p class="text-xs text-muted-foreground">
+                            A short paragraph about the company used in the
+                            introduction. AI-generated.
+                          </p>
+                          <textarea
+                            placeholder="Describe the company…"
+                            rows="4"
+                            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          ></textarea>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="space-y-3">
+                      <h3 class="text-base font-semibold">Foundations</h3>
+                      <div class="rounded-md border p-4 space-y-4">
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Our Commitment</label
+                            >
+                          </div>
+                          <textarea
+                            rows="3"
+                            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          >
+We are committed to supporting the global ambition to limit global warming to 1.5°C.</textarea
+                          >
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Why This Matters for Our Planet</label
+                            >
+                          </div>
+                          <textarea
+                            rows="4"
+                            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          >
+Climate change poses an urgent threat to Earth's ecosystems and communities. Limiting warming to 1.5°C is critical to protect coral reefs, reduce extreme heatwaves, floods and droughts, and prevent biodiversity collapse.
+
+Every fraction of a degree matters for people around the world who are already facing the impacts of extreme weather, food insecurity, and rising sea levels. The scientific consensus is clear: decisive action today is essential to avoid irreversible consequences and safeguard a liveable planet for current and future generations.</textarea
+                          >
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Why This Matters for Our Business</label
+                            >
+                          </div>
+                          <textarea
+                            rows="4"
+                            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          >
+The transition to a low-carbon economy creates significant business opportunities. Companies taking early action can gain competitive advantages through innovation, operational efficiencies, and access to growing sustainable markets.
+
+Climate change also represents a risk to business continuity. Unchecked warming threatens supply chain resilience, increases operational disruptions and poses direct physical risks including damage to assets from extreme weather. Limiting warming to 1.5°C helps protect physical assets and employees while reducing long-term business uncertainty.</textarea
+                          >
+                        </div>
+                      </div>
+                    </section>
+                    <section class="space-y-3">
+                      <h3 class="text-base font-semibold">
+                        Implementation Plan
+                      </h3>
+                      <div class="rounded-md border p-4 space-y-4">
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Actions Overview</label
+                            >
+                          </div>
+                          <p class="text-xs text-muted-foreground">
+                            AI-generated summary of climate actions across
+                            scopes.
+                          </p>
+                          <textarea
+                            placeholder="AI will generate an overview of actions…"
+                            rows="5"
+                            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          ></textarea>
+                        </div>
+                        <div class="rounded-md border p-4 space-y-6">
+                          <div class="space-y-2">
+                            <p
+                              class="text-sm font-medium text-muted-foreground"
+                            >
+                              Scope 3 - Value Chain
+                            </p>
+                            <table class="w-full">
+                              <thead>
+                                <tr class="border-b">
+                                  <th
+                                    class="pb-2 pr-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide"
+                                  >
+                                    Title
+                                  </th>
+                                  <th
+                                    class="pb-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide"
+                                  >
+                                    GHG Category
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr class="border-t">
+                                  <td class="py-2 pr-4 text-sm align-top">
+                                    Make events more sustainable
+                                  </td>
+                                  <td
+                                    class="py-2 text-sm align-top text-muted-foreground"
+                                  >
+                                    Cat 1 - Purchased goods and services, Cat 5
+                                    - Waste generated in operations
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="space-y-2">
+                      <h3 class="text-base font-semibold">Engagement</h3>
+                      <p class="text-xs text-muted-foreground">
+                        Pre-populated intro text. Leave empty to omit this
+                        section from the PDF.
+                      </p>
+                      <textarea
+                        rows="3"
+                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      >
+We recognise that achieving our climate ambitions requires working alongside our customers and industry peers that's why we are committed to engaging in collaborative initiatives where our participation can contribute to collective progress. Our plan contains the following Engagement actions:</textarea
+                      >
+                    </section>
+                    <section class="space-y-2">
+                      <h3 class="text-base font-semibold">Governance</h3>
+                      <p class="text-xs text-muted-foreground">
+                        Pre-populated intro text. Leave empty to omit this
+                        section from the PDF.
+                      </p>
+                      <textarea
+                        rows="3"
+                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      >
+We recognise that delivering our climate ambitions requires robust governance structures, clear accountability, and aligned organizational culture. That's why we are committed to embedding our transition plan across all levels of our organization, from Board oversight to day-to-day operations. Our plan contains the following Governance actions:</textarea
+                      >
+                      <div class="space-y-3 pt-1">
+                        <div class="space-y-1.5">
+                          <h4 class="text-sm font-semibold">Culture Actions</h4>
+                          <ul class="bcorp-list">
+                            <li>
+                              Conduct an employee engagement survey on
+                              sustainability
+                            </li>
+                            <li>
+                              Create a Green Wall to collect employee ideas for
+                              company sustainability
+                            </li>
+                          </ul>
+                        </div>
+                        <div class="space-y-1.5">
+                          <h4 class="text-sm font-semibold">Other Actions</h4>
+                          <ul class="bcorp-list">
+                            <li>
+                              Provide climate change training to employees
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="space-y-2">
+                      <h3 class="text-base font-semibold">
+                        Performance Reporting &amp; Public Disclosure
+                      </h3>
+                      <p class="text-xs text-muted-foreground">
+                        Intro paragraph shown before the disclosure actions
+                        list.
+                      </p>
+                      <textarea
+                        rows="3"
+                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      >
+We are committed to comprehensive public reporting on our plan, creating accountability to our stakeholders and demonstrating the integrity of our commitments. We have the following disclosure related actions on our plan:</textarea
+                      >
+                      <div class="space-y-1">
+                        <div class="flex items-center gap-1.5">
+                          <label
+                            data-slot="label"
+                            class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                            >Reports through CDP</label
+                          >
+                        </div>
+                        <div
+                          class="inline-flex rounded-md border overflow-hidden"
+                        >
+                          <button
+                            type="button"
+                            class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                          >
+                            Yes
+                          </button>
+                          <div class="w-px bg-border"></div>
+                          <button
+                            type="button"
+                            class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                          >
+                            No
+                          </button>
+                        </div>
+                      </div>
+                      <div class="space-y-1">
+                        <div class="flex items-center gap-1.5">
+                          <label
+                            data-slot="label"
+                            class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                            >Has an Ecovadis Rating</label
+                          >
+                        </div>
+                        <div
+                          class="inline-flex rounded-md border overflow-hidden"
+                        >
+                          <button
+                            type="button"
+                            class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                          >
+                            Yes
+                          </button>
+                          <div class="w-px bg-border"></div>
+                          <button
+                            type="button"
+                            class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                          >
+                            No
+                          </button>
+                        </div>
+                      </div>
+                      <p class="text-xs text-muted-foreground">
+                        Closing paragraph shown after the actions and
+                        certifications.
+                      </p>
+                      <textarea
+                        rows="3"
+                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      >
+To ensure transparent reporting of climate performance to stakeholders, and accountability for commitments and plans, this plan is available on our website or is available on request.</textarea
+                      >
+                    </section>
+                    <section class="space-y-3">
+                      <h3 class="text-base font-semibold">Progress Tracking</h3>
+                      <div class="rounded-md border p-4 space-y-4">
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Actions In Progress</label
+                            >
+                          </div>
+                          <p class="text-xs text-muted-foreground">
+                            AI-generated summary of in-progress actions.
+                          </p>
+                          <textarea
+                            placeholder="AI will summarise in-progress actions…"
+                            rows="4"
+                            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          ></textarea>
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Actions Added to Plan</label
+                            >
+                          </div>
+                          <p class="text-xs text-muted-foreground">
+                            AI-generated summary of recently added actions.
+                          </p>
+                          <textarea
+                            placeholder="AI will summarise actions added to the plan…"
+                            rows="4"
+                            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          ></textarea>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="space-y-3">
+                      <h3 class="text-base font-semibold">Emission Targets</h3>
+                      <div class="rounded-md border p-4 space-y-4">
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Scope 1 &amp; 2 Interim Target</label
+                            >
+                          </div>
+                          <p class="text-xs text-muted-foreground">
+                            e.g. "Reduce by 50% by 2030"
+                          </p>
+                          <input
+                            data-slot="input"
+                            class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                            value=""
+                          />
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Scope 3 Interim Target</label
+                            >
+                          </div>
+                          <p class="text-xs text-muted-foreground">
+                            e.g. "Reduce by 30% by 2030"
+                          </p>
+                          <input
+                            data-slot="input"
+                            class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                            value=""
+                          />
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Long-term Target</label
+                            >
+                          </div>
+                          <p class="text-xs text-muted-foreground">
+                            e.g. "Net zero by 2050"
+                          </p>
+                          <input
+                            data-slot="input"
+                            class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                            value=""
+                          />
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Baseline Year</label
+                            >
+                          </div>
+                          <p class="text-xs text-muted-foreground">
+                            e.g. "2023"
+                          </p>
+                          <input
+                            data-slot="input"
+                            class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                            value=""
+                          />
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Baseline Emissions (tCO2e)</label
+                            >
+                          </div>
+                          <p class="text-xs text-muted-foreground">
+                            e.g. "1250"
+                          </p>
+                          <input
+                            data-slot="input"
+                            class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                            value=""
+                          />
+                        </div>
+                      </div>
+                    </section>
+                    <section class="space-y-3">
+                      <h3 class="text-base font-semibold">
+                        Certifications &amp; Initiatives
+                      </h3>
+                      <div class="rounded-md border p-4 space-y-4">
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >B Corp Certified</label
+                            >
+                          </div>
+                          <div
+                            class="inline-flex rounded-md border overflow-hidden"
+                          >
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              Yes
+                            </button>
+                            <div class="w-px bg-border"></div>
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              No
+                            </button>
+                          </div>
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >ISO 14001 Certified</label
+                            >
+                          </div>
+                          <div
+                            class="inline-flex rounded-md border overflow-hidden"
+                          >
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              Yes
+                            </button>
+                            <div class="w-px bg-border"></div>
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              No
+                            </button>
+                          </div>
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Signed up to SME Climate Hub</label
+                            >
+                          </div>
+                          <div
+                            class="inline-flex rounded-md border overflow-hidden"
+                          >
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              Yes
+                            </button>
+                            <div class="w-px bg-border"></div>
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              No
+                            </button>
+                          </div>
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Has a Science Based Target (SBTi)</label
+                            >
+                          </div>
+                          <div
+                            class="inline-flex rounded-md border overflow-hidden"
+                          >
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              Yes
+                            </button>
+                            <div class="w-px bg-border"></div>
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              No
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="space-y-3">
+                      <h3 class="text-base font-semibold">Policies</h3>
+                      <div class="rounded-md border p-4 space-y-4">
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Sustainable Procurement Policy</label
+                            >
+                          </div>
+                          <div
+                            class="inline-flex rounded-md border overflow-hidden"
+                          >
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              Yes
+                            </button>
+                            <div class="w-px bg-border"></div>
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              No
+                            </button>
+                          </div>
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Supplier Code of Conduct</label
+                            >
+                          </div>
+                          <div
+                            class="inline-flex rounded-md border overflow-hidden"
+                          >
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              Yes
+                            </button>
+                            <div class="w-px bg-border"></div>
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              No
+                            </button>
+                          </div>
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Sustainable Travel Policy</label
+                            >
+                          </div>
+                          <div
+                            class="inline-flex rounded-md border overflow-hidden"
+                          >
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              Yes
+                            </button>
+                            <div class="w-px bg-border"></div>
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              No
+                            </button>
+                          </div>
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Environmental Management Policy</label
+                            >
+                          </div>
+                          <div
+                            class="inline-flex rounded-md border overflow-hidden"
+                          >
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              Yes
+                            </button>
+                            <div class="w-px bg-border"></div>
+                            <button
+                              type="button"
+                              class="px-3 py-1.5 text-sm font-medium transition-colors bg-background text-muted-foreground hover:bg-muted"
+                            >
+                              No
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="space-y-3">
+                      <h3 class="text-base font-semibold">Sign Off</h3>
+                      <div class="rounded-md border p-4 space-y-4">
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Approval Authority</label
+                            >
+                          </div>
+                          <p class="text-xs text-muted-foreground">
+                            Board / Directors / Trustees / Executive Committee
+                          </p>
+                          <input
+                            data-slot="input"
+                            class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                            value=""
+                          />
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Approval Date</label
+                            >
+                          </div>
+                          <input
+                            data-slot="input"
+                            class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                            type="date"
+                            value=""
+                          />
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-1.5">
+                            <label
+                              data-slot="label"
+                              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                              >Review Date</label
+                            >
+                          </div>
+                          <p class="text-xs text-muted-foreground">
+                            Next review date (max 36 months from approval)
+                          </p>
+                          <input
+                            data-slot="input"
+                            class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                            type="date"
+                            value=""
+                          />
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+                <div
+                  data-state="inactive"
+                  data-orientation="horizontal"
+                  role="tabpanel"
+                  aria-labelledby="radix-_r_11_-trigger-plan"
+                  id="radix-_r_11_-content-plan"
+                  tabindex="0"
+                  data-slot="tabs-content"
+                  class="flex-1 outline-none mt-6"
+                  hidden=""
+                ></div>
+                <div
+                  data-state="inactive"
+                  data-orientation="horizontal"
+                  role="tabpanel"
+                  aria-labelledby="radix-_r_11_-trigger-json"
+                  hidden=""
+                  id="radix-_r_11_-content-json"
+                  tabindex="0"
+                  data-slot="tabs-content"
+                  class="flex-1 outline-none mt-6"
+                ></div>
+              </div>
+            </main>
+          </main>
+        </div>
+        <section
+          aria-label="Notifications alt+T"
+          tabindex="-1"
+          aria-live="polite"
+          aria-relevant="additions text"
+          aria-atomic="false"
+        ></section>
+      </body>
+    </html>
+  </head>
+</html>
