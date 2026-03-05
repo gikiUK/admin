@@ -15,21 +15,31 @@ export function EngagementSection({
 }) {
   if (!get("engagement")) return null;
   return (
-    <section className="space-y-2">
-      <h3 className="text-base font-semibold">Engagement</h3>
+    <section>
+      <h3>Engagement</h3>
       {actions.length === 0 ? (
         <p className="text-xs text-muted-foreground">No engagement actions were chosen</p>
       ) : (
         <>
-          <p className="text-xs text-muted-foreground">
-            Pre-populated intro text. Leave empty to omit this section from the PDF.
-          </p>
-          <ProseEditor rows={3} value={get("engagement")} onChange={(v) => set("engagement", v)} />
-          <ul className="bcorp-list">
-            {actions.map((a) => (
-              <li key={a.tal_action.title}>{a.tal_action.title}</li>
-            ))}
-          </ul>
+          <div className="textarea-section">
+            <div className="textarea-header">
+              <span>Intro Text</span>
+              <aside>leave empty to omit this section from the PDF</aside>
+            </div>
+            <div className="textarea-body">
+              <ProseEditor rows={3} value={get("engagement")} onChange={(v) => set("engagement", v)} />
+            </div>
+          </div>
+          <div className="bcorp-list-section">
+            <div>
+              <h4>Actions</h4>
+              <ul>
+                {actions.map((a) => (
+                  <li key={a.tal_action.title}>{a.tal_action.title}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </>
       )}
     </section>

@@ -19,19 +19,28 @@ export function DisclosureSection({
   actions: PlanAction[];
 }) {
   return (
-    <section className="space-y-2">
-      <h3 className="text-base font-semibold">Performance Reporting &amp; Public Disclosure</h3>
-      <p className="text-xs text-muted-foreground">Intro paragraph shown before the disclosure actions list.</p>
-      <ProseEditor rows={3} value={get("disclosure_intro")} onChange={(v) => set("disclosure_intro", v)} />
+    <section>
+      <h3>Performance Reporting &amp; Public Disclosure</h3>
+      <div className="textarea-section">
+        <div className="textarea-header">
+          <span>Intro Paragraph</span>
+          <aside>shown before the disclosure actions list</aside>
+        </div>
+        <div className="textarea-body">
+          <ProseEditor rows={3} value={get("disclosure_intro")} onChange={(v) => set("disclosure_intro", v)} />
+        </div>
+      </div>
       {actions.length > 0 && (
-        <>
-          <h4 className="text-sm font-semibold">Actions</h4>
-          <ul className="bcorp-list">
-            {actions.map((a) => (
-              <li key={a.tal_action.title}>{a.tal_action.title}</li>
-            ))}
-          </ul>
-        </>
+        <div className="bcorp-list-section">
+          <div>
+            <h4>Actions</h4>
+            <ul>
+              {actions.map((a) => (
+                <li key={a.tal_action.title}>{a.tal_action.title}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
       )}
       <FieldGroup label="Reports through CDP" {...hint("reporting_cdp")}>
         <YesNoSelect value={yesNo(get("reporting_cdp"))} onChange={(v) => set("reporting_cdp", v)} />
@@ -44,8 +53,15 @@ export function DisclosureSection({
           <Input value={get("rating_ecovadis_level")} onChange={(e) => set("rating_ecovadis_level", e.target.value)} />
         </FieldGroup>
       )}
-      <p className="text-xs text-muted-foreground">Closing paragraph shown after the actions and certifications.</p>
-      <ProseEditor rows={3} value={get("disclosure_closing")} onChange={(v) => set("disclosure_closing", v)} />
+      <div className="textarea-section">
+        <div className="textarea-header">
+          <span>Closing Paragraph</span>
+          <aside>shown after the actions and certifications</aside>
+        </div>
+        <div className="textarea-body">
+          <ProseEditor rows={3} value={get("disclosure_closing")} onChange={(v) => set("disclosure_closing", v)} />
+        </div>
+      </div>
     </section>
   );
 }

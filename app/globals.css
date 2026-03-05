@@ -6,7 +6,7 @@
 
 @theme {
 	--font-*: initial;
-	--font-outfit: Outfit, sans-serif;
+	--font-sans: "Source Sans 3", sans-serif;
 	--font-mono:
 		ui-monospace, SFMono-Regular, "SF Mono", Monaco, Inconsolata, "Roboto Mono", "Source Code Pro", Menlo, Consolas,
 		"DejaVu Sans Mono", monospace;
@@ -14,7 +14,7 @@
 
 @layer base {
 	body {
-		@apply font-normal font-outfit bg-background text-foreground;
+		@apply font-normal font-sans bg-background text-foreground;
 	}
 	* {
 		@apply border-border outline-ring/50;
@@ -63,7 +63,8 @@
 }
 
 html {
-	font-size: 19px;
+	font-size: 21px;
+	-webkit-font-smoothing: antialiased;
 }
 
 :root {
@@ -142,8 +143,4 @@ html {
 	body {
 		@apply bg-background text-foreground;
 	}
-}
-
-.bcorp-list {
-	@apply text-sm list-disc pl-5 space-y-1;
 }

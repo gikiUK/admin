@@ -102,7 +102,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         </div>
       )}
 
-      <Tabs defaultValue="bcorp">
+      <Tabs defaultValue="bcorp" className="max-w-[760px]">
         <TabsList>
           <TabsTrigger value="bcorp">B Corp Data</TabsTrigger>
           <TabsTrigger value="plan">Plan ({plan?.length ?? 0})</TabsTrigger>
