@@ -12,6 +12,7 @@ type FieldGroupProps = {
   isAI?: boolean;
   isPopulating?: boolean;
   aiHasData?: boolean;
+  aiDisabled?: boolean;
   onAiGenerate?: () => void;
   children: React.ReactNode;
 };
@@ -24,6 +25,7 @@ export function FieldGroup({
   isAI,
   isPopulating,
   aiHasData,
+  aiDisabled,
   onAiGenerate,
   children
 }: FieldGroupProps) {
@@ -51,7 +53,7 @@ export function FieldGroup({
                   <span className="inline-flex">
                     <button
                       type="button"
-                      disabled={isPopulating || aiHasData}
+                      disabled={isPopulating || aiHasData || aiDisabled}
                       onClick={() => onAiGenerate?.()}
                       className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
                       style={{
