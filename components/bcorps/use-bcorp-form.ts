@@ -25,6 +25,7 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
 
   const [data, setData] = useState<BcorpData>({ ...initialData });
   const [reasoning, setReasoning] = useState<Record<string, string>>(initialReasoning);
+  const [populatingField, setPopulatingField] = useState<keyof BcorpData | null>(null);
 
   useEffect(() => {
     const allFilled = AI_FIELDS.every((k) => (initialData[k as keyof BcorpData] ?? "") !== "");
@@ -54,7 +55,8 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
 
   function hint(key: keyof BcorpData) {
     const isAI = AI_FIELDS.includes(key as string);
-    const isPopulating = isAI && populateState === "populating";
+    const isPopulating =
+      isAI && ((populateState === "populating" && populatingField === null) || populatingField === key);
     const r = reasoning[key as string];
     return {
       ...(isAI ? { isAI: true, aiHasData: get(key) !== "", onAiGenerate: () => handlePopulateField(key) } : {}),
@@ -109,6 +111,7 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
   }
 
   async function handlePopulateField(key: keyof BcorpData) {
+    setPopulatingField(key);
     setPopulateState("populating", "");
     try {
       const fakeExisting = { ...data };
@@ -138,11 +141,13 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
       if (llmReasoning?.[key as string]) {
         setReasoning((prev) => ({ ...prev, [key as string]: llmReasoning[key as string] }));
       }
-      setDirty(true);
+      if (fieldValue) setDirty(true);
+      setPopulatingField(null);
       setPopulateState("idle", "");
       if (fieldValue) toast.success("AI field populated");
       else toast.info("AI populate", { description: "No content generated" });
     } catch (err) {
+      setPopulatingField(null);
       setPopulateState("error", err instanceof Error ? err.message : "Populate failed");
     }
   }
