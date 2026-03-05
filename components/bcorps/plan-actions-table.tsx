@@ -6,7 +6,7 @@ import type { Plan } from "@/lib/bcorp/types";
 function ActionsGroup({ actions, title }: { actions: Plan; title: string }) {
   if (actions.length === 0) return null;
   return (
-    <div>
+    <div className="bcorp-list-section">
       <h4>{title}</h4>
       <ul>
         {actions.map((a) => (
@@ -28,9 +28,9 @@ export function PlanActionsTables() {
   if (scope12.length === 0 && scope3.length === 0) return null;
 
   return (
-    <div className="bcorp-list-section">
+    <>
       <ActionsGroup actions={scope12} title="Scope 1 & 2 - Direct Emissions & Electricity" />
       <ActionsGroup actions={scope3} title="Scope 3 - Value Chain" />
-    </div>
+    </>
   );
 }

@@ -127,7 +127,7 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
                   size="sm"
                   disabled={populateDisabled}
                   onClick={() => populateRef.current?.()}
-                  className="transition-all duration-200"
+                  className="!h-[32px] text-[17px] rounded-[5px] shadow-[0_0_5px_rgba(0,0,0,0.2)] transition-all duration-200"
                 >
                   {populateState === "populating" ? (
                     <Loader2 className="size-3.5 animate-spin" />
@@ -151,6 +151,7 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
                 size="sm"
                 disabled={busy || pdfState === "generating"}
                 onClick={handleGeneratePdf}
+                className="!h-[32px] text-[17px] rounded-[5px] shadow-[0_0_5px_rgba(0,0,0,0.2)]"
               >
                 <FileText className="size-3.5" />
                 {pdfState === "generating" ? "Generating..." : "PDF Report"}
@@ -165,7 +166,7 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
                 size="sm"
                 disabled={busy}
                 onClick={() => saveRef.current?.()}
-                className={`transition-colors duration-300 ${
+                className={`!h-[32px] text-[17px] rounded-[5px] shadow-[0_0_5px_rgba(0,0,0,0.2)] transition-colors duration-300 ${
                   saveState === "saved"
                     ? "bg-green-600 hover:bg-green-700 text-white border-transparent"
                     : saveState === "error"

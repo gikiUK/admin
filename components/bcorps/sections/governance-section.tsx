@@ -31,31 +31,27 @@ export function GovernanceSection({
     <section>
       <h3>Governance</h3>
       {actions.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No governance actions were chosen</p>
+        <p className="text-[18px] text-muted-foreground">No governance actions were chosen.</p>
       ) : (
         <>
           <div className="textarea-section">
             <div className="textarea-header">
-              <span>Intro Text</span>
+              <span>Introduction Paragraph</span>
             </div>
             <div className="textarea-body">
               <ProseEditor rows={3} value={get("government")} onChange={(v) => set("government", v)} />
             </div>
           </div>
-          {orderedCats.length > 0 && (
-            <div className="bcorp-list-section">
-              {orderedCats.map((cat) => (
-                <div key={cat}>
-                  <h4>{cat} Actions</h4>
-                  <ul>
-                    {byCategory[cat].map((a) => (
-                      <li key={a.external_action_id}>{a.tal_action.title}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+          {orderedCats.map((cat) => (
+            <div key={cat} className="bcorp-list-section">
+              <h4>{cat} Actions</h4>
+              <ul>
+                {byCategory[cat].map((a) => (
+                  <li key={a.external_action_id}>{a.tal_action.title}</li>
+                ))}
+              </ul>
             </div>
-          )}
+          ))}
         </>
       )}
     </section>

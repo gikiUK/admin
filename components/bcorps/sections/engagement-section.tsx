@@ -18,12 +18,12 @@ export function EngagementSection({
     <section>
       <h3>Engagement</h3>
       {actions.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No engagement actions were chosen</p>
+        <p className="text-[18px] text-muted-foreground">No engagement actions were chosen.</p>
       ) : (
         <>
           <div className="textarea-section">
             <div className="textarea-header">
-              <span>Intro Text</span>
+              <span>Introduction Paragraph</span>
               <aside>leave empty to omit this section from the PDF</aside>
             </div>
             <div className="textarea-body">
@@ -31,14 +31,12 @@ export function EngagementSection({
             </div>
           </div>
           <div className="bcorp-list-section">
-            <div>
-              <h4>Actions</h4>
-              <ul>
-                {actions.map((a) => (
-                  <li key={a.tal_action.title}>{a.tal_action.title}</li>
-                ))}
-              </ul>
-            </div>
+            <h4>Actions</h4>
+            <ul>
+              {actions.map((a) => (
+                <li key={a.tal_action.title}>{a.tal_action.title}</li>
+              ))}
+            </ul>
           </div>
         </>
       )}

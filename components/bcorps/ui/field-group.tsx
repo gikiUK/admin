@@ -4,7 +4,7 @@ import { Info, Loader2, Sparkles } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-type FieldGroupProps = {
+type TextareaSectionProps = {
   label: string;
   description?: string;
   hint?: string;
@@ -17,7 +17,7 @@ type FieldGroupProps = {
   children: React.ReactNode;
 };
 
-export function FieldGroup({
+export function TextareaSection({
   label,
   description,
   hint,
@@ -28,7 +28,7 @@ export function FieldGroup({
   aiDisabled,
   onAiGenerate,
   children
-}: FieldGroupProps) {
+}: TextareaSectionProps) {
   return (
     <div className={`textarea-section ${isPopulating ? "is-populating" : ""}`}>
       <div className="textarea-header">

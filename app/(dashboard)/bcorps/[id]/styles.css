@@ -1,7 +1,8 @@
 @reference "../../../globals.css";
 
 h3 {
-	@apply text-base font-semibold;
+	font-size: 23px;
+	font-weight: 700;
 	margin-bottom: 16px;
 }
 
@@ -9,15 +10,19 @@ h3 {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	background: #eee;
+	background: var(--accent-50);
 	padding: 8px 16px;
 	border-radius: 6px 6px 0 0;
 	margin-bottom: 0;
-	transition: background 300ms;
+	border-bottom: 1px solid var(--accent-200);
+	transition:
+		background 300ms,
+		border-color 300ms;
 }
 
 .textarea-section:focus-within .textarea-header {
-	background: rgba(139, 92, 246, 0.1);
+	background: var(--accent-100);
+	border-bottom-color: var(--accent-300);
 }
 
 .textarea-section .textarea-header aside {
@@ -39,13 +44,17 @@ h3 {
 	display: flex;
 	align-items: center;
 	gap: 4px;
-	border-radius: 4px;
+	border-radius: 5px;
 	padding: 2px 6px;
-	font-size: 13px;
+	font-size: 15px;
 	font-weight: 500;
 	background: linear-gradient(135deg, #a855f7, #6366f1, #3b82f6);
 	color: white;
-	transition: opacity 200ms;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+	transition:
+		opacity 200ms,
+		background 200ms,
+		box-shadow 200ms;
 }
 
 .ai-generate-btn:hover {
@@ -53,23 +62,26 @@ h3 {
 }
 
 .ai-generate-btn:disabled {
+	background: #333;
+	box-shadow: none;
 	cursor: not-allowed;
-	opacity: 0.5;
+	opacity: 0.3;
 }
 
 .textarea-section {
-	border: 1px solid #eee;
+	border: 1px solid var(--accent-200);
 	border-radius: 6px;
 	transition: all 500ms;
 }
 
 .textarea-section:focus-within {
-	box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.7);
+	border-color: var(--accent-400);
+	box-shadow: 0 0 0 2px var(--accent-ring);
 	border-radius: 6px;
 }
 
 .textarea-section.is-populating {
-	box-shadow: 0 0 8px 2px rgba(139, 92, 246, 0.4);
+	box-shadow: 0 0 8px 2px var(--accent-glow);
 	border-radius: 6px;
 }
 
@@ -82,13 +94,14 @@ h3 {
 .textarea-body textarea {
 	border-radius: 0 0 6px 6px;
 	border: 0;
+	font-size: 17px;
 }
 
 .textarea-body input {
 	width: 100%;
 	background: transparent;
 	padding: 8px 12px;
-	font-size: 0.875rem;
+	font-size: 17px;
 	outline: none;
 }
 
@@ -114,14 +127,76 @@ h3 {
 .bcorp-list-section h4 {
 	font-size: 0.875rem;
 	font-weight: 600;
-}
-
-.bcorp-list-section > div + div {
-	margin-top: 12px;
+	margin-bottom: 6px;
 }
 
 .bcorp-list-section ul {
-	@apply text-sm list-disc pl-5 space-y-1;
+	@apply text-sm list-disc pl-5;
+}
+
+.bcorp-list-section ul li {
+	margin-bottom: 2px;
+}
+
+.toggle-section {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	cursor: pointer;
+	border: 1px solid #f87171;
+	border-radius: 5px;
+	padding: 12px 16px;
+	background: #fef2f2;
+	transition:
+		background 150ms,
+		border-color 150ms;
+}
+
+.toggle-section + .toggle-section {
+	margin-top: 8px;
+}
+
+.toggle-label {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.toggle-label span {
+	font-size: 17px;
+	font-weight: 500;
+	line-height: 1;
+	user-select: none;
+}
+
+.toggle-label aside {
+	font-size: 0.75rem;
+	color: var(--muted-foreground);
+}
+
+.toggle-section:has(input:checked) {
+	background: #f0fdfa;
+	border-color: #5eead4;
+}
+
+.toggle-body {
+	flex-shrink: 0;
+}
+
+.toggle-checkbox {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.toggle-icon {
+	display: flex;
+	flex-shrink: 0;
+}
+
+h3 + p {
+	margin-top: -10px;
 }
 
 section > :not(h3) + * {

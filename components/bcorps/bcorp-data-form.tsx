@@ -34,7 +34,7 @@ export function BcorpDataForm({ orgId, initialData, initialReasoning = {} }: Bco
   );
 
   return (
-    <div className="space-y-6">
+    <div>
       <IntroductionSection get={get} set={set} hint={hint} />
       <FoundationsSection get={get} set={set} hint={hint} />
       <ImplementationPlanSection get={get} set={set} hint={hint} />
@@ -43,8 +43,8 @@ export function BcorpDataForm({ orgId, initialData, initialReasoning = {} }: Bco
       <DisclosureSection get={get} set={set} hint={hint} actions={disclosureActions} />
       <ProgressTrackingSection get={get} set={set} hint={hint} />
       <EmissionTargetsSection get={get} set={set} hint={hint} />
-      <CertificationsSection get={get} set={set} hint={hint} />
-      <PoliciesSection get={get} set={set} hint={hint} />
+      <CertificationsSection get={get} set={set} />
+      <PoliciesSection get={get} set={set} />
       <SignOffSection get={get} set={set} hint={hint} />
     </div>
   );
