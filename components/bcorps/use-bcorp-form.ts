@@ -28,9 +28,8 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
   const [populatingField, setPopulatingField] = useState<keyof BcorpData | null>(null);
 
   useEffect(() => {
-    const allFilled = AI_FIELDS.every((k) => (initialData[k as keyof BcorpData] ?? "") !== "");
-    setAllAiFilled(allFilled);
-  }, [initialData, setAllAiFilled]);
+    setAllAiFilled(AI_FIELDS.every((k) => (data[k as keyof BcorpData] ?? "") !== ""));
+  }, [data, setAllAiFilled]);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   function get(key: keyof BcorpData): string {
@@ -39,11 +38,7 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
 
   function set(key: keyof BcorpData, value: string) {
     setDirty(true);
-    setData((prev) => {
-      const next = { ...prev, [key]: value };
-      setAllAiFilled(AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== ""));
-      return next;
-    });
+    setData((prev) => ({ ...prev, [key]: value }));
     setReasoning((prev) => {
       if (!prev[key]) return prev;
       const next = { ...prev };
@@ -97,9 +92,7 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
         throw new Error(body.error ?? `Request failed (${res.status})`);
       }
       const { data: llmData, reasoning: llmReasoning } = await res.json();
-      const next = { ...data, ...llmData };
-      setData(next);
-      setAllAiFilled(AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== ""));
+      setData((prev) => ({ ...prev, ...llmData }));
       setReasoning((prev) => ({ ...(llmReasoning ?? {}), ...prev }));
       setDirty(true);
       setPopulateState("idle", "");
@@ -134,9 +127,7 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
       const { data: llmData, reasoning: llmReasoning } = await res.json();
       const fieldValue = llmData[key as string];
       if (fieldValue) {
-        const next = { ...data, [key]: fieldValue };
-        setData(next);
-        setAllAiFilled(AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== ""));
+        setData((prev) => ({ ...prev, [key]: fieldValue }));
       }
       if (llmReasoning?.[key as string]) {
         setReasoning((prev) => ({ ...prev, [key as string]: llmReasoning[key as string] }));
