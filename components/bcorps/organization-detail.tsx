@@ -43,7 +43,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
   useEffect(() => {
     async function load() {
       try {
-        const [planData, data] = await Promise.all([
+        const [{ plan: planData }, data] = await Promise.all([
           fetchPlan(orgId),
           fetchBcorpData(orgId).catch((err) => {
             if (err instanceof Error && "status" in err && (err as { status: number }).status === 404) return {};

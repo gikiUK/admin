@@ -1,5 +1,5 @@
 import { getApiUrl } from "@/lib/api/config";
-import type { BcorpData, Organization, Plan } from "./types";
+import type { BcorpData, FetchPlanResult, Organization, Plan } from "./types";
 
 class BcorpApiError extends Error {
   constructor(
@@ -43,10 +43,14 @@ export async function fetchOrganizations(): Promise<Organization[]> {
   return res.data;
 }
 
-export async function fetchPlan(orgId: string): Promise<Plan> {
+export async function fetchPlan(orgId: string): Promise<FetchPlanResult> {
   const res = await bcorpApi<{ data: Plan } | Plan>(`/admin/legacy/organizations/${orgId}/plan`);
   const raw = Array.isArray(res) ? res : ((res as { data: Plan }).data ?? []);
-  return raw.filter((a) => a.tal_action !== null);
+  const all = raw.filter((a) => a.tal_action !== null);
+  return {
+    plan: all.filter((a) => a.state !== "already_doing"),
+    alreadyDoingActions: all.filter((a) => a.state === "already_doing")
+  };
 }
 
 export async function fetchBcorpData(orgId: string): Promise<BcorpData> {

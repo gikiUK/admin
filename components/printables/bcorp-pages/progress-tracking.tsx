@@ -2,11 +2,10 @@ import type { BcorpPageProps } from "@/components/printables/bcorp-printable-pag
 import { MarkdownContent } from "@/components/printables/markdown-content";
 import { ScopeLabels } from "@/components/printables/scope-labels";
 
-export function ProgressTracking({ data, plan }: BcorpPageProps) {
+export function ProgressTracking({ data, plan, alreadyDoingActions }: BcorpPageProps) {
   const inProgressActions = plan.filter((a) => a.state === "in_progress");
   const notStartedActions = plan.filter((a) => a.state === "not_started");
   const completedActions = plan.filter((a) => a.state === "completed");
-  const alreadyDoingActions = plan.filter((a) => a.state === "already_doing");
 
   return (
     <div className="ui-page">
