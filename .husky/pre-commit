@@ -1,2 +1,3 @@
 pnpm biome check --staged --write --no-errors-on-unmatched
+git diff --name-only | xargs git add
 pnpm run test
