@@ -14,6 +14,27 @@ const CHART_COLORS = {
   gray: "#71717A"
 };
 
+const IMPACT_ORDER = [
+  "Transformative (over 10% of emissions)",
+  "Large (over 5% of emissions)",
+  "Medium (typically 1-5% of emissions)",
+  "Small (typically under 1% of emissions)",
+  "Long term potential (future impact)",
+  "Enabling action (foundations for change)"
+];
+
+function buildImpactBreakdown(plan: Plan): { labels: string[]; data: number[] } {
+  const counts: Record<string, number> = {};
+  for (const action of plan) {
+    const v = action.tal_action.impact_opportunity;
+    if (v) counts[v] = (counts[v] ?? 0) + 1;
+  }
+  const ordered = IMPACT_ORDER.filter((k) => counts[k]);
+  const labels = ordered.map((k) => k.replace(/ \(.*\)$/, ""));
+  const data = ordered.map((k) => counts[k]);
+  return { labels, data };
+}
+
 function buildScopeBreakdown(plan: Plan): { labels: string[]; data: number[] } {
   const counts: Record<string, number> = {};
   for (const action of plan) {
@@ -46,7 +67,13 @@ function buildScopeBreakdown(plan: Plan): { labels: string[]; data: number[] } {
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: Chart.js loaded from CDN
-function initCharts(Chart: any, breakdownCanvas: HTMLCanvasElement, impactCanvas: HTMLCanvasElement, plan: Plan) {
+function initCharts(
+  Chart: any,
+  breakdownCanvas: HTMLCanvasElement,
+  impactCanvas: HTMLCanvasElement,
+  plan: Plan,
+  impact: { labels: string[]; data: number[] }
+) {
   Chart.defaults.font.family = "'Inter', sans-serif";
   Chart.defaults.font.size = 14;
   Chart.defaults.font.weight = "400";
@@ -89,10 +116,10 @@ function initCharts(Chart: any, breakdownCanvas: HTMLCanvasElement, impactCanvas
   new Chart(impactCanvas, {
     type: "doughnut",
     data: {
-      labels: ["Enabling action", "Large", "Transformative", "Medium", "Long term potential", "Small"],
+      labels: impact.labels,
       datasets: [
         {
-          data: [35, 25, 12, 15, 8, 5],
+          data: impact.data,
           backgroundColor: [
             CHART_COLORS.blue,
             CHART_COLORS.green,
@@ -137,8 +164,9 @@ export function Overview({ plan }: BcorpPageProps) {
     const impact = impactRef.current;
     if (!breakdown || !impact) return;
 
+    const impactBreakdown = buildImpactBreakdown(plan);
     // biome-ignore lint/suspicious/noExplicitAny: Chart.js loaded from CDN
-    const run = (C: any) => document.fonts.ready.then(() => initCharts(C, breakdown, impact, plan));
+    const run = (C: any) => document.fonts.ready.then(() => initCharts(C, breakdown, impact, plan, impactBreakdown));
 
     // Load Chart.js from CDN if not already loaded
     // biome-ignore lint/suspicious/noExplicitAny: Chart.js loaded from CDN
