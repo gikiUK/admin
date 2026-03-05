@@ -9,11 +9,7 @@ import { SectionCard } from "@/components/bcorps/ui/section-card";
 export function ImplementationPlanSection({ get, set, hint }: { get: FieldGetter; set: FieldSetter; hint: FieldHint }) {
   return (
     <SectionCard title="Implementation Plan">
-      <FieldGroup
-        label="Actions Overview"
-        description="AI-generated summary of climate actions across scopes."
-        {...hint("actions_overview")}
-      >
+      <FieldGroup label="Actions Overview" {...hint("actions_overview")}>
         <ProseEditor
           rows={5}
           value={get("actions_overview")}

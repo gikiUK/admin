@@ -8,11 +8,7 @@ import { SectionCard } from "@/components/bcorps/ui/section-card";
 export function ProgressTrackingSection({ get, set, hint }: { get: FieldGetter; set: FieldSetter; hint: FieldHint }) {
   return (
     <SectionCard title="Progress Tracking">
-      <FieldGroup
-        label="Actions In Progress"
-        description="AI-generated summary of in-progress actions."
-        {...hint("actions_in_progress")}
-      >
+      <FieldGroup label="Actions In Progress" {...hint("actions_in_progress")}>
         <ProseEditor
           rows={4}
           value={get("actions_in_progress")}
@@ -20,11 +16,7 @@ export function ProgressTrackingSection({ get, set, hint }: { get: FieldGetter; 
           placeholder="AI will summarise in-progress actions…"
         />
       </FieldGroup>
-      <FieldGroup
-        label="Actions Added to Plan"
-        description="AI-generated summary of recently added actions."
-        {...hint("actions_added")}
-      >
+      <FieldGroup label="Actions Added to Plan" {...hint("actions_added")}>
         <ProseEditor
           rows={4}
           value={get("actions_added")}

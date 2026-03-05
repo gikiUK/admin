@@ -18,8 +18,8 @@ export function ProseEditor({ value, onChange, placeholder, className, rows = 4 
       placeholder={placeholder}
       rows={rows}
       className={cn(
-        "w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
-        "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+        "w-full rounded-[8px] border border-input bg-background px-3 py-2 text-sm",
+        "focus:outline-none focus:ring-0",
         className
       )}
     />

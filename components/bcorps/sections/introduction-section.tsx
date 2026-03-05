@@ -8,11 +8,7 @@ import { SectionCard } from "@/components/bcorps/ui/section-card";
 export function IntroductionSection({ get, set, hint }: { get: FieldGetter; set: FieldSetter; hint: FieldHint }) {
   return (
     <SectionCard title="Introduction">
-      <FieldGroup
-        label="Company Description"
-        description="A short paragraph about the company used in the introduction. AI-generated."
-        {...hint("company_description")}
-      >
+      <FieldGroup label="Company Description" {...hint("company_description")}>
         <ProseEditor
           rows={4}
           value={get("company_description")}
