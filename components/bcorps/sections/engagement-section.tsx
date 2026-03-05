@@ -17,16 +17,20 @@ export function EngagementSection({
   return (
     <section className="space-y-2">
       <h3 className="text-base font-semibold">Engagement</h3>
-      <p className="text-xs text-muted-foreground">
-        Pre-populated intro text. Leave empty to omit this section from the PDF.
-      </p>
-      <ProseEditor rows={3} value={get("engagement")} onChange={(v) => set("engagement", v)} />
-      {actions.length > 0 && (
-        <ul className="bcorp-list">
-          {actions.map((a) => (
-            <li key={a.tal_action.title}>{a.tal_action.title}</li>
-          ))}
-        </ul>
+      {actions.length === 0 ? (
+        <p className="text-xs text-muted-foreground">No engagement actions were chosen</p>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground">
+            Pre-populated intro text. Leave empty to omit this section from the PDF.
+          </p>
+          <ProseEditor rows={3} value={get("engagement")} onChange={(v) => set("engagement", v)} />
+          <ul className="bcorp-list">
+            {actions.map((a) => (
+              <li key={a.tal_action.title}>{a.tal_action.title}</li>
+            ))}
+          </ul>
+        </>
       )}
     </section>
   );

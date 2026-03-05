@@ -19,6 +19,8 @@ type BcorpHeaderContextValue = {
   setDirty: (dirty: boolean) => void;
   plan: Plan;
   setPlan: (plan: Plan) => void;
+  allAiFilled: boolean;
+  setAllAiFilled: (filled: boolean) => void;
 };
 
 const BcorpHeaderContext = createContext<BcorpHeaderContextValue | null>(null);
@@ -34,6 +36,7 @@ export function BcorpHeaderProvider({ children }: { children: React.ReactNode })
 
   const [isDirty, setDirty] = useState(false);
   const [plan, setPlan] = useState<Plan>([]);
+  const [allAiFilled, setAllAiFilled] = useState(false);
 
   function setSaveState(state: SaveState, error: string) {
     setSaveStateRaw(state);
@@ -59,7 +62,9 @@ export function BcorpHeaderProvider({ children }: { children: React.ReactNode })
         isDirty,
         setDirty,
         plan,
-        setPlan
+        setPlan,
+        allAiFilled,
+        setAllAiFilled
       }}
     >
       {children}

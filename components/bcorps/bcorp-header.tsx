@@ -20,9 +20,10 @@ import { getApiUrl } from "@/lib/api/config";
 import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
 
 export function BcorpHeader({ orgId }: { orgId: string }) {
-  const { saveState, saveRef, populateState, populateError, populateRef, isDirty } = useBcorpHeader();
+  const { saveState, saveRef, populateState, populateError, populateRef, isDirty, allAiFilled } = useBcorpHeader();
   const name = useSearchParams().get("name") ?? orgId;
   const busy = saveState === "saving" || populateState === "populating";
+  const populateDisabled = busy || allAiFilled;
   const [pdfState, setPdfState] = useState<"idle" | "generating" | "error">("idle");
   const [confirmBack, setConfirmBack] = useState(false);
   const popstateDeltaRef = useRef<number>(0);
@@ -116,36 +117,32 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
       <span className="text-sm font-medium">{name}</span>
       <div className="ml-auto flex items-center gap-3">
         {populateState === "error" && <span className="text-sm text-destructive">{populateError}</span>}
+
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" disabled={busy} onClick={() => populateRef.current?.()}>
-                <span className="relative size-3.5 flex items-center justify-center">
-                  <Sparkles
-                    className={`absolute size-3.5 transition-all duration-300 ${populateState === "populating" ? "opacity-0 scale-50" : "opacity-100 scale-100"}`}
-                  />
-                  <Loader2
-                    className={`absolute size-3.5 transition-all duration-300 ${populateState === "populating" ? "opacity-100 scale-100 animate-spin" : "opacity-0 scale-50"}`}
-                  />
-                </span>
-                <span className="relative overflow-hidden inline-flex">
-                  <span aria-hidden className="invisible">
-                    Populating...
-                  </span>
-                  <span
-                    className={`absolute inset-0 transition-all duration-300 ${populateState === "populating" ? "opacity-0 -translate-y-2" : "opacity-100 translate-y-0"}`}
-                  >
-                    Populate
-                  </span>
-                  <span
-                    className={`absolute inset-0 transition-all duration-300 ${populateState === "populating" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
-                  >
-                    Populating...
-                  </span>
-                </span>
-              </Button>
+              <span className="inline-flex">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={populateDisabled}
+                  onClick={() => populateRef.current?.()}
+                  className="transition-all duration-200"
+                >
+                  {populateState === "populating" ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="size-3.5" />
+                  )}
+                  {populateState === "populating" ? "Populating..." : "Populate"}
+                </Button>
+              </span>
             </TooltipTrigger>
-            <TooltipContent>Use AI to populate fields from plan data</TooltipContent>
+            <TooltipContent>
+              {allAiFilled
+                ? "All AI fields populated - edit to make changes"
+                : "Use AI to populate fields from plan data"}
+            </TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>

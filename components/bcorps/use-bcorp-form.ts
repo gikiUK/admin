@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { patchBcorpData } from "@/lib/bcorp/api";
 import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
@@ -19,11 +19,16 @@ export const GOVERNANCE_CATEGORIES = [
 const AI_FIELDS = ["company_description", "actions_overview", "actions_in_progress", "actions_added"];
 
 export function useBcorpForm(orgId: string, initialData: BcorpData, initialReasoning: Record<string, string>) {
-  const { saveRef, setSaveState, populateRef, setPopulateState, setDirty, plan } = useBcorpHeader();
+  const { saveRef, setSaveState, populateRef, setPopulateState, setDirty, plan, populateState, setAllAiFilled } =
+    useBcorpHeader();
   const orgName = useSearchParams().get("name") ?? orgId;
 
   const [data, setData] = useState<BcorpData>({ ...initialData });
   const [reasoning, setReasoning] = useState<Record<string, string>>(initialReasoning);
+
+  useEffect(() => {
+    setAllAiFilled(AI_FIELDS.every((k) => (data[k as keyof BcorpData] ?? "") !== ""));
+  }, [data, setAllAiFilled]);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   function get(key: keyof BcorpData): string {
@@ -42,9 +47,21 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
   }
 
   function hint(key: keyof BcorpData) {
+    const isAI = AI_FIELDS.includes(key as string);
+    const isPopulating = isAI && populateState === "populating";
     const r = reasoning[key as string];
-    if (!r) return {};
-    return { hint: r, filled: get(key) !== "" };
+    return {
+      ...(isAI
+        ? {
+            isAI: true,
+            aiHasData: get(key) !== "",
+            aiDisabled: populateState === "populating",
+            onAiGenerate: () => handlePopulate()
+          }
+        : {}),
+      ...(isPopulating ? { isPopulating: true } : {}),
+      ...(r ? { hint: r, filled: get(key) !== "" } : {})
+    };
   }
 
   async function handleSave() {
