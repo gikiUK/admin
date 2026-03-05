@@ -39,9 +39,11 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
 
   function set(key: keyof BcorpData, value: string) {
     setDirty(true);
-    setData((prev) => ({ ...prev, [key]: value }));
-    const next = { ...data, [key]: value };
-    setAllAiFilled(AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== ""));
+    setData((prev) => {
+      const next = { ...prev, [key]: value };
+      setAllAiFilled(AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== ""));
+      return next;
+    });
     setReasoning((prev) => {
       if (!prev[key]) return prev;
       const next = { ...prev };
