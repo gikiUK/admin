@@ -6,7 +6,7 @@
 
 @theme {
 	--font-*: initial;
-	--font-outfit: Outfit, sans-serif;
+	--font-sans: "Source Sans 3", sans-serif;
 	--font-mono:
 		ui-monospace, SFMono-Regular, "SF Mono", Monaco, Inconsolata, "Roboto Mono", "Source Code Pro", Menlo, Consolas,
 		"DejaVu Sans Mono", monospace;
@@ -14,7 +14,7 @@
 
 @layer base {
 	body {
-		@apply font-normal font-outfit bg-background text-foreground;
+		@apply font-normal font-sans bg-background text-foreground;
 	}
 	* {
 		@apply border-border outline-ring/50;
@@ -63,25 +63,26 @@
 }
 
 html {
-	font-size: 19px;
+	font-size: 21px;
+	-webkit-font-smoothing: antialiased;
 }
 
 :root {
 	--radius: 0.625rem;
 	--background: oklch(1 0 0);
-	--foreground: oklch(0.141 0.005 285.823);
+	--foreground: #18181b;
 	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.141 0.005 285.823);
+	--card-foreground: #18181b;
 	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.141 0.005 285.823);
+	--popover-foreground: #18181b;
 	--primary: oklch(0.541 0.281 293.009);
 	--primary-foreground: oklch(0.985 0 0);
 	--secondary: oklch(0.967 0.001 286.375);
-	--secondary-foreground: oklch(0.21 0.006 285.885);
+	--secondary-foreground: #18181b;
 	--muted: oklch(0.967 0.001 286.375);
-	--muted-foreground: oklch(0.552 0.016 285.938);
+	--muted-foreground: #52525b;
 	--accent: oklch(0.967 0.001 286.375);
-	--accent-foreground: oklch(0.21 0.006 285.885);
+	--accent-foreground: #18181b;
 	--destructive: oklch(0.577 0.245 27.325);
 	--border: oklch(0.92 0.004 286.32);
 	--input: oklch(0.92 0.004 286.32);
@@ -92,13 +93,21 @@ html {
 	--chart-4: oklch(0.828 0.189 84.429);
 	--chart-5: oklch(0.769 0.188 70.08);
 	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.141 0.005 285.823);
+	--sidebar-foreground: #18181b;
 	--sidebar-primary: oklch(0.541 0.281 293.009);
 	--sidebar-primary-foreground: oklch(0.985 0 0);
 	--sidebar-accent: oklch(0.967 0.001 286.375);
-	--sidebar-accent-foreground: oklch(0.21 0.006 285.885);
+	--sidebar-accent-foreground: #18181b;
 	--sidebar-border: oklch(0.92 0.004 286.32);
 	--sidebar-ring: oklch(0.705 0.015 286.067);
+	--accent-50: #eff3ff;
+	--accent-100: #dbe4fe;
+	--accent-200: #bfd0fe;
+	--accent-300: #93affd;
+	--accent-400: #6088fa;
+	--accent-ring: rgba(37, 89, 235, 0.7);
+	--accent-glow: rgba(37, 89, 235, 0.4);
+	--purple-500: #a855f7;
 }
 
 .dark {
@@ -142,8 +151,4 @@ html {
 	body {
 		@apply bg-background text-foreground;
 	}
-}
-
-.bcorp-list {
-	@apply text-sm list-disc pl-5 space-y-1;
 }

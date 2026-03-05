@@ -28,30 +28,30 @@ export function GovernanceSection({
   const orderedCats = [...GOVERNANCE_CATEGORIES, "Other"].filter((c) => byCategory[c]);
 
   return (
-    <section className="space-y-2">
-      <h3 className="text-base font-semibold">Governance</h3>
+    <section>
+      <h3>Governance</h3>
       {actions.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No governance actions were chosen</p>
+        <p className="text-[18px] text-muted-foreground">No governance actions were chosen.</p>
       ) : (
         <>
-          <p className="text-xs text-muted-foreground">
-            Pre-populated intro text. Leave empty to omit this section from the PDF.
-          </p>
-          <ProseEditor rows={3} value={get("government")} onChange={(v) => set("government", v)} />
-          {orderedCats.length > 0 && (
-            <div className="space-y-3 pt-1">
-              {orderedCats.map((cat) => (
-                <div key={cat} className="space-y-1.5">
-                  <h4 className="text-sm font-semibold">{cat} Actions</h4>
-                  <ul className="bcorp-list">
-                    {byCategory[cat].map((a) => (
-                      <li key={a.external_action_id}>{a.tal_action.title}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+          <div className="textarea-section">
+            <div className="textarea-header">
+              <span>Introduction Paragraph</span>
             </div>
-          )}
+            <div className="textarea-body">
+              <ProseEditor rows={3} value={get("government")} onChange={(v) => set("government", v)} />
+            </div>
+          </div>
+          {orderedCats.map((cat) => (
+            <div key={cat} className="bcorp-list-section">
+              <h4>{cat} Actions</h4>
+              <ul>
+                {byCategory[cat].map((a) => (
+                  <li key={a.external_action_id}>{a.tal_action.title}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </>
       )}
     </section>

@@ -2,7 +2,8 @@
 
 import type { FieldGetter, FieldHint, FieldSetter } from "@/components/bcorps/form-types";
 import { ProseEditor } from "@/components/bcorps/prose-editor";
-import { FieldGroup } from "@/components/bcorps/ui/field-group";
+import { TextareaSection } from "@/components/bcorps/ui/field-group";
+import { ToggleSection } from "@/components/bcorps/ui/toggle-section";
 import { YesNoSelect, yesNo } from "@/components/bcorps/ui/yes-no-select";
 import { Input } from "@/components/ui/input";
 import type { PlanAction } from "@/lib/bcorp/types";
@@ -19,33 +20,47 @@ export function DisclosureSection({
   actions: PlanAction[];
 }) {
   return (
-    <section className="space-y-2">
-      <h3 className="text-base font-semibold">Performance Reporting &amp; Public Disclosure</h3>
-      <p className="text-xs text-muted-foreground">Intro paragraph shown before the disclosure actions list.</p>
-      <ProseEditor rows={3} value={get("disclosure_intro")} onChange={(v) => set("disclosure_intro", v)} />
+    <section>
+      <h3>Performance Reporting &amp; Public Disclosure</h3>
+      <div className="textarea-section">
+        <div className="textarea-header">
+          <span>Introduction Paragraph</span>
+          <aside>shown before the disclosure actions list</aside>
+        </div>
+        <div className="textarea-body">
+          <ProseEditor rows={3} value={get("disclosure_intro")} onChange={(v) => set("disclosure_intro", v)} />
+        </div>
+      </div>
       {actions.length > 0 && (
-        <>
-          <h4 className="text-sm font-semibold">Actions</h4>
-          <ul className="bcorp-list">
+        <div className="bcorp-list-section">
+          <h4>Actions</h4>
+          <ul>
             {actions.map((a) => (
               <li key={a.tal_action.title}>{a.tal_action.title}</li>
             ))}
           </ul>
-        </>
+        </div>
       )}
-      <FieldGroup label="Reports through CDP" {...hint("reporting_cdp")}>
+      <ToggleSection label="Reports through CDP">
         <YesNoSelect value={yesNo(get("reporting_cdp"))} onChange={(v) => set("reporting_cdp", v)} />
-      </FieldGroup>
-      <FieldGroup label="Has an Ecovadis Rating" {...hint("rating_ecovadis")}>
+      </ToggleSection>
+      <ToggleSection label="Has an Ecovadis Rating">
         <YesNoSelect value={yesNo(get("rating_ecovadis"))} onChange={(v) => set("rating_ecovadis", v)} />
-      </FieldGroup>
+      </ToggleSection>
       {get("rating_ecovadis") === "yes" && (
-        <FieldGroup label="Ecovadis Rating Level" {...hint("rating_ecovadis_level")}>
+        <TextareaSection label="Ecovadis Rating Level" {...hint("rating_ecovadis_level")}>
           <Input value={get("rating_ecovadis_level")} onChange={(e) => set("rating_ecovadis_level", e.target.value)} />
-        </FieldGroup>
+        </TextareaSection>
       )}
-      <p className="text-xs text-muted-foreground">Closing paragraph shown after the actions and certifications.</p>
-      <ProseEditor rows={3} value={get("disclosure_closing")} onChange={(v) => set("disclosure_closing", v)} />
+      <div className="textarea-section">
+        <div className="textarea-header">
+          <span>Closing Paragraph</span>
+          <aside>shown after the actions and certifications</aside>
+        </div>
+        <div className="textarea-body">
+          <ProseEditor rows={3} value={get("disclosure_closing")} onChange={(v) => set("disclosure_closing", v)} />
+        </div>
+      </div>
     </section>
   );
 }

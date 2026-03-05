@@ -17,11 +17,7 @@ export function ProseEditor({ value, onChange, placeholder, className, rows = 4 
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className={cn(
-        "w-full rounded-[8px] border border-input bg-background px-3 py-2 text-sm",
-        "focus:outline-none focus:ring-2 focus:ring-primary/40",
-        className
-      )}
+      className={cn("w-full bg-background px-3 py-2 text-sm", className)}
     />
   );
 }

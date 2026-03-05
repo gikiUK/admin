@@ -5,9 +5,9 @@ const PRINTABLE_CSS = `
   --page-width: 210mm;
   --page-height: 297mm;
 
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-heading: 'Literata', Georgia, serif;
-  --font-size-base: 12.5pt;
+  --font-body: 'Source Sans 3', sans-serif;
+  --font-heading: 'Source Sans 3', sans-serif;
+  --font-size-base: 14pt;
   --font-size-body: var(--font-size-base);
   --font-size-h1: calc(var(--font-size-base) * 2.2);
   --font-size-h2: calc(var(--font-size-base) * 2.3);
@@ -99,8 +99,7 @@ tr { break-inside: avoid; }
 }
 `;
 
-const FONTS_URL =
-  "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Literata:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap";
+const FONTS_URL = "https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&display=swap";
 
 export function PrintableLayout({ children }: { children: React.ReactNode }) {
   return (
