@@ -235,17 +235,17 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
       const hist = alreadyAtDiscard
         ? state.history
         : appendToHistory(
-          state.history,
-          {
-            id: crypto.randomUUID(),
-            timestamp: Date.now(),
-            action: null,
-            description: "Discarded draft",
-            details: [],
-            isDiscard: true
-          },
-          state.dataset?.data ?? ({} as DatasetData)
-        );
+            state.history,
+            {
+              id: crypto.randomUUID(),
+              timestamp: Date.now(),
+              action: null,
+              description: "Discarded draft",
+              details: [],
+              isDiscard: true
+            },
+            state.dataset?.data ?? ({} as DatasetData)
+          );
       return {
         ...state,
         draft: null,

@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import ReactMarkdown from "react-markdown"
-import remarkDirective from "remark-directive"
+import ReactMarkdown from "react-markdown";
+import remarkDirective from "remark-directive";
 
 interface MarkdownDocProps {
-  content: string
+  content: string;
 }
 
 export function MarkdownDoc({ content }: MarkdownDocProps) {
@@ -22,15 +22,15 @@ export function MarkdownDoc({ content }: MarkdownDocProps) {
           </a>
         ),
         code: ({ children, className }) => {
-          const isBlock = className?.startsWith("language-")
+          const isBlock = className?.startsWith("language-");
           if (isBlock) {
             return (
               <code className="block overflow-x-auto whitespace-pre rounded-lg bg-muted p-4 text-sm leading-relaxed">
                 {children}
               </code>
-            )
+            );
           }
-          return <code className="rounded bg-muted px-1.5 py-0.5 text-sm">{children}</code>
+          return <code className="rounded bg-muted px-1.5 py-0.5 text-sm">{children}</code>;
         },
         pre: ({ children }) => <pre className="my-2">{children}</pre>,
         ul: ({ children }) => <ul className="list-inside list-disc space-y-1 text-[15px]">{children}</ul>,
@@ -44,10 +44,10 @@ export function MarkdownDoc({ content }: MarkdownDocProps) {
             <code className="rounded bg-muted px-1.5 py-0.5 text-sm">{children}</code>
           </dt>
         ),
-        dd: ({ children }) => <dd className="ml-2 inline text-muted-foreground">{children}</dd>,
+        dd: ({ children }) => <dd className="ml-2 inline text-muted-foreground">{children}</dd>
       }}
     >
       {content}
     </ReactMarkdown>
-  )
+  );
 }
