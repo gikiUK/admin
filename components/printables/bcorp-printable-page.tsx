@@ -9,12 +9,14 @@ import type { BcorpData, Plan } from "@/lib/bcorp/types";
 export type BcorpPageProps = {
   data: BcorpData;
   plan: Plan;
+  alreadyDoingActions: Plan;
 };
 
 export function BcorpPrintablePage({ children }: { children: (props: BcorpPageProps) => React.ReactNode }) {
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<BcorpData | null>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
+  const [alreadyDoingActions, setAlreadyDoingActions] = useState<Plan>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -26,9 +28,10 @@ export function BcorpPrintablePage({ children }: { children: (props: BcorpPagePr
       }),
       fetchPlan(id)
     ])
-      .then(([bcorpData, planData]) => {
+      .then(([bcorpData, { plan: planData, alreadyDoingActions: alreadyDoing }]) => {
         setData(bcorpData as BcorpData);
         setPlan(planData);
+        setAlreadyDoingActions(alreadyDoing);
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : "Failed to load data");
@@ -39,5 +42,5 @@ export function BcorpPrintablePage({ children }: { children: (props: BcorpPagePr
   if (loading) return <div className="p-8 text-sm text-gray-500">Loading...</div>;
   if (error) return <div className="p-8 text-sm text-red-600">{error}</div>;
 
-  return <PrintableLayout>{children({ data: data ?? {}, plan: plan ?? [] })}</PrintableLayout>;
+  return <PrintableLayout>{children({ data: data ?? {}, plan: plan ?? [], alreadyDoingActions })}</PrintableLayout>;
 }

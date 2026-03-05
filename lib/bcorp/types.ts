@@ -21,6 +21,11 @@ export type PlanAction = {
 
 export type Plan = PlanAction[];
 
+export type FetchPlanResult = {
+  plan: Plan;
+  alreadyDoingActions: Plan;
+};
+
 export type BcorpData = {
   // Introduction
   company_description?: string;
