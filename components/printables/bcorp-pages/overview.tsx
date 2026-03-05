@@ -81,6 +81,8 @@ function initCharts(
 
   const breakdown = buildScopeBreakdown(plan);
 
+  const dpr = 3;
+
   new Chart(breakdownCanvas, {
     type: "bar",
     data: {
@@ -98,6 +100,7 @@ function initCharts(
       responsive: true,
       maintainAspectRatio: false,
       animation: false,
+      devicePixelRatio: dpr,
       plugins: { legend: { display: false } },
       scales: {
         x: {
@@ -137,6 +140,7 @@ function initCharts(
       responsive: true,
       maintainAspectRatio: false,
       animation: false,
+      devicePixelRatio: dpr,
       cutout: "55%",
       layout: { padding: { left: 40, right: -30 } },
       plugins: {
