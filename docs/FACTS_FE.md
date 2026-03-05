@@ -1,10 +1,10 @@
-# Facts Engine — Frontend Guide
+# Facts Engine - Frontend Guide
 
 ## What this is
 
 Giki narrows ~800 climate actions down to the ~50-100 relevant to a specific company. It does this through a pipeline: **questions** set **facts** about a company, **rules** derive additional facts, and **actions** are filtered based on those facts.
 
-Questions are asked throughout the UI — some during onboarding, others as the user explores different areas of the platform.
+Questions are asked throughout the UI - some during onboarding, others as the user explores different areas of the platform.
 
 The admin UI lets admins edit this pipeline and test the effects before going live.
 
@@ -12,9 +12,9 @@ The admin UI lets admins edit this pipeline and test the effects before going li
 
 ### Two layers of data
 
-**Facts engine (dataset blob)** — the interdependent core: facts, questions, rules, and action conditions. Stored as a single JSONB blob per dataset. Versioned with draft/publish workflow.
+**Facts engine (dataset blob)** - the interdependent core: facts, questions, rules, and action conditions. Stored as a single JSONB blob per dataset. Versioned with draft/publish workflow.
 
-**Surrounding data (normal tables)** — action metadata (titles, descriptions, tags), reference values (industries, sizes), hotspots. Standard CRUD, independently managed.
+**Surrounding data (normal tables)** - action metadata (titles, descriptions, tags), reference values (industries, sizes), hotspots. Standard CRUD, independently managed.
 
 Action conditions live in the blob (versioned with facts they reference). Action metadata lives in normal tables, linked by action key.
 
@@ -22,7 +22,7 @@ Action conditions live in the blob (versioned with facts they reference). Action
 
 The facts engine data (facts, questions, rules, action conditions) is stored as a single JSONB blob in Postgres, one row per "dataset." This is because:
 - The data is tiny (~50KB)
-- Facts, questions, rules, and action conditions are deeply interdependent — changing a fact key must be reflected in all conditions atomically
+- Facts, questions, rules, and action conditions are deeply interdependent - changing a fact key must be reflected in all conditions atomically
 - It enables draft/publish workflow and diffing
 
 ### Draft/publish workflow
@@ -59,22 +59,22 @@ Validation errors are returned to the FE. A blob that fails validation can be sa
 
 ### Datasets
 ```
-GET    /admin/datasets              — list datasets (id, status, owner, timestamps)
-GET    /admin/datasets/:id          — full dataset blob + test cases
-POST   /admin/datasets              — create new draft (copies live)
-PATCH  /admin/datasets/:id          — save draft blob (validated)
-DELETE /admin/datasets/:id          — delete a draft
-POST   /admin/datasets/:id/publish  — promote draft to live (must pass validation)
-POST   /admin/datasets/:id/test     — run test cases, return results
-POST   /admin/datasets/:id/diff     — compare with another dataset
+GET    /admin/datasets              - list datasets (id, status, owner, timestamps)
+GET    /admin/datasets/:id          - full dataset blob + test cases
+POST   /admin/datasets              - create new draft (copies live)
+PATCH  /admin/datasets/:id          - save draft blob (validated)
+DELETE /admin/datasets/:id          - delete a draft
+POST   /admin/datasets/:id/publish  - promote draft to live (must pass validation)
+POST   /admin/datasets/:id/test     - run test cases, return results
+POST   /admin/datasets/:id/diff     - compare with another dataset
 ```
 
 ### Reference Values
 ```
-GET    /admin/reference_values      — all reference values (grouped by group_key)
-POST   /admin/reference_values      — create a value
-PATCH  /admin/reference_values/:id  — update a value
-DELETE /admin/reference_values/:id  — soft delete a value
+GET    /admin/reference_values      - all reference values (grouped by group_key)
+POST   /admin/reference_values      - create a value
+PATCH  /admin/reference_values/:id  - update a value
+DELETE /admin/reference_values/:id  - soft delete a value
 ```
 
 ## Dataset blob structure
@@ -164,20 +164,20 @@ The blob returned by `GET /admin/datasets/:id` has this shape:
 ## Data types in the blob
 
 ### Fact types
-- `boolean_state` — values: `true`, `false`, `unknown`, `not_applicable`
-- `enum` — single value from a reference values group (by ID)
-- `array` — multiple values from a reference values group (by ID)
+- `boolean_state` - values: `true`, `false`, `unknown`, `not_applicable`
+- `enum` - single value from a reference values group (by ID)
+- `array` - multiple values from a reference values group (by ID)
 
 `values_ref` on a fact points to a `group_key` in the reference values table.
 
 ### Question types
-- `boolean_state` — yes/no/not sure, sets one fact via `fact` key
-- `single-select` — pick one from `options_ref` group, sets one fact via `fact` key
-- `multi-select` — pick many from `options_ref` group, sets one array fact via `fact` key
-- `checkbox-radio-hybrid` — inline `options` with `exclusive` flags, sets multiple facts via `facts` mapping
+- `boolean_state` - yes/no/not sure, sets one fact via `fact` key
+- `single-select` - pick one from `options_ref` group, sets one fact via `fact` key
+- `multi-select` - pick many from `options_ref` group, sets one array fact via `fact` key
+- `checkbox-radio-hybrid` - inline `options` with `exclusive` flags, sets multiple facts via `facts` mapping
 
 ### Rule condition shapes
-Rules are ordered — earlier rules take priority. Hotspot rules come before general rules.
+Rules are ordered - earlier rules take priority. Hotspot rules come before general rules.
 
 ```json
 { "remote_only": true }
@@ -195,15 +195,15 @@ Questions can have `show_when` (only display when condition met) and `hide_when`
 
 ## Admin workflow
 
-1. Admin clicks "Start new version" — API creates a draft copied from live
+1. Admin clicks "Start new version" - API creates a draft copied from live
 2. FE loads the blob into local state
 3. Admin edits facts/questions/rules/action conditions in the UI
 4. Work-in-progress auto-saves to localStorage
 5. Admin can save the draft to the API at any point (validated on save)
 6. Admin picks a company and previews the effects of their changes
-7. Admin runs the test suite — sees pass/fail/diffs
+7. Admin runs the test suite - sees pass/fail/diffs
 8. Admin updates test expectations for deliberate changes
-9. Admin clicks "Go live" — draft becomes the new live dataset (must pass validation)
+9. Admin clicks "Go live" - draft becomes the new live dataset (must pass validation)
 10. Previous live dataset is archived (available for rollback)
 
 ## Reference values

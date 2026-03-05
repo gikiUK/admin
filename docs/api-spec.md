@@ -1,8 +1,8 @@
-# Giki Admin — Required API Endpoints
+# Giki Admin - Required API Endpoints
 
 ## Facts
 
-**`GET /api/facts`** — Returns all facts with their relationships (question, rules, action count), grouped by category.
+**`GET /api/facts`** - Returns all facts with their relationships (question, rules, action count), grouped by category.
 
 ```json
 [
@@ -30,7 +30,7 @@
 ]
 ```
 
-**`GET /api/facts/:id`** — Returns a single enriched fact by ID (same shape as above, without the category wrapper).
+**`GET /api/facts/:id`** - Returns a single enriched fact by ID (same shape as above, without the category wrapper).
 
 ```json
 {
@@ -50,7 +50,7 @@
 }
 ```
 
-**`POST /api/facts`** — Creates a new fact.
+**`POST /api/facts`** - Creates a new fact.
 
 ```json
 {
@@ -61,7 +61,7 @@
 }
 ```
 
-**`PATCH /api/facts/:id`** — Updates a fact's properties (type, core, values_ref).
+**`PATCH /api/facts/:id`** - Updates a fact's properties (type, core, values_ref).
 
 ```json
 {
@@ -71,11 +71,11 @@
 }
 ```
 
-**`DELETE /api/facts/:id`** — Deletes a fact and its associated rules.
+**`DELETE /api/facts/:id`** - Deletes a fact and its associated rules.
 
 ## Rules (scoped to a fact)
 
-**`GET /api/facts/:id/rules`** — Returns all rules that set this fact.
+**`GET /api/facts/:id/rules`** - Returns all rules that set this fact.
 
 ```json
 [
@@ -97,15 +97,15 @@
 - Array match: `{ "industries": ["Advertising", "Interactive Media & Services"] }`
 - Any-of (OR): `{ "any": [{ "owns_buildings": true }, { "leases_buildings": true }] }`
 
-**`POST /api/facts/:id/rules`** — Adds a rule. Body is a single rule object (same shape as above).
+**`POST /api/facts/:id/rules`** - Adds a rule. Body is a single rule object (same shape as above).
 
-**`PATCH /api/facts/:id/rules/:index`** — Updates a rule by its index within this fact's rules.
+**`PATCH /api/facts/:id/rules/:index`** - Updates a rule by its index within this fact's rules.
 
-**`DELETE /api/facts/:id/rules/:index`** — Deletes a rule by index.
+**`DELETE /api/facts/:id/rules/:index`** - Deletes a rule by index.
 
 ## Questions
 
-**`GET /api/questions`** — Returns the ordered list of questions.
+**`GET /api/questions`** - Returns the ordered list of questions.
 
 ```json
 [
@@ -143,20 +143,20 @@
 ```
 
 There are 4 question types:
-- `boolean_state` — yes/no, sets a single `fact`
-- `single-select` — one choice from `options_ref` (a constants group), sets a single `fact`
-- `multi-select` — multiple choices from `options_ref`, sets a single `fact` (array type)
-- `checkbox-radio-hybrid` — inline `options` with `exclusive` flags, sets multiple facts via the `facts` map
+- `boolean_state` - yes/no, sets a single `fact`
+- `single-select` - one choice from `options_ref` (a constants group), sets a single `fact`
+- `multi-select` - multiple choices from `options_ref`, sets a single `fact` (array type)
+- `checkbox-radio-hybrid` - inline `options` with `exclusive` flags, sets multiple facts via the `facts` map
 
 A question links to facts in one of two ways:
-- `fact`: string — sets a single fact directly (used by boolean_state, single-select, multi-select)
-- `facts`: object — maps option values to fact assignments (used by checkbox-radio-hybrid). Contains a `defaults` key for reset values.
+- `fact`: string - sets a single fact directly (used by boolean_state, single-select, multi-select)
+- `facts`: object - maps option values to fact assignments (used by checkbox-radio-hybrid). Contains a `defaults` key for reset values.
 
 `show_when` / `hide_when` use the same `Condition` shape as rules (see Rules section).
 
-**`GET /api/questions/:index`** — Returns a single question by its index.
+**`GET /api/questions/:index`** - Returns a single question by its index.
 
-**`POST /api/questions`** — Creates a new question (appended to end of list).
+**`POST /api/questions`** - Creates a new question (appended to end of list).
 
 ```json
 {
@@ -169,7 +169,7 @@ A question links to facts in one of two ways:
 }
 ```
 
-**`PATCH /api/questions/:index`** — Updates a question at the given index.
+**`PATCH /api/questions/:index`** - Updates a question at the given index.
 
 ```json
 {
@@ -179,9 +179,9 @@ A question links to facts in one of two ways:
 }
 ```
 
-**`DELETE /api/questions/:index`** — Deletes a question by index.
+**`DELETE /api/questions/:index`** - Deletes a question by index.
 
-**`PATCH /api/questions/reorder`** — Reorders questions. Body is the new ordered list of indices.
+**`PATCH /api/questions/reorder`** - Reorders questions. Body is the new ordered list of indices.
 
 ```json
 { "order": [0, 2, 1, 3, 4] }
@@ -189,7 +189,7 @@ A question links to facts in one of two ways:
 
 ## Constants (enum value lists)
 
-**`GET /api/constants`** — Returns all constant groups.
+**`GET /api/constants`** - Returns all constant groups.
 
 ```json
 [
@@ -198,15 +198,15 @@ A question links to facts in one of two ways:
 ]
 ```
 
-**`POST /api/constants`** — Creates a new constant group.
+**`POST /api/constants`** - Creates a new constant group.
 
 ```json
 { "name": "MY_OPTIONS", "value_type": "string" }
 ```
 
-**`DELETE /api/constants/:name`** — Deletes a constant group.
+**`DELETE /api/constants/:name`** - Deletes a constant group.
 
-**`POST /api/constants/:name/values`** — Adds a value to a group.
+**`POST /api/constants/:name/values`** - Adds a value to a group.
 
 ```json
 { "value": "New Option" }
@@ -216,9 +216,9 @@ or for label-value:
 { "value": { "label": "Display Name", "value": "internal_key" } }
 ```
 
-**`PATCH /api/constants/:name/values/:index`** — Updates a value at index.
+**`PATCH /api/constants/:name/values/:index`** - Updates a value at index.
 
-**`DELETE /api/constants/:name/values/:index`** — Deletes a value at index.
+**`DELETE /api/constants/:name/values/:index`** - Deletes a value at index.
 
 ## Summary
 

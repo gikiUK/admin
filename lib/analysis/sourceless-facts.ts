@@ -15,7 +15,7 @@ export function extractConditionFacts(condition: BlobCondition): string[] {
   );
 }
 
-/** Return fact IDs that have no source — no enabled question or rule sets them */
+/** Return fact IDs that have no source - no enabled question or rule sets them */
 export function findSourcelessFacts(factIds: string[], data: DatasetData): string[] {
   return factIds.filter((id) => {
     const fact = data.facts[id];

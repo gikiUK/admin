@@ -28,7 +28,7 @@ export function QuestionCard({ question, conditionallyHidden }: QuestionCardProp
 
   return (
     // biome-ignore lint/a11y/useKeyWithClickEvents: card is supplemental click target, inner links are keyboard-accessible
-    // biome-ignore lint/a11y/noStaticElementInteractions: intentional — card wraps interactive children
+    // biome-ignore lint/a11y/noStaticElementInteractions: intentional - card wraps interactive children
     <div onClick={handleClick} className="cursor-pointer">
       <Card
         className={cn(

@@ -20,7 +20,7 @@ export function useAutoSave(state: DatasetState, dispatch: Dispatch<DatasetActio
   const doSave = useCallback(async () => {
     const { dataset, mutationVersion, savedVersion, isEditing } = stateRef.current;
     if (!dataset || !isEditing || mutationVersion <= savedVersion) return;
-    if (savingRef.current) return; // another save in flight — will re-check after
+    if (savingRef.current) return; // another save in flight - will re-check after
 
     savingRef.current = true;
     const savingVersion = mutationVersion;

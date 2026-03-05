@@ -7,7 +7,7 @@ DatasetBlob = { data: DatasetData, test_cases: TestCase[] }
 DatasetData = { facts, questions, rules, constants, action_conditions }
 ```
 
-## Facts — `Record<string, BlobFact>`
+## Facts - `Record<string, BlobFact>`
 ```ts
 BlobFact = {
   type: "boolean_state" | "enum" | "array"
@@ -19,7 +19,7 @@ BlobFact = {
 ```
 Key: fact ID string (e.g. "has_company_vehicles")
 
-## Questions — `BlobQuestion[]` (array, index matters!)
+## Questions - `BlobQuestion[]` (array, index matters!)
 ```ts
 BlobQuestion = {
   type: "boolean_state" | "single-select" | "multi-select" | "checkbox-radio-hybrid"
@@ -36,7 +36,7 @@ BlobQuestion = {
 }
 ```
 
-## Rules — `BlobRule[]` (array, index matters!)
+## Rules - `BlobRule[]` (array, index matters!)
 ```ts
 BlobRule = {
   sets: string           // fact ID being set
@@ -49,13 +49,13 @@ BlobRule = {
 - `value === true` + `!core` = derivation rule
 - `value === false` or `"not_applicable"` = constraint rule
 
-## Constants — `Record<string, BlobConstantValue[]>`
+## Constants - `Record<string, BlobConstantValue[]>`
 ```ts
 BlobConstantValue = { id: number, name: string, label?: string, description: string|null, enabled: boolean }
 ```
 Groups: industries, building_types, sizes, etc. Referenced by `values_ref`/`options_ref`.
 
-## Action Conditions — `Record<string, BlobActionCondition>`
+## Action Conditions - `Record<string, BlobActionCondition>`
 ```ts
 BlobActionCondition = {
   enabled: boolean

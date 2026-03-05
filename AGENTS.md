@@ -35,10 +35,10 @@ This is a standalone project (not a monorepo). All commands run from the project
 
 Read these before making changes to understand how the system works:
 
-- [State Management](docs/state-management.md) — reducer, auto-save, smart dispatch, race conditions, API endpoints, lifecycles
-- [UI Architecture](docs/ui-architecture.md) — layout hierarchy, routes, component map, server/client boundaries
-- [Data Model](docs/data-model.md) — Dataset/Facts/Questions/Rules/Constants/ActionConditions types, conditions, enriched types
-- [Condition Patterns](docs/condition-patterns.md) — breakdown of all conditions across data files
+- [State Management](docs/state-management.md) - reducer, auto-save, smart dispatch, race conditions, API endpoints, lifecycles
+- [UI Architecture](docs/ui-architecture.md) - layout hierarchy, routes, component map, server/client boundaries
+- [Data Model](docs/data-model.md) - Dataset/Facts/Questions/Rules/Constants/ActionConditions types, conditions, enriched types
+- [Condition Patterns](docs/condition-patterns.md) - breakdown of all conditions across data files
 
 ### Key Architecture Decisions
 
@@ -50,8 +50,8 @@ Read these before making changes to understand how the system works:
 
 ### Known Gotchas
 
-- Questions and Rules use array indices as identifiers — index shifts break references
-- Browser logs 404 for GET /draft when no draft exists — this is normal (caught by ApiError.isNotFound)
+- Questions and Rules use array indices as identifiers - index shifts break references
+- Browser logs 404 for GET /draft when no draft exists - this is normal (caught by ApiError.isNotFound)
 - DRAFT_CREATED must bump `mutationVersion` when replaying pending mutations, or auto-save won't trigger
 - AUTO_SAVED keeps local data (not server response) to handle edits during save flight
 

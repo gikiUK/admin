@@ -154,7 +154,7 @@ function DatasetHeaderInner() {
         </div>
       )}
 
-      {/* History button — always visible when there's history, independent of draft/live */}
+      {/* History button - always visible when there's history, independent of draft/live */}
       {hasHistory && (
         <TooltipProvider>
           <Tooltip>

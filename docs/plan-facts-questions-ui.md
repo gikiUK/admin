@@ -22,16 +22,16 @@ Then fix formatting: `pnpm run check:fix`
 
 Define types matching the JSON structures:
 - `FactType` = `"boolean_state" | "enum" | "array"`
-- `FactDefinition` — id, type, core, valuesRef?, values?
+- `FactDefinition` - id, type, core, valuesRef?, values?
 - `QuestionType` = `"boolean_state" | "single-select" | "multi-select" | "checkbox-radio-hybrid"`
-- `Question` — index, type, label, description?, fact?, facts? (for checkbox-radio-hybrid), options?, optionsRef?, showWhen?, hideWhen?, unknowable?
-- `Condition` — `SimpleCondition | AnyCondition` for show_when/hide_when
+- `Question` - index, type, label, description?, fact?, facts? (for checkbox-radio-hybrid), options?, optionsRef?, showWhen?, hideWhen?, unknowable?
+- `Condition` - `SimpleCondition | AnyCondition` for show_when/hide_when
 
 ### Step 3: Data loaders
 
-**Create `lib/data/constants.ts`** — reads `../facts/data/constants.json`
-**Create `lib/data/facts.ts`** — reads `../facts/data/facts.json`, transforms map → array with id embedded, resolves `values_ref` from constants
-**Create `lib/data/questions.ts`** — reads `../facts/data/questions.json`, transforms to typed array with index, camelCases keys (show_when → showWhen)
+**Create `lib/data/constants.ts`** - reads `../facts/data/constants.json`
+**Create `lib/data/facts.ts`** - reads `../facts/data/facts.json`, transforms map → array with id embedded, resolves `values_ref` from constants
+**Create `lib/data/questions.ts`** - reads `../facts/data/questions.json`, transforms to typed array with index, camelCases keys (show_when → showWhen)
 
 All use `readFileSync` from `node:fs`. Path: `resolve(process.cwd(), "..", "facts", "data")`.
 
@@ -53,7 +53,7 @@ All use `readFileSync` from `node:fs`. Path: `resolve(process.cwd(), "..", "fact
 
 ### Step 5: Update home page
 
-**Modify `app/page.tsx`** — redirect to `/data/facts`
+**Modify `app/page.tsx`** - redirect to `/data/facts`
 
 ### Step 6: Facts page
 
@@ -84,8 +84,8 @@ All use `readFileSync` from `node:fs`. Path: `resolve(process.cwd(), "..", "fact
 ### Step 8: Update tests
 
 - Update `tests/sanity.test.tsx` for the redirect behavior
-- Add `tests/data/facts.test.ts` — validates loadFacts returns correct structure/count
-- Add `tests/data/questions.test.ts` — validates loadQuestions returns correct structure/count
+- Add `tests/data/facts.test.ts` - validates loadFacts returns correct structure/count
+- Add `tests/data/questions.test.ts` - validates loadQuestions returns correct structure/count
 
 ## Files to Create/Modify
 
@@ -110,12 +110,12 @@ All use `readFileSync` from `node:fs`. Path: `resolve(process.cwd(), "..", "fact
 
 ## Verification
 
-1. `pnpm run dev` — sidebar renders, navigation works between Facts and Questions
+1. `pnpm run dev` - sidebar renders, navigation works between Facts and Questions
 2. Facts page shows 63 facts with working search and filters
 3. Questions page shows 27 questions with conditions displayed
-4. `pnpm run check` — passes Biome checks
-5. `npx tsc --noEmit` — passes type checking
-6. `pnpm run test` — all tests pass
+4. `pnpm run check` - passes Biome checks
+5. `npx tsc --noEmit` - passes type checking
+6. `pnpm run test` - all tests pass
 
 ## Future Phases
 

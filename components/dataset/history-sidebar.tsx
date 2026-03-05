@@ -26,16 +26,16 @@ export function HistorySidebar() {
 
   return (
     <div data-state={open ? "expanded" : "collapsed"}>
-      {/* Backdrop — mobile only, closes panel on tap */}
+      {/* Backdrop - mobile only, closes panel on tap */}
       {open && <div className="fixed inset-0 z-10 bg-black/50 md:hidden" role="none" onClick={() => setOpen(false)} />}
 
-      {/* Gap — takes up space in the flex row so SidebarInset shrinks (desktop only) */}
+      {/* Gap - takes up space in the flex row so SidebarInset shrinks (desktop only) */}
       <div
         className="relative hidden w-0 bg-transparent transition-[width] duration-200 ease-linear data-[state=expanded]:w-[24rem] md:block"
         data-state={open ? "expanded" : "collapsed"}
       />
 
-      {/* Fixed panel — overlay on mobile, push on desktop */}
+      {/* Fixed panel - overlay on mobile, push on desktop */}
       <aside
         className="bg-sidebar text-sidebar-foreground fixed inset-y-0 right-0 z-20 flex h-svh w-[min(24rem,100vw)] flex-col border-l transition-[right] duration-200 ease-linear data-[state=collapsed]:right-[calc(min(24rem,100vw)*-1)]"
         data-state={open ? "expanded" : "collapsed"}

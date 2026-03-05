@@ -2,7 +2,7 @@ import type { SVGProps } from "react";
 
 type IconProps = SVGProps<SVGSVGElement>;
 
-/** Buffer — single pass-through */
+/** Buffer - single pass-through */
 export function GateSingle(props: IconProps) {
   return (
     <svg
@@ -20,7 +20,7 @@ export function GateSingle(props: IconProps) {
   );
 }
 
-/** AND — flat left, curved right */
+/** AND - flat left, curved right */
 export function GateAnd(props: IconProps) {
   return (
     <svg
@@ -38,7 +38,7 @@ export function GateAnd(props: IconProps) {
   );
 }
 
-/** OR — curved left, pointed right */
+/** OR - curved left, pointed right */
 export function GateOr(props: IconProps) {
   return (
     <svg

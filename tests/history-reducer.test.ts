@@ -120,7 +120,7 @@ describe("history reducer", () => {
       state = datasetReducer(state, { type: "SET_FACT", id: "test_fact", fact: editedFact });
       expect(state.isDirty).toBe(true);
 
-      // Undo to base — data matches live, so isDirty should be false
+      // Undo to base - data matches live, so isDirty should be false
       state = datasetReducer(state, { type: "UNDO", cursor: -1 });
       expect(state.isDirty).toBe(false);
     });
@@ -197,7 +197,7 @@ describe("history reducer", () => {
       };
 
       const next = datasetReducer(state, { type: "RESTORE_HISTORY", history });
-      // Should return state unchanged — stale history is discarded
+      // Should return state unchanged - stale history is discarded
       expect(next.history).toEqual(state.history);
       expect(next.dataset?.data).toEqual(state.dataset?.data);
     });
@@ -220,7 +220,7 @@ describe("history reducer", () => {
       expect(state.history.cursor).toBe(0);
       expect(state.history.entries).toHaveLength(2); // entries still there, just cursor moved
 
-      // New edit — should truncate the undone entry
+      // New edit - should truncate the undone entry
       state = datasetReducer(state, { type: "SET_RULE", index: 0, rule: { ...baseRule, value: false } });
       expect(state.history.entries).toHaveLength(2); // entry[0] = SET_FACT, entry[1] = SET_RULE
       expect(state.history.cursor).toBe(1);
@@ -263,7 +263,7 @@ describe("history reducer", () => {
       expect(state.isDirty).toBe(false);
     });
 
-    it("DRAFT_DELETED is undoable — undo restores pre-discard data", () => {
+    it("DRAFT_DELETED is undoable - undo restores pre-discard data", () => {
       let state = stateWithDraft();
       state = datasetReducer(state, { type: "SET_FACT", id: "test_fact", fact: { ...baseFact, core: false } });
       expect(state.dataset?.data.facts.test_fact.core).toBe(false);
@@ -272,12 +272,12 @@ describe("history reducer", () => {
       state = datasetReducer(state, { type: "DRAFT_DELETED" });
       expect(state.dataset?.data.facts.test_fact.core).toBe(true); // reverted to live
 
-      // Undo the discard — should restore the edited state
+      // Undo the discard - should restore the edited state
       state = datasetReducer(state, { type: "UNDO", cursor: 0 });
       expect(state.dataset?.data.facts.test_fact.core).toBe(false);
       expect(state.isDirty).toBe(true);
 
-      // Redo the discard — should revert back to live
+      // Redo the discard - should revert back to live
       state = datasetReducer(state, { type: "REDO", cursor: 1 });
       expect(state.dataset?.data.facts.test_fact.core).toBe(true);
       expect(state.isDirty).toBe(false);
@@ -292,7 +292,7 @@ describe("history reducer", () => {
       state = datasetReducer(state, { type: "DRAFT_DELETED" });
       state = datasetReducer(state, { type: "UNDO", cursor: 0 });
 
-      // New edit — should truncate the discard entry
+      // New edit - should truncate the discard entry
       state = datasetReducer(state, {
         type: "SET_QUESTION",
         index: 0,
