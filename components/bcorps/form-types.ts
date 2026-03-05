@@ -8,4 +8,5 @@ export type FieldHint = (key: keyof BcorpData) => {
   isAI?: boolean;
   isPopulating?: boolean;
   aiHasData?: boolean;
+  onAiGenerate?: () => void;
 };

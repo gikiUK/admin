@@ -38,7 +38,12 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
 
   function set(key: keyof BcorpData, value: string) {
     setDirty(true);
-    setData((prev) => ({ ...prev, [key]: value }));
+    setData((prev) => {
+      const next = { ...prev, [key]: value };
+      const allFilled = AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== "");
+      setAllAiFilled(allFilled);
+      return next;
+    });
     setReasoning((prev) => {
       if (!prev[key]) return prev;
       const next = { ...prev };
@@ -52,7 +57,7 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
     const isPopulating = isAI && populateState === "populating";
     const r = reasoning[key as string];
     return {
-      ...(isAI ? { isAI: true, aiHasData: get(key) !== "" } : {}),
+      ...(isAI ? { isAI: true, aiHasData: get(key) !== "", onAiGenerate: () => handlePopulateField(key) } : {}),
       ...(isPopulating ? { isPopulating: true } : {}),
       ...(r ? { hint: r, filled: get(key) !== "" } : {})
     };
@@ -98,6 +103,45 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
       if (filled > 0)
         toast.success("AI fields populated", { description: `${filled} field${filled !== 1 ? "s" : ""} filled` });
       else toast.info("AI populate", { description: "No fields populated" });
+    } catch (err) {
+      setPopulateState("error", err instanceof Error ? err.message : "Populate failed");
+    }
+  }
+
+  async function handlePopulateField(key: keyof BcorpData) {
+    setPopulateState("populating", "");
+    try {
+      const fakeExisting = { ...data };
+      for (const f of AI_FIELDS) {
+        if (f !== (key as string) && !fakeExisting[f as keyof BcorpData]) {
+          (fakeExisting as Record<string, string>)[f] = "skip";
+        }
+      }
+      const res = await fetch("/api/bcorp/populate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orgId, orgName, plan, existingData: fakeExisting })
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? `Request failed (${res.status})`);
+      }
+      const { data: llmData, reasoning: llmReasoning } = await res.json();
+      const fieldValue = llmData[key as string];
+      setData((prev) => {
+        if (!fieldValue) return prev;
+        const next = { ...prev, [key]: fieldValue };
+        const allFilled = AI_FIELDS.every((k) => (next[k as keyof BcorpData] ?? "") !== "");
+        setAllAiFilled(allFilled);
+        return next;
+      });
+      if (llmReasoning?.[key as string]) {
+        setReasoning((prev) => ({ ...prev, [key as string]: llmReasoning[key as string] }));
+      }
+      setDirty(true);
+      setPopulateState("idle", "");
+      if (fieldValue) toast.success("AI field populated");
+      else toast.info("AI populate", { description: "No content generated" });
     } catch (err) {
       setPopulateState("error", err instanceof Error ? err.message : "Populate failed");
     }

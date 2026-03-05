@@ -3,7 +3,6 @@
 import { Info, Loader2, Sparkles } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
 
 type FieldGroupProps = {
   label: string;
@@ -13,6 +12,7 @@ type FieldGroupProps = {
   isAI?: boolean;
   isPopulating?: boolean;
   aiHasData?: boolean;
+  onAiGenerate?: () => void;
   children: React.ReactNode;
 };
 
@@ -24,10 +24,9 @@ export function FieldGroup({
   isAI,
   isPopulating,
   aiHasData,
+  onAiGenerate,
   children
 }: FieldGroupProps) {
-  const { populateRef } = useBcorpHeader();
-
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-1.5">
@@ -53,7 +52,7 @@ export function FieldGroup({
                     <button
                       type="button"
                       disabled={isPopulating || aiHasData}
-                      onClick={() => populateRef.current?.()}
+                      onClick={() => onAiGenerate?.()}
                       className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
                       style={{
                         background: "linear-gradient(135deg, #a855f7, #6366f1, #3b82f6)",
