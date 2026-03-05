@@ -35,6 +35,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
   }, [populateState]);
 
   const [plan, setPlanLocal] = useState<Plan | null>(null);
+  const [alreadyDoingActions, setAlreadyDoingActions] = useState<Plan | null>(null);
   const [bcorpData, setBcorpData] = useState<BcorpData | null>(null);
   const [initialReasoning, setInitialReasoning] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -43,7 +44,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
   useEffect(() => {
     async function load() {
       try {
-        const [{ plan: planData }, data] = await Promise.all([
+        const [{ plan: planData, alreadyDoingActions: alreadyDoing }, data] = await Promise.all([
           fetchPlan(orgId),
           fetchBcorpData(orgId).catch((err) => {
             if (err instanceof Error && "status" in err && (err as { status: number }).status === 404) return {};
@@ -52,6 +53,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         ]);
         const { data: ruleData, reasoning: ruleReasoning } = deriveFromPlan(planData);
         setPlanLocal(planData);
+        setAlreadyDoingActions(alreadyDoing);
         setPlan(planData);
         setBcorpData({ ...ruleData, ...(data as BcorpData) });
         setInitialReasoning(ruleReasoning);
@@ -105,6 +107,8 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
           <TabsTrigger value="bcorp">B Corp Data</TabsTrigger>
           <TabsTrigger value="plan">Plan ({plan?.length ?? 0})</TabsTrigger>
           <TabsTrigger value="json">JSON</TabsTrigger>
+          <TabsTrigger value="already-doing">Already Doing ({alreadyDoingActions?.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="already-doing-json">Already Doing JSON</TabsTrigger>
         </TabsList>
         <TabsContent value="bcorp" className="mt-6">
           {bcorpData !== null && (
@@ -116,6 +120,12 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         </TabsContent>
         <TabsContent value="json" className="mt-6">
           <PlanJsonExplorer plan={plan ?? []} />
+        </TabsContent>
+        <TabsContent value="already-doing" className="mt-6">
+          <PlanView plan={alreadyDoingActions ?? []} showFilters={false} />
+        </TabsContent>
+        <TabsContent value="already-doing-json" className="mt-6">
+          <PlanJsonExplorer plan={alreadyDoingActions ?? []} />
         </TabsContent>
       </Tabs>
     </>

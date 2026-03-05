@@ -76,7 +76,7 @@ function ActionCard({ action }: { action: PlanAction }) {
 
 // ─── ThemeGroup ──────────────────────────────────────────────────────────────
 
-function ThemeGroup({ theme, actions }: { theme: string; actions: PlanAction[] }) {
+function ThemeGroup({ theme, actions, showStarted }: { theme: string; actions: PlanAction[]; showStarted: boolean }) {
   const [open, setOpen] = useState(true);
   const started = actions.filter((a) => a.state !== "not_started").length;
 
@@ -87,9 +87,11 @@ function ThemeGroup({ theme, actions }: { theme: string; actions: PlanAction[] }
           className={`size-4 text-muted-foreground transition-transform duration-200 ${open ? "" : "-rotate-90"}`}
         />
         <span className="font-semibold text-sm">{theme}</span>
-        <span className="text-xs text-muted-foreground ml-1">
-          {started}/{actions.length} started
-        </span>
+        {showStarted && (
+          <span className="text-xs text-muted-foreground ml-1">
+            {started}/{actions.length} started
+          </span>
+        )}
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="mt-2 space-y-2 pl-6">
@@ -122,7 +124,7 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
 
 // ─── PlanView ─────────────────────────────────────────────────────────────────
 
-export function PlanView({ plan }: { plan: Plan }) {
+export function PlanView({ plan, showFilters = true }: { plan: Plan; showFilters?: boolean }) {
   const [stateFilter, setStateFilter] = useState<Set<string>>(new Set());
 
   if (plan.length === 0) {
@@ -137,10 +139,12 @@ export function PlanView({ plan }: { plan: Plan }) {
     });
   }
 
-  const filtered = plan.filter((a) => {
-    if (stateFilter.size > 0 && !stateFilter.has(a.state)) return false;
-    return true;
-  });
+  const filtered = showFilters
+    ? plan.filter((a) => {
+        if (stateFilter.size > 0 && !stateFilter.has(a.state)) return false;
+        return true;
+      })
+    : plan;
 
   // Group by theme, preserving order of first appearance
   const themeMap = new Map<string, PlanAction[]>();
@@ -156,24 +160,26 @@ export function PlanView({ plan }: { plan: Plan }) {
   return (
     <div className="space-y-5">
       {/* Filter bar */}
-      <div className="space-y-2">
-        <div className="flex flex-wrap gap-1.5">
-          {ALL_STATES.map((s) => {
-            const cfg = STATE_CONFIG[s];
-            return (
-              <FilterChip
-                key={s}
-                label={`${cfg.label} (${stateCounts[s]})`}
-                active={stateFilter.has(s)}
-                onClick={() => toggleState(s)}
-              />
-            );
-          })}
+      {showFilters && (
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-1.5">
+            {ALL_STATES.map((s) => {
+              const cfg = STATE_CONFIG[s];
+              return (
+                <FilterChip
+                  key={s}
+                  label={`${cfg.label} (${stateCounts[s]})`}
+                  active={stateFilter.has(s)}
+                  onClick={() => toggleState(s)}
+                />
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Results summary */}
-      {stateFilter.size > 0 && (
+      {showFilters && stateFilter.size > 0 && (
         <p className="text-xs text-muted-foreground">
           Showing {filtered.length} of {plan.length} actions
           <button type="button" className="ml-2 underline hover:no-underline" onClick={() => setStateFilter(new Set())}>
@@ -188,7 +194,7 @@ export function PlanView({ plan }: { plan: Plan }) {
           <p className="text-sm text-muted-foreground">No actions match the current filters.</p>
         ) : (
           Array.from(themeMap.entries()).map(([theme, actions]) => (
-            <ThemeGroup key={theme} theme={theme} actions={actions} />
+            <ThemeGroup key={theme} theme={theme} actions={actions} showStarted={showFilters} />
           ))
         )}
       </div>
