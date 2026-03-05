@@ -25,7 +25,6 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
 
   const [data, setData] = useState<BcorpData>({ ...initialData });
   const [reasoning, setReasoning] = useState<Record<string, string>>(initialReasoning);
-  const [populatingField, setPopulatingField] = useState<keyof BcorpData | null>(null);
 
   useEffect(() => {
     setAllAiFilled(AI_FIELDS.every((k) => (data[k as keyof BcorpData] ?? "") !== ""));
@@ -49,16 +48,15 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
 
   function hint(key: keyof BcorpData) {
     const isAI = AI_FIELDS.includes(key as string);
-    const isPopulating =
-      isAI && ((populateState === "populating" && populatingField === null) || populatingField === key);
+    const isPopulating = isAI && populateState === "populating";
     const r = reasoning[key as string];
     return {
       ...(isAI
         ? {
             isAI: true,
             aiHasData: get(key) !== "",
-            aiDisabled: populatingField === key || (populateState === "populating" && populatingField === null),
-            onAiGenerate: () => handlePopulateField(key)
+            aiDisabled: populateState === "populating",
+            onAiGenerate: () => handlePopulate()
           }
         : {}),
       ...(isPopulating ? { isPopulating: true } : {}),
@@ -103,39 +101,6 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
       else toast.info("AI populate", { description: "No fields populated" });
     } catch (err) {
       setPopulateState("error", err instanceof Error ? err.message : "Populate failed");
-    }
-  }
-
-  async function handlePopulateField(key: keyof BcorpData) {
-    setPopulatingField(key);
-    setPopulateState("populating", "");
-    try {
-      const res = await fetch("/api/bcorp/populate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orgId, orgName, plan, existingData: data, fieldsToPopulate: [key] })
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? `Request failed (${res.status})`);
-      }
-      const { data: llmData, reasoning: llmReasoning } = await res.json();
-      const fieldValue = llmData[key as string];
-      if (fieldValue) {
-        setData((prev) => ({ ...prev, [key]: fieldValue }));
-      }
-      if (llmReasoning?.[key as string]) {
-        setReasoning((prev) => ({ ...prev, [key as string]: llmReasoning[key as string] }));
-      }
-      if (fieldValue) setDirty(true);
-      setPopulatingField(null);
-      setPopulateState("idle", "");
-      if (fieldValue) toast.success("AI field populated");
-      else toast.info("AI populate", { description: "No content generated" });
-    } catch (err) {
-      setPopulatingField(null);
-      setPopulateState("idle", "");
-      toast.error(err instanceof Error ? err.message : "Populate failed");
     }
   }
 
