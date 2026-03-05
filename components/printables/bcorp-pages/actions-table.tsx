@@ -80,8 +80,8 @@ export function ActionsTable({ plan }: BcorpPageProps) {
     <div className="ui-page">
       <div className="ui-section">
         <ScopedActionsTable
-          title="Actions for Direct Emissions &amp; Electricity"
-          subtitle="Scope 1 &amp; 2 Emissions Actions"
+          title="Actions for Direct Emissions & Electricity"
+          subtitle="Scope 1 & 2 Emissions Actions"
           actions={scope12Actions}
         />
         <ScopedActionsTable
