@@ -18,9 +18,7 @@ export async function POST(req: Request) {
     wants("company_description")
       ? runCompanyDescription(client, orgName, existingData.company_description ?? "")
       : skip(),
-    wants("actions_overview")
-      ? runActionsOverview(client, orgName, plan, existingData.actions_overview ?? "")
-      : skip(),
+    wants("actions_overview") ? runActionsOverview(client, orgName, plan, existingData.actions_overview ?? "") : skip(),
     wants("actions_in_progress") || wants("actions_added")
       ? runProgressSummaries(
           client,

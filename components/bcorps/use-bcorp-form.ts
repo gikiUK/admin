@@ -56,7 +56,7 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
       ...(isAI
         ? {
             isAI: true,
-            aiHasData: get(key) !== "" || populateState === "populating",
+            aiHasData: get(key) !== "" || populatingField === key || (populateState === "populating" && populatingField === null),
             onAiGenerate: () => handlePopulateField(key)
           }
         : {}),
