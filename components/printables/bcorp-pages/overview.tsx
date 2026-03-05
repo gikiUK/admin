@@ -67,7 +67,13 @@ function buildScopeBreakdown(plan: Plan): { labels: string[]; data: number[] } {
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: Chart.js loaded from CDN
-function initCharts(Chart: any, breakdownCanvas: HTMLCanvasElement, impactCanvas: HTMLCanvasElement, plan: Plan, impact: { labels: string[]; data: number[] }) {
+function initCharts(
+  Chart: any,
+  breakdownCanvas: HTMLCanvasElement,
+  impactCanvas: HTMLCanvasElement,
+  plan: Plan,
+  impact: { labels: string[]; data: number[] }
+) {
   Chart.defaults.font.family = "'Inter', sans-serif";
   Chart.defaults.font.size = 14;
   Chart.defaults.font.weight = "400";
