@@ -178,7 +178,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         <TabsContent value="preview" className="mt-3">
           <iframe
             key={previewKey}
-            src={`/organizations/${orgId}/bcorp-content`}
+            src={`/printables/organizations/${orgId}/bcorp-content`}
             className="w-full rounded border border-border"
             style={{ height: "calc(100vh - 140px)" }}
             title="PDF Preview"
