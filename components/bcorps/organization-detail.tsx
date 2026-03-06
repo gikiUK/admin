@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BcorpDataForm } from "@/components/bcorps/bcorp-data-form";
 import { PillTab } from "@/components/bcorps/bcorp-header";
 import { PlanJsonExplorer } from "@/components/bcorps/plan-json-explorer";
@@ -35,6 +35,13 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
   useEffect(() => {
     if (populateState === "populating") setHasPopulated(true);
   }, [populateState]);
+
+  const [previewKey, setPreviewKey] = useState(0);
+  const prevTabRef = useRef<string>("bcorp");
+  useEffect(() => {
+    if (activeTab === "preview" && prevTabRef.current !== "preview") setPreviewKey((k) => k + 1);
+    prevTabRef.current = activeTab;
+  }, [activeTab]);
 
   const [plan, setPlanLocal] = useState<Plan | null>(null);
   const [alreadyDoingActions, setAlreadyDoingActions] = useState<Plan | null>(null);
@@ -129,6 +136,9 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
               JSON
             </PillTab>
           </div>
+          <PillTab value="preview" active={activeTab} onClick={setActiveTab}>
+            Preview
+          </PillTab>
         </div>
       </div>
 
@@ -149,6 +159,15 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         </TabsContent>
         <TabsContent value="already-doing-json" className="mt-3">
           <PlanJsonExplorer plan={alreadyDoingActions ?? []} />
+        </TabsContent>
+        <TabsContent value="preview" className="mt-3">
+          <iframe
+            key={previewKey}
+            src={`/organizations/${orgId}/bcorp-content`}
+            className="w-full rounded border border-border"
+            style={{ height: "calc(100vh - 140px)" }}
+            title="PDF Preview"
+          />
         </TabsContent>
       </Tabs>
     </>
