@@ -42,5 +42,7 @@ export function BcorpPrintablePage({ children }: { children: (props: BcorpPagePr
   if (loading) return <div className="p-8 text-sm text-gray-500">Loading...</div>;
   if (error) return <div className="p-8 text-sm text-red-600">{error}</div>;
 
-  return <PrintableLayout>{children({ data: data ?? {}, plan: plan ?? [], alreadyDoingActions })}</PrintableLayout>;
+  return (
+    <PrintableLayout>{children({ data: data ?? { name: "" }, plan: plan ?? [], alreadyDoingActions })}</PrintableLayout>
+  );
 }
