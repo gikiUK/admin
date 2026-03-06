@@ -102,26 +102,26 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         </div>
       )}
 
-      <Tabs defaultValue="bcorp" className="max-w-[760px]">
-        <TabsList>
+      <Tabs defaultValue="bcorp">
+        <TabsList className="max-w-[760px]">
           <TabsTrigger value="bcorp">B Corp Data</TabsTrigger>
           <TabsTrigger value="plan">Plan ({plan?.length ?? 0})</TabsTrigger>
           <TabsTrigger value="json">JSON</TabsTrigger>
           <TabsTrigger value="already-doing">Already Doing ({alreadyDoingActions?.length ?? 0})</TabsTrigger>
           <TabsTrigger value="already-doing-json">Already Doing JSON</TabsTrigger>
         </TabsList>
-        <TabsContent value="bcorp" className="mt-6">
+        <TabsContent value="bcorp" className="mt-6 max-w-[760px]">
           {bcorpData !== null && (
             <BcorpDataForm orgId={orgId} initialData={bcorpData} initialReasoning={initialReasoning} />
           )}
         </TabsContent>
-        <TabsContent value="plan" className="mt-6">
+        <TabsContent value="plan" className="mt-6 max-w-[760px]">
           <PlanView plan={plan ?? []} />
         </TabsContent>
         <TabsContent value="json" className="mt-6">
           <PlanJsonExplorer plan={plan ?? []} />
         </TabsContent>
-        <TabsContent value="already-doing" className="mt-6">
+        <TabsContent value="already-doing" className="mt-6 max-w-[760px]">
           <PlanView plan={alreadyDoingActions ?? []} showFilters={false} />
         </TabsContent>
         <TabsContent value="already-doing-json" className="mt-6">

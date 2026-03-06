@@ -86,15 +86,15 @@ export function SearchResultsList({ result, query, onNavigate }: SearchResultsLi
   return (
     <div className="space-y-1">
       {result.truncated && (
-        <p className="text-xs text-muted-foreground pb-1">
+        <p className="text-xs text-muted-foreground pb-2">
           Showing {result.matches.length} of {result.total} matches
         </p>
       )}
-      {result.matches.length === 0 && <p className="text-sm text-muted-foreground py-4">No matches found.</p>}
+      {result.matches.length === 0 && <p className="text-xs text-muted-foreground py-4">No matches found.</p>}
       {result.matches.map((match, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: stable search result order
         <div key={i} className="flex items-baseline gap-2 py-0.5">
-          <span className="flex shrink-0 items-center gap-0.5 text-muted-foreground">
+          <span className="flex shrink-0 items-center gap-0.5 text-xs text-muted-foreground">
             {match.path.map((segment, j) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: stable path segments
               <span key={j} className="flex items-center gap-0.5">
@@ -103,12 +103,12 @@ export function SearchResultsList({ result, query, onNavigate }: SearchResultsLi
                   <button
                     type="button"
                     onClick={() => onNavigate(match.path.slice(0, j + 1))}
-                    className="text-[11px] hover:text-foreground hover:underline"
+                    className="hover:text-foreground hover:underline"
                   >
                     {segment}
                   </button>
                 ) : (
-                  <span className="text-[11px]">{segment}</span>
+                  <span>{segment}</span>
                 )}
               </span>
             ))}

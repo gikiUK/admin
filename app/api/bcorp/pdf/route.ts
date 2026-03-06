@@ -29,17 +29,17 @@ export async function POST(req: Request) {
     const cfEndpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/browser-rendering/pdf`;
 
     // Fetch all three PDFs in parallel (matches Ruby's threaded approach)
-    const [headerBytes, contentBytes, footerBytes] = await Promise.all([
+    const [headerBytes, contentBytes] = await Promise.all([
       fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-header?print&jwt=${encodeURIComponent(jwt)}`, ZERO_MARGIN),
-      fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-content?print&jwt=${encodeURIComponent(jwt)}`, CONTENT_MARGIN),
-      fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-footer?print&jwt=${encodeURIComponent(jwt)}`, ZERO_MARGIN)
+      fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-content?print&jwt=${encodeURIComponent(jwt)}`, CONTENT_MARGIN)
+      // fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-footer?print&jwt=${encodeURIComponent(jwt)}`, ZERO_MARGIN)
     ]);
 
     // Add page numbers to content PDF (starting at page 2)
     const numberedContent = await addPageNumbers(contentBytes);
 
     // Combine all three PDFs
-    const combined = await combinePdfs(headerBytes, numberedContent, footerBytes);
+    const combined = await combinePdfs(headerBytes, numberedContent);
 
     // const combined = await fetchPdf(cfEndpoint, apiToken, `${orgBase}/bcorp-content?print&jwt=${encodeURIComponent(jwt)}`, CONTENT_MARGIN);
 

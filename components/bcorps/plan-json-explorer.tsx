@@ -1,11 +1,11 @@
 "use client";
 
-import { ChevronRight, ChevronsDownUp, ChevronsUpDown, Home, Search, X } from "lucide-react";
+import { ChevronRight, ChevronsDownUp, ChevronsUpDown, Home, X } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import { JsonTree } from "@/components/raw/json-tree";
 import { SearchResultsList } from "@/components/raw/search-results";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Command, CommandInput } from "@/components/ui/command";
 import type { Plan } from "@/lib/bcorp/types";
 import { flattenSearch } from "@/lib/blob/flatten-search";
 
@@ -72,37 +72,31 @@ export function PlanJsonExplorer({ plan }: { plan: Plan }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute top-2.5 left-3 size-4 text-muted-foreground" />
-          <Input
-            placeholder="Search keys and values..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-20"
-          />
-          {search && (
-            <div className="absolute top-1.5 right-2 flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground">
-                {searchResult.total} {searchResult.total === 1 ? "match" : "matches"}
-              </span>
-              <Button variant="ghost" size="icon-xs" onClick={() => setSearch("")}>
-                <X className="size-3" />
-              </Button>
-            </div>
-          )}
-        </div>
-        {!isSearching && (
-          <div className="flex gap-2 shrink-0">
-            <Button variant="outline" size="sm" onClick={() => setCollapseSignal((s) => s + 1)}>
-              <ChevronsDownUp className="size-3" />
+      <div className="flex items-center gap-2">
+        <Command className="flex-1 rounded-md border">
+          <CommandInput placeholder="Search keys and values..." value={search} onValueChange={setSearch} />
+        </Command>
+        {search ? (
+          <>
+            <span className="shrink-0 text-sm text-muted-foreground">
+              {searchResult.total} {searchResult.total === 1 ? "match" : "matches"}
+            </span>
+            <Button variant="outline" onClick={() => setSearch("")}>
+              <X className="size-4" />
+              Clear
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button variant="outline" onClick={() => setCollapseSignal((s) => s + 1)}>
+              <ChevronsDownUp className="size-4" />
               Collapse all
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setExpandSignal((s) => s + 1)}>
-              <ChevronsUpDown className="size-3" />
+            <Button variant="outline" onClick={() => setExpandSignal((s) => s + 1)}>
+              <ChevronsUpDown className="size-4" />
               Expand all
             </Button>
-          </div>
+          </>
         )}
       </div>
 

@@ -1,18 +1,19 @@
 type ToggleSectionProps = {
   label: string;
   description?: string;
-  children: React.ReactNode;
+  value: boolean;
+  onChange: (checked: boolean) => void;
 };
 
-export function ToggleSection({ label, description, children }: ToggleSectionProps) {
+export function ToggleSection({ label, description, value, onChange }: ToggleSectionProps) {
   return (
-    // biome-ignore lint/a11y/noLabelWithoutControl: checkbox is passed via children
-    <label className="toggle-section">
+    <label className={`toggle-section${value ? " toggle-section--checked" : ""}`}>
+      <input type="checkbox" className="toggle-checkbox" checked={value} onChange={(e) => onChange(e.target.checked)} />
       <div className="toggle-label">
         <span>{label}</span>
         {description && <aside>{description}</aside>}
       </div>
-      <div className="toggle-body">{children}</div>
+      <div className="toggle-indicator" />
     </label>
   );
 }

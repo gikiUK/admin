@@ -16,7 +16,7 @@ export function ProgressTrackingSection({ get, set, hint }: { get: FieldGetter; 
           placeholder="AI will summarise in-progress actions…"
         />
       </TextareaSection>
-      <TextareaSection label="Actions Added to Plan" {...hint("actions_added")}>
+      <TextareaSection label="Actions we Plan To Do" {...hint("actions_added")}>
         <ProseEditor
           rows={4}
           value={get("actions_added")}

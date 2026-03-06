@@ -4,7 +4,7 @@ import type { FieldGetter, FieldHint, FieldSetter } from "@/components/bcorps/fo
 import { ProseEditor } from "@/components/bcorps/prose-editor";
 import { TextareaSection } from "@/components/bcorps/ui/field-group";
 import { ToggleSection } from "@/components/bcorps/ui/toggle-section";
-import { YesNoSelect, yesNo } from "@/components/bcorps/ui/yes-no-select";
+import { toYesNo } from "@/components/bcorps/ui/yes-no-select";
 import { Input } from "@/components/ui/input";
 import type { PlanAction } from "@/lib/bcorp/types";
 
@@ -41,12 +41,16 @@ export function DisclosureSection({
           </ul>
         </div>
       )}
-      <ToggleSection label="Reports through CDP">
-        <YesNoSelect value={yesNo(get("reporting_cdp"))} onChange={(v) => set("reporting_cdp", v)} />
-      </ToggleSection>
-      <ToggleSection label="Has an Ecovadis Rating">
-        <YesNoSelect value={yesNo(get("rating_ecovadis"))} onChange={(v) => set("rating_ecovadis", v)} />
-      </ToggleSection>
+      <ToggleSection
+        label="Reports through CDP"
+        value={get("reporting_cdp") === "yes"}
+        onChange={(v) => set("reporting_cdp", toYesNo(v))}
+      />
+      <ToggleSection
+        label="Has an Ecovadis Rating"
+        value={get("rating_ecovadis") === "yes"}
+        onChange={(v) => set("rating_ecovadis", toYesNo(v))}
+      />
       {get("rating_ecovadis") === "yes" && (
         <TextareaSection label="Ecovadis Rating Level" {...hint("rating_ecovadis_level")}>
           <Input value={get("rating_ecovadis_level")} onChange={(e) => set("rating_ecovadis_level", e.target.value)} />

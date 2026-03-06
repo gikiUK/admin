@@ -38,7 +38,7 @@ export function ProgressTracking({ data, plan, alreadyDoingActions }: BcorpPageP
           </table>
         )}
 
-        <h3>Actions Added to Plan</h3>
+        <h3>Actions we Plan To Do</h3>
         {data.actions_added ? <MarkdownContent content={data.actions_added} /> : null}
         {notStartedActions.length > 0 && (
           <table>

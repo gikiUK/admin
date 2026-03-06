@@ -324,11 +324,9 @@ export function JsonTree({ data, collapseAllSignal, expandAllSignal, virtual = t
         className="overflow-auto rounded-lg border bg-muted/50 p-4 font-mono text-xs leading-relaxed"
         style={{ height: "calc(100vh - 235px)" }}
       >
-        <div className="p-4">
-          {lines.map((line) => (
-            <div key={line.id}>{renderLine(line)}</div>
-          ))}
-        </div>
+        {lines.map((line) => (
+          <div key={line.id}>{renderLine(line)}</div>
+        ))}
       </div>
     );
   }

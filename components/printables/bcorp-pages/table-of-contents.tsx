@@ -24,7 +24,6 @@ export function TableOfContents({ data, plan }: BcorpPageProps) {
 
   return (
     <div className="ui-page">
-      <DocHeader />
       <h1>B Corp Climate Action Certification Plan</h1>
       <h2 style={{ marginTop: 0 }}>Contents</h2>
       <div className="toc-item">
