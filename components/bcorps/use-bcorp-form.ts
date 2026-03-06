@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { patchBcorpData } from "@/lib/bcorp/api";
 import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
@@ -18,13 +18,30 @@ export const GOVERNANCE_CATEGORIES = [
 
 const AI_FIELDS = ["company_description", "actions_overview", "actions_in_progress", "actions_added"];
 
-export function useBcorpForm(orgId: string, initialData: BcorpData, initialReasoning: Record<string, string>) {
-  const { saveRef, setSaveState, populateRef, setPopulateState, setDirty, plan, populateState, setAllAiFilled } =
-    useBcorpHeader();
+export function useBcorpForm(orgId: string, initialData: BcorpData) {
+  const {
+    saveRef,
+    setSaveState,
+    populateRef,
+    setPopulateState,
+    setDirty,
+    plan,
+    populateState,
+    setAllAiFilled,
+    bcorpFormData,
+    setBcorpFormData,
+    bcorpFormReasoning,
+    setBcorpFormReasoning
+  } = useBcorpHeader();
   const orgName = useSearchParams().get("name") ?? orgId;
 
-  const [data, setData] = useState<BcorpData>({ ...initialData });
-  const [reasoning, setReasoning] = useState<Record<string, string>>(initialReasoning);
+  const data = bcorpFormData ?? initialData;
+  const setData = (updater: BcorpData | ((prev: BcorpData) => BcorpData)) => {
+    const next = typeof updater === "function" ? updater(data) : updater;
+    setBcorpFormData(next);
+  };
+  const reasoning = bcorpFormReasoning;
+  const setReasoning = setBcorpFormReasoning;
 
   useEffect(() => {
     setAllAiFilled(AI_FIELDS.every((k) => (data[k as keyof BcorpData] ?? "") !== ""));
@@ -37,13 +54,12 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
 
   function set(key: keyof BcorpData, value: string) {
     setDirty(true);
-    setData((prev) => ({ ...prev, [key]: value }));
-    setReasoning((prev) => {
-      if (!prev[key]) return prev;
-      const next = { ...prev };
+    setData({ ...data, [key]: value });
+    if (reasoning[key as string]) {
+      const next = { ...reasoning };
       delete next[key as string];
-      return next;
-    });
+      setReasoning(next);
+    }
   }
 
   function hint(key: keyof BcorpData) {
@@ -91,8 +107,8 @@ export function useBcorpForm(orgId: string, initialData: BcorpData, initialReaso
         throw new Error(body.error ?? `Request failed (${res.status})`);
       }
       const { data: llmData, reasoning: llmReasoning } = await res.json();
-      setData((prev) => ({ ...prev, ...llmData }));
-      setReasoning((prev) => ({ ...(llmReasoning ?? {}), ...prev }));
+      setData({ ...data, ...llmData });
+      setReasoning({ ...(llmReasoning ?? {}), ...reasoning });
       setDirty(true);
       setPopulateState("idle", "");
       const filled = AI_FIELDS.filter((k) => llmData[k] !== undefined && llmData[k] !== "").length;

@@ -16,8 +16,19 @@ type OrganizationDetailProps = {
 };
 
 export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
-  const { setPlan, populateState, isDirty, setDirty, activeTab, setActiveTab, setPlanCount, setAlreadyDoingCount } =
-    useBcorpHeader();
+  const {
+    setPlan,
+    populateState,
+    isDirty,
+    setDirty,
+    activeTab,
+    setActiveTab,
+    setPlanCount,
+    setAlreadyDoingCount,
+    bcorpFormData,
+    setBcorpFormData,
+    setBcorpFormReasoning
+  } = useBcorpHeader();
 
   useEffect(() => {
     return () => setDirty(false);
@@ -38,15 +49,21 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
 
   const [previewKey, setPreviewKey] = useState(0);
   const prevTabRef = useRef<string>("bcorp");
+  const scrollPositions = useRef<Record<string, number>>({});
   useEffect(() => {
-    if (activeTab === "preview" && prevTabRef.current !== "preview") setPreviewKey((k) => k + 1);
-    prevTabRef.current = activeTab;
+    const prev = prevTabRef.current;
+    if (prev !== activeTab) {
+      scrollPositions.current[prev] = window.scrollY;
+      if (activeTab === "preview" && prev !== "preview") setPreviewKey((k) => k + 1);
+      prevTabRef.current = activeTab;
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: scrollPositions.current[activeTab] ?? 0, behavior: "instant" });
+      });
+    }
   }, [activeTab]);
 
   const [plan, setPlanLocal] = useState<Plan | null>(null);
   const [alreadyDoingActions, setAlreadyDoingActions] = useState<Plan | null>(null);
-  const [bcorpData, setBcorpData] = useState<BcorpData | null>(null);
-  const [initialReasoning, setInitialReasoning] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -66,8 +83,8 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         setPlan(planData);
         setPlanCount(planData.length);
         setAlreadyDoingCount(alreadyDoing?.length ?? 0);
-        setBcorpData({ ...ruleData, ...(data as BcorpData) });
-        setInitialReasoning(ruleReasoning);
+        setBcorpFormData({ ...ruleData, ...(data as BcorpData) });
+        setBcorpFormReasoning(ruleReasoning);
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : "Failed to load organization");
       } finally {
@@ -75,7 +92,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
       }
     }
     load();
-  }, [orgId, setPlan, setPlanCount, setAlreadyDoingCount]);
+  }, [orgId, setPlan, setPlanCount, setAlreadyDoingCount, setBcorpFormData, setBcorpFormReasoning]);
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
   if (loadError) return <div className="text-destructive">{loadError}</div>;
@@ -144,9 +161,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsContent value="bcorp" className="mt-3 max-w-[760px]">
-          {bcorpData !== null && (
-            <BcorpDataForm orgId={orgId} initialData={bcorpData} initialReasoning={initialReasoning} />
-          )}
+          {bcorpFormData !== null && <BcorpDataForm orgId={orgId} initialData={bcorpFormData} />}
         </TabsContent>
         <TabsContent value="plan" className="mt-3 max-w-[760px]">
           <PlanView plan={plan ?? []} />
