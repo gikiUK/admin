@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { patchBcorpData } from "@/lib/bcorp/api";
@@ -25,6 +24,7 @@ export function useBcorpForm(orgId: string, initialData: BcorpData) {
     populateRef,
     setPopulateState,
     setDirty,
+    orgName: ctxOrgName,
     plan,
     populateState,
     setAllAiFilled,
@@ -33,7 +33,7 @@ export function useBcorpForm(orgId: string, initialData: BcorpData) {
     bcorpFormReasoning,
     setBcorpFormReasoning
   } = useBcorpHeader();
-  const orgName = useSearchParams().get("name") ?? orgId;
+  const orgName = ctxOrgName || orgId;
 
   const data = bcorpFormData ?? initialData;
   const setData = (updater: BcorpData | ((prev: BcorpData) => BcorpData)) => {
