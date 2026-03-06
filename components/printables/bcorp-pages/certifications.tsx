@@ -4,7 +4,7 @@ import type { BcorpData } from "@/lib/bcorp/types";
 const CERT_DESCRIPTIONS: [string, string][] = [
   [
     "cert_bcorp",
-    "**B Corp certification**: We have been awarded B Corp certification. B Corp certification verifies that a company meets rigorous standards of social and environmental performance, accountability, and transparency, balancing profit with purpose."
+    "**B Corp Certification**: We have been awarded B Corp certification. B Corp certification verifies that a company meets rigorous standards of social and environmental performance, accountability, and transparency, balancing profit with purpose."
   ],
   [
     "cert_iso14001",
@@ -12,7 +12,11 @@ const CERT_DESCRIPTIONS: [string, string][] = [
   ],
   [
     "initiative_sbti",
-    "**Science Based Targets initiative (SBTi)**: We have set a Science Based Target. The SBTi provides a clearly defined pathway for companies to reduce greenhouse gas emissions in line with the goals of the Paris Agreement, ensuring our targets are grounded in climate science."
+    "**Science Based Targets**: We have a validated near-term/long-term science-based target, aligned with 1.5°C."
+  ],
+  [
+    "initiative_smech",
+    "**SME Climate Hub Member**: We are a committed member of the SME Climate Hub. This means we are committed to halving greenhouse gas emissions by 2030, achieving net-zero emissions before 2050, and reporting progress annually."
   ]
 ];
 
