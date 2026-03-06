@@ -17,6 +17,8 @@ type BcorpHeaderContextValue = {
   populateRef: React.MutableRefObject<(() => Promise<void>) | null>;
   isDirty: boolean;
   setDirty: (dirty: boolean) => void;
+  orgName: string;
+  setOrgName: (name: string) => void;
   plan: Plan;
   setPlan: (plan: Plan) => void;
   allAiFilled: boolean;
@@ -45,6 +47,7 @@ export function BcorpHeaderProvider({ children }: { children: React.ReactNode })
   const populateRef = useRef<(() => Promise<void>) | null>(null);
 
   const [isDirty, setDirty] = useState(false);
+  const [orgName, setOrgName] = useState("");
   const [plan, setPlan] = useState<Plan>([]);
   const [allAiFilled, setAllAiFilled] = useState(false);
   const [activeTab, setActiveTab] = useState("bcorp");
@@ -76,6 +79,8 @@ export function BcorpHeaderProvider({ children }: { children: React.ReactNode })
         populateRef,
         isDirty,
         setDirty,
+        orgName,
+        setOrgName,
         plan,
         setPlan,
         allAiFilled,

@@ -28,6 +28,7 @@ export type FetchPlanResult = {
 };
 
 export type BcorpData = {
+  name: string;
   // Introduction
   company_description?: string;
   // Foundations

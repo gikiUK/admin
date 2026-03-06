@@ -54,7 +54,7 @@ export function OrganizationsTable({ organizations }: OrganizationsTableProps) {
                 <TableRow
                   key={org.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => router.push(`/bcorps/${org.id}?name=${encodeURIComponent(org.name)}`)}
+                  onClick={() => router.push(`/bcorps/${org.id}`)}
                 >
                   <TableCell>{org.name}</TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{org.id}</TableCell>
