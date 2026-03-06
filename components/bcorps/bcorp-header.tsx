@@ -19,6 +19,31 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { getApiUrl } from "@/lib/api/config";
 import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
 
+export function PillTab({
+  value,
+  active,
+  onClick,
+  children
+}: {
+  value: string;
+  active: string;
+  onClick: (v: string) => void;
+  children: React.ReactNode;
+}) {
+  const isActive = active === value;
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(value)}
+      className={`px-3 py-1 h-7 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+        isActive ? "bg-foreground/15 text-foreground" : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function BcorpHeader({ orgId }: { orgId: string }) {
   const { saveState, saveRef, populateState, populateError, populateRef, isDirty, allAiFilled, orgName } =
     useBcorpHeader();
@@ -111,6 +136,7 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
       <Separator orientation="vertical" className="!h-4" />
       <Button variant="ghost" size="icon" className="-ml-1 size-7" onClick={handleBack}>
         <ArrowLeft className="size-4" />

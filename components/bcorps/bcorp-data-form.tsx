@@ -20,11 +20,10 @@ export type SaveState = "idle" | "saving" | "saved" | "error";
 type BcorpDataFormProps = {
   orgId: string;
   initialData: BcorpData;
-  initialReasoning?: Record<string, string>;
 };
 
-export function BcorpDataForm({ orgId, initialData, initialReasoning = {} }: BcorpDataFormProps) {
-  const { get, set, hint } = useBcorpForm(orgId, initialData, initialReasoning);
+export function BcorpDataForm({ orgId, initialData }: BcorpDataFormProps) {
+  const { get, set, hint } = useBcorpForm(orgId, initialData);
   const { plan } = useBcorpHeader();
 
   const engagementActions = plan.filter((a) => a.tal_action.ghg_scope?.includes("Engagement"));

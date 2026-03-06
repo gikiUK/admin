@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BcorpDataForm } from "@/components/bcorps/bcorp-data-form";
+import { PillTab } from "@/components/bcorps/bcorp-header";
 import { PlanJsonExplorer } from "@/components/bcorps/plan-json-explorer";
 import { PlanView } from "@/components/bcorps/plan-view";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { fetchBcorpData, fetchPlan } from "@/lib/bcorp/api";
 import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
 import { deriveFromPlan } from "@/lib/bcorp/plan-rules";
@@ -15,7 +16,20 @@ type OrganizationDetailProps = {
 };
 
 export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
-  const { setPlan, setOrgName, populateState, isDirty, setDirty } = useBcorpHeader();
+  const {
+    setPlan,
+    setOrgName,
+    populateState,
+    isDirty,
+    setDirty,
+    activeTab,
+    setActiveTab,
+    setPlanCount,
+    setAlreadyDoingCount,
+    bcorpFormData,
+    setBcorpFormData,
+    setBcorpFormReasoning
+  } = useBcorpHeader();
 
   useEffect(() => {
     return () => setDirty(false);
@@ -34,10 +48,23 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
     if (populateState === "populating") setHasPopulated(true);
   }, [populateState]);
 
+  const [previewKey, setPreviewKey] = useState(0);
+  const prevTabRef = useRef<string>("bcorp");
+  const scrollPositions = useRef<Record<string, number>>({});
+  useEffect(() => {
+    const prev = prevTabRef.current;
+    if (prev !== activeTab) {
+      scrollPositions.current[prev] = window.scrollY;
+      if (activeTab === "preview" && prev !== "preview") setPreviewKey((k) => k + 1);
+      prevTabRef.current = activeTab;
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: scrollPositions.current[activeTab] ?? 0, behavior: "instant" });
+      });
+    }
+  }, [activeTab]);
+
   const [plan, setPlanLocal] = useState<Plan | null>(null);
   const [alreadyDoingActions, setAlreadyDoingActions] = useState<Plan | null>(null);
-  const [bcorpData, setBcorpData] = useState<BcorpData | null>(null);
-  const [initialReasoning, setInitialReasoning] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -57,8 +84,10 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         setAlreadyDoingActions(alreadyDoing);
         setPlan(planData);
         setOrgName(merged.name);
-        setBcorpData(merged);
-        setInitialReasoning(ruleReasoning);
+        setPlanCount(planData.length);
+        setAlreadyDoingCount(alreadyDoing?.length ?? 0);
+        setBcorpFormData({ ...ruleData, ...(data as BcorpData) });
+        setBcorpFormReasoning(ruleReasoning);
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : "Failed to load organization");
       } finally {
@@ -66,7 +95,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
       }
     }
     load();
-  }, [orgId, setPlan, setOrgName]);
+  }, [orgId, setPlan, setOrgName, setPlanCount, setAlreadyDoingCount, setBcorpFormData, setBcorpFormReasoning]);
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
   if (loadError) return <div className="text-destructive">{loadError}</div>;
@@ -104,30 +133,59 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         </div>
       )}
 
-      <Tabs defaultValue="bcorp">
-        <TabsList className="max-w-[760px]">
-          <TabsTrigger value="bcorp">B Corp Data</TabsTrigger>
-          <TabsTrigger value="plan">Plan ({plan?.length ?? 0})</TabsTrigger>
-          <TabsTrigger value="already-doing">Already Doing ({alreadyDoingActions?.length ?? 0})</TabsTrigger>
-          <TabsTrigger value="json">Plan JSON</TabsTrigger>
-          <TabsTrigger value="already-doing-json">Already Doing JSON</TabsTrigger>
-        </TabsList>
-        <TabsContent value="bcorp" className="mt-6 max-w-[760px]">
-          {bcorpData !== null && (
-            <BcorpDataForm orgId={orgId} initialData={bcorpData} initialReasoning={initialReasoning} />
-          )}
+      <div className="sticky top-12 z-10 flex justify-center -mt-4 pt-1.5 pb-1 pointer-events-none">
+        <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-border bg-background/90 px-1.5 py-1 backdrop-blur-md">
+          <PillTab value="bcorp" active={activeTab} onClick={setActiveTab}>
+            B Corp Data
+          </PillTab>
+          <div className="flex items-center rounded-full bg-muted/60 overflow-hidden">
+            <PillTab value="plan" active={activeTab} onClick={setActiveTab}>
+              Plan ({plan?.length ?? 0})
+            </PillTab>
+            <div className="w-px h-3.5 bg-border/70 shrink-0" />
+            <PillTab value="json" active={activeTab} onClick={setActiveTab}>
+              JSON
+            </PillTab>
+          </div>
+          <div className="flex items-center rounded-full bg-muted/60 overflow-hidden">
+            <PillTab value="already-doing" active={activeTab} onClick={setActiveTab}>
+              Already Doing ({alreadyDoingActions?.length ?? 0})
+            </PillTab>
+            <div className="w-px h-3.5 bg-border/70 shrink-0" />
+            <PillTab value="already-doing-json" active={activeTab} onClick={setActiveTab}>
+              JSON
+            </PillTab>
+          </div>
+          <PillTab value="preview" active={activeTab} onClick={setActiveTab}>
+            Preview
+          </PillTab>
+        </div>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsContent value="bcorp" className="mt-3 max-w-[760px]">
+          {bcorpFormData !== null && <BcorpDataForm orgId={orgId} initialData={bcorpFormData} />}
         </TabsContent>
-        <TabsContent value="plan" className="mt-6 max-w-[760px]">
+        <TabsContent value="plan" className="mt-3 max-w-[760px]">
           <PlanView plan={plan ?? []} />
         </TabsContent>
-        <TabsContent value="json" className="mt-6">
+        <TabsContent value="json" className="mt-3">
           <PlanJsonExplorer plan={plan ?? []} />
         </TabsContent>
-        <TabsContent value="already-doing" className="mt-6 max-w-[760px]">
+        <TabsContent value="already-doing" className="mt-3 max-w-[760px]">
           <PlanView plan={alreadyDoingActions ?? []} showFilters={false} />
         </TabsContent>
-        <TabsContent value="already-doing-json" className="mt-6">
+        <TabsContent value="already-doing-json" className="mt-3">
           <PlanJsonExplorer plan={alreadyDoingActions ?? []} />
+        </TabsContent>
+        <TabsContent value="preview" className="mt-3">
+          <iframe
+            key={previewKey}
+            src={`/printables/organizations/${orgId}/bcorp-content`}
+            className="w-full rounded border border-border"
+            style={{ height: "calc(100vh - 140px)" }}
+            title="PDF Preview"
+          />
         </TabsContent>
       </Tabs>
     </>

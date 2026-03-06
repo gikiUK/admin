@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       return new Response("Missing JWT token", { status: 400 });
     }
 
-    const orgBase = `${baseUrl}/organizations/${orgId}`;
+    const orgBase = `${baseUrl}/printables/organizations/${orgId}`;
     const cfEndpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/browser-rendering/pdf`;
 
     // Fetch all three PDFs in parallel (matches Ruby's threaded approach)
