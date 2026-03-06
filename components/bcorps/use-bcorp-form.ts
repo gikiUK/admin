@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { patchBcorpData } from "@/lib/bcorp/api";
@@ -19,9 +18,18 @@ export const GOVERNANCE_CATEGORIES = [
 const AI_FIELDS = ["company_description", "actions_overview", "actions_in_progress", "actions_added"];
 
 export function useBcorpForm(orgId: string, initialData: BcorpData, initialReasoning: Record<string, string>) {
-  const { saveRef, setSaveState, populateRef, setPopulateState, setDirty, plan, populateState, setAllAiFilled } =
-    useBcorpHeader();
-  const orgName = useSearchParams().get("name") ?? orgId;
+  const {
+    saveRef,
+    setSaveState,
+    populateRef,
+    setPopulateState,
+    setDirty,
+    orgName: ctxOrgName,
+    plan,
+    populateState,
+    setAllAiFilled
+  } = useBcorpHeader();
+  const orgName = ctxOrgName || orgId;
 
   const [data, setData] = useState<BcorpData>({ ...initialData });
   const [reasoning, setReasoning] = useState<Record<string, string>>(initialReasoning);

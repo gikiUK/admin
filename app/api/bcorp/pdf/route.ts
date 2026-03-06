@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { orgId, jwt } = await req.json();
+    const { orgId, orgName, jwt } = await req.json();
 
     if (typeof orgId !== "string" || !/^[\w-]+$/.test(orgId)) {
       return new Response("Invalid orgId", { status: 400 });
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     return new Response(combined as unknown as BodyInit, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="bcorp-report-${orgId}.pdf"`
+        "Content-Disposition": `attachment; filename="${orgName || orgId} - B Corp Climate Action Report.pdf"`
       }
     });
   } catch (err) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertCircle, ArrowLeft, Check, FileText, Loader2, PenLine, Save, Sparkles } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   AlertDialog,
@@ -20,8 +20,9 @@ import { getApiUrl } from "@/lib/api/config";
 import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
 
 export function BcorpHeader({ orgId }: { orgId: string }) {
-  const { saveState, saveRef, populateState, populateError, populateRef, isDirty, allAiFilled } = useBcorpHeader();
-  const name = useSearchParams().get("name") ?? orgId;
+  const { saveState, saveRef, populateState, populateError, populateRef, isDirty, allAiFilled, orgName } =
+    useBcorpHeader();
+  const name = orgName || orgId;
   const busy = saveState === "saving" || populateState === "populating";
   const populateDisabled = busy || allAiFilled;
   const [pdfState, setPdfState] = useState<"idle" | "generating" | "error">("idle");
@@ -58,14 +59,14 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
       const res = await fetch("/api/bcorp/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orgId, jwt })
+        body: JSON.stringify({ orgId, orgName: name, jwt })
       });
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `bcorp-report-${orgId}.pdf`;
+      a.download = `${name} - B Corp Climate Action Report.pdf`;
       a.click();
       URL.revokeObjectURL(url);
       setPdfState("idle");

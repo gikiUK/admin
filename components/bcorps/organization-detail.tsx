@@ -15,7 +15,7 @@ type OrganizationDetailProps = {
 };
 
 export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
-  const { setPlan, populateState, isDirty, setDirty } = useBcorpHeader();
+  const { setPlan, setOrgName, populateState, isDirty, setDirty } = useBcorpHeader();
 
   useEffect(() => {
     return () => setDirty(false);
@@ -52,10 +52,12 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
           })
         ]);
         const { data: ruleData, reasoning: ruleReasoning } = deriveFromPlan(planData);
+        const merged = { ...ruleData, ...(data as BcorpData) };
         setPlanLocal(planData);
         setAlreadyDoingActions(alreadyDoing);
         setPlan(planData);
-        setBcorpData({ ...ruleData, ...(data as BcorpData) });
+        setOrgName(merged.name);
+        setBcorpData(merged);
         setInitialReasoning(ruleReasoning);
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : "Failed to load organization");
@@ -64,7 +66,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
       }
     }
     load();
-  }, [orgId, setPlan]);
+  }, [orgId, setPlan, setOrgName]);
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
   if (loadError) return <div className="text-destructive">{loadError}</div>;
@@ -106,8 +108,8 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         <TabsList>
           <TabsTrigger value="bcorp">B Corp Data</TabsTrigger>
           <TabsTrigger value="plan">Plan ({plan?.length ?? 0})</TabsTrigger>
-          <TabsTrigger value="json">JSON</TabsTrigger>
           <TabsTrigger value="already-doing">Already Doing ({alreadyDoingActions?.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="json">Plan JSON</TabsTrigger>
           <TabsTrigger value="already-doing-json">Already Doing JSON</TabsTrigger>
         </TabsList>
         <TabsContent value="bcorp" className="mt-6">
