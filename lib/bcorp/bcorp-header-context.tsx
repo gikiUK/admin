@@ -21,6 +21,12 @@ type BcorpHeaderContextValue = {
   setPlan: (plan: Plan) => void;
   allAiFilled: boolean;
   setAllAiFilled: (filled: boolean) => void;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  planCount: number;
+  setPlanCount: (n: number) => void;
+  alreadyDoingCount: number;
+  setAlreadyDoingCount: (n: number) => void;
 };
 
 const BcorpHeaderContext = createContext<BcorpHeaderContextValue | null>(null);
@@ -37,6 +43,9 @@ export function BcorpHeaderProvider({ children }: { children: React.ReactNode })
   const [isDirty, setDirty] = useState(false);
   const [plan, setPlan] = useState<Plan>([]);
   const [allAiFilled, setAllAiFilled] = useState(false);
+  const [activeTab, setActiveTab] = useState("bcorp");
+  const [planCount, setPlanCount] = useState(0);
+  const [alreadyDoingCount, setAlreadyDoingCount] = useState(0);
 
   function setSaveState(state: SaveState, error: string) {
     setSaveStateRaw(state);
@@ -64,7 +73,13 @@ export function BcorpHeaderProvider({ children }: { children: React.ReactNode })
         plan,
         setPlan,
         allAiFilled,
-        setAllAiFilled
+        setAllAiFilled,
+        activeTab,
+        setActiveTab,
+        planCount,
+        setPlanCount,
+        alreadyDoingCount,
+        setAlreadyDoingCount
       }}
     >
       {children}
