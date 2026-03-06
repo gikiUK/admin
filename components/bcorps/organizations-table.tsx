@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Command, CommandInput } from "@/components/ui/command";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Organization } from "@/lib/bcorp/types";
 
@@ -31,12 +31,9 @@ export function OrganizationsTable({ organizations }: OrganizationsTableProps) {
 
   return (
     <div className="space-y-4">
-      <Input
-        placeholder="Search organizations..."
-        value={search}
-        onChange={(e) => handleSearch(e.target.value)}
-        className="max-w-sm"
-      />
+      <Command className="rounded-md border">
+        <CommandInput placeholder="Search organizations..." value={search} onValueChange={handleSearch} />
+      </Command>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
