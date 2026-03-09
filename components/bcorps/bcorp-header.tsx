@@ -75,8 +75,7 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
       const jwtRes = await fetch(getApiUrl("/internal/jwt_token"), {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ valid_endpoints: "admin/legacy/*" })
+        headers: { "Content-Type": "application/json" }
       });
       if (!jwtRes.ok) throw new Error("Failed to get JWT token");
       const { token: jwt } = await jwtRes.json();
