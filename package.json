@@ -16,8 +16,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@gikiuk/facts-engine": "^0.1.0",
     "@anthropic-ai/sdk": "^0.78.0",
+    "@gikiuk/facts-engine": "^0.3.0",
     "@sentry/nextjs": "^10",
     "@tanstack/react-virtual": "^3.13.18",
     "class-variance-authority": "^0.7.1",
