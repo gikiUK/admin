@@ -4,7 +4,14 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { BlobCondition, SimpleCondition } from "@/lib/blob/types";
 import { useDataset } from "@/lib/blob/use-dataset";
-import { buildCondition, type ConditionMode, getMode, getSubs } from "./condition-helpers";
+import {
+  buildCondition,
+  type ConditionMode,
+  getMode,
+  getSubs,
+  isAllCondition,
+  isAnyCondition
+} from "./condition-helpers";
 import { GateAnd, GateOr, GateSingle } from "./logic-gate-icons";
 import { SimpleConditionRow } from "./simple-condition-row";
 
@@ -21,21 +28,20 @@ export function ConditionEditor({ condition, onChange, factIds }: ConditionEdito
   const mode = getMode(condition);
   const isMulti = mode !== "single";
   const subs = getSubs(condition, mode);
+  const simpleSubs = subs.filter((s): s is SimpleCondition => !isAnyCondition(s) && !isAllCondition(s));
 
   function handleModeChange(newMode: ConditionMode) {
     if (newMode === mode) return;
-    const current = getSubs(condition, mode);
-
     if (newMode === "single") {
-      onChange(current[0] ?? { "": true });
+      onChange(simpleSubs[0] ?? { "": true });
     } else {
-      const padded = current.length < 2 ? [...current, { "": true }] : current;
+      const padded = simpleSubs.length < 2 ? [...simpleSubs, { "": true }] : simpleSubs;
       onChange(buildCondition(newMode, padded));
     }
   }
 
   function handleSubChange(index: number, updated: SimpleCondition) {
-    const next = [...subs];
+    const next = [...simpleSubs];
     next[index] = updated;
     onChange(buildCondition(mode, next));
   }
@@ -44,13 +50,13 @@ export function ConditionEditor({ condition, onChange, factIds }: ConditionEdito
     onChange(
       buildCondition(
         mode,
-        subs.filter((_, j) => j !== index)
+        simpleSubs.filter((_, j) => j !== index)
       )
     );
   }
 
   function handleSubAdd() {
-    onChange(buildCondition(mode, [...subs, { "": true }]));
+    onChange(buildCondition(mode, [...simpleSubs, { "": true }]));
   }
 
   return (
@@ -88,12 +94,12 @@ export function ConditionEditor({ condition, onChange, factIds }: ConditionEdito
         </div>
       </div>
 
-      {subs.map((sub, i) => (
+      {simpleSubs.map((sub, i) => (
         <SimpleConditionRow
           key={`${mode}-${Object.keys(sub)[0] || i}`}
           condition={sub}
           onChange={(updated) => handleSubChange(i, updated)}
-          onRemove={isMulti && subs.length > 1 ? () => handleSubRemove(i) : undefined}
+          onRemove={isMulti && simpleSubs.length > 1 ? () => handleSubRemove(i) : undefined}
           factIds={factIds}
           facts={facts}
           constants={constants}
