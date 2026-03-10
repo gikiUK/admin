@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { applyAction, type MutationAction } from "./dataset-mutations";
 import type { DatasetData } from "./types";
 
@@ -23,9 +24,6 @@ export type ChangeEntry = {
   entityBefore?: unknown;
   entityAfter?: unknown;
   isRevert?: boolean;
-  isLifecycle?: boolean;
-  /** When true, replaying this entry resets data back to the history base (used by "discard draft"). */
-  isDiscard?: boolean;
 };
 
 function formatValue(v: unknown): string {
@@ -98,7 +96,7 @@ export function buildChangeEntry(action: MutationAction, dataBefore: DatasetData
   const afterRef = resolveAfterRef(action, entityRef, dataAfter);
   const entityAfter = afterRef ? lookupEntity(dataAfter, afterRef) : undefined;
   return {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     timestamp: Date.now(),
     action,
     description: describeAction(action),
@@ -185,9 +183,9 @@ function describeAction(action: MutationAction): string {
     case "RESTORE_RULE":
       return `Enabled rule #${action.index + 1}`;
     case "SET_QUESTION":
-      return `Edited question #${action.index + 1}`;
+      return `Edited question "${action.question.key ?? `#${action.index + 1}`}"`;
     case "ADD_QUESTION":
-      return `Added question "${action.question.label}"`;
+      return `Added question "${action.question.key ?? action.question.label}"`;
     case "DISCARD_QUESTION":
       return `Disabled question #${action.index + 1}`;
     case "RESTORE_QUESTION":
@@ -206,8 +204,5 @@ function describeAction(action: MutationAction): string {
 }
 
 export function replayChanges(base: DatasetData, entries: ChangeEntry[]): DatasetData {
-  return entries.reduce(
-    (data, entry) => (entry.isDiscard ? structuredClone(base) : entry.action ? applyAction(data, entry.action) : data),
-    base
-  );
+  return entries.reduce((data, entry) => (entry.action ? applyAction(data, entry.action) : data), base);
 }

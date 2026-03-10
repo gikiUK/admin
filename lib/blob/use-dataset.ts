@@ -77,10 +77,9 @@ export function useDataset() {
   const { history } = state;
   const { entries } = history;
 
-  // Find nearest non-lifecycle entry index searching in `dir` from `from` (inclusive)
   function findActionIndex(from: number, dir: -1 | 1): number | null {
     for (let i = from; i >= 0 && i < entries.length; i += dir) {
-      if (!entries[i].isLifecycle) return i;
+      if (entries[i].action) return i;
     }
     return null;
   }

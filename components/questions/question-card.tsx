@@ -40,11 +40,16 @@ export function QuestionCard({ question, conditionallyHidden }: QuestionCardProp
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-sm font-medium leading-snug">
-              <span className="mr-2 text-muted-foreground">Q{q.index + 1}</span>
+              <span className="mr-2 font-mono text-xs text-muted-foreground">{q.key ?? `Q${q.index + 1}`}</span>
               {q.label}
             </CardTitle>
             <div className="flex items-center gap-1.5">
               <EntityIssueIndicator type="question" id={String(q.index)} />
+              {q.onboarding && (
+                <span className="rounded-sm bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+                  onboarding
+                </span>
+              )}
               <QuestionTypeBadge type={q.type} />
             </div>
           </div>

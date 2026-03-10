@@ -22,6 +22,7 @@ Key: fact ID string (e.g. "has_company_vehicles")
 ## Questions - `BlobQuestion[]` (array, index matters!)
 ```ts
 BlobQuestion = {
+  key?: string                     // stable identifier (e.g. "has_company_vehicles")
   type: "boolean_state" | "single-select" | "multi-select" | "checkbox-radio-hybrid"
   label: string
   description?: string

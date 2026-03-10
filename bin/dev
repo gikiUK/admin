@@ -3,4 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 pnpm install --frozen-lockfile
+echo ""
+echo "  Admin: http://local.gikiactions.com:3112"
+echo ""
 exec pnpm run dev
