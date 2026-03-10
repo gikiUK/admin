@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { buildChangeEntry, type ChangeEntry, replayChanges } from "./change-log";
 import type { MutationAction } from "./dataset-mutations";
 import { applyAction } from "./dataset-mutations";
@@ -144,13 +145,8 @@ function buildRevertMutation(
   return null;
 }
 
-/** Append a new entry to history. Lifecycle entries are inserted without truncating or moving cursor. */
 function appendToHistory(history: HistoryState, entry: ChangeEntry, currentData: DatasetData): HistoryState {
   const base = history.base ?? structuredClone(currentData);
-  if (entry.isLifecycle) {
-    // Lifecycle markers don't truncate future entries or move the cursor
-    return { entries: [...history.entries, entry], cursor: history.cursor, base };
-  }
   const entries = [...history.entries.slice(0, history.cursor + 1), entry];
   return { entries, cursor: entries.length - 1, base };
 }
@@ -227,46 +223,17 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
       };
     }
 
-    case "DRAFT_DELETED": {
-      // If the cursor already points at a discard entry (e.g. we redo'd to it),
-      // the auto-drop is just a side effect of history traversal - don't duplicate.
-      const currentEntry = state.history.entries[state.history.cursor];
-      const alreadyAtDiscard = currentEntry?.isDiscard === true;
-      const hist = alreadyAtDiscard
-        ? state.history
-        : appendToHistory(
-            state.history,
-            {
-              id: crypto.randomUUID(),
-              timestamp: Date.now(),
-              action: null,
-              description: "Discarded draft",
-              details: [],
-              isDiscard: true
-            },
-            state.dataset?.data ?? ({} as DatasetData)
-          );
+    case "DRAFT_DELETED":
       return {
         ...state,
         draft: null,
         dataset: state.live,
         original: state.live ? structuredClone(state.live.data) : null,
         isDirty: false,
-        isEditing: false,
-        history: hist
+        isEditing: false
       };
-    }
 
-    case "DRAFT_PUBLISHED": {
-      const publishEntry: ChangeEntry = {
-        id: crypto.randomUUID(),
-        timestamp: Date.now(),
-        action: null,
-        description: "Published to live",
-        details: [],
-        isLifecycle: true
-      };
-      const hist = appendToHistory(state.history, publishEntry, state.dataset?.data ?? ({} as DatasetData));
+    case "DRAFT_PUBLISHED":
       return {
         ...state,
         live: action.payload,
@@ -275,10 +242,8 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         original: structuredClone(action.payload.data),
         isDirty: false,
         saving: false,
-        isEditing: false,
-        history: { ...hist, cursor: hist.entries.length - 1 }
+        isEditing: false
       };
-    }
 
     case "QUEUE_MUTATION":
       return { ...state, pendingMutations: [...state.pendingMutations, action.mutation] };

@@ -228,78 +228,46 @@ describe("history reducer", () => {
     });
   });
 
-  describe("lifecycle entries", () => {
-    it("DRAFT_PUBLISHED appends without moving cursor", () => {
+  describe("lifecycle events", () => {
+    it("DRAFT_PUBLISHED does not add history entries", () => {
       let state = stateWithDraft();
       state = datasetReducer(state, { type: "SET_FACT", id: "test_fact", fact: { ...baseFact, core: false } });
       const entriesBefore = state.history.entries.length;
 
-      // Publish
       const data = state.dataset?.data ?? baseData;
       const publishedLive: Dataset = { id: 3, status: "live", data, test_cases: [] };
       state = datasetReducer(state, { type: "DRAFT_PUBLISHED", payload: publishedLive });
 
-      expect(state.history.entries).toHaveLength(entriesBefore + 1);
-      const lastEntry = state.history.entries[state.history.entries.length - 1];
-      expect(lastEntry.isLifecycle).toBe(true);
-      expect(lastEntry.description).toBe("Published to live");
-      // DRAFT_PUBLISHED sets cursor to entries.length - 1 (end of timeline)
-      expect(state.history.cursor).toBe(state.history.entries.length - 1);
+      expect(state.history.entries).toHaveLength(entriesBefore);
+      expect(state.isEditing).toBe(false);
     });
 
-    it("DRAFT_DELETED appends discard entry and advances cursor", () => {
+    it("DRAFT_DELETED does not add history entries", () => {
       let state = stateWithDraft();
       state = datasetReducer(state, { type: "SET_FACT", id: "test_fact", fact: { ...baseFact, core: false } });
       const entriesBefore = state.history.entries.length;
 
       state = datasetReducer(state, { type: "DRAFT_DELETED" });
 
-      expect(state.history.entries).toHaveLength(entriesBefore + 1);
-      const lastEntry = state.history.entries[state.history.entries.length - 1];
-      expect(lastEntry.isDiscard).toBe(true);
-      expect(lastEntry.description).toBe("Discarded draft");
-      // Cursor is at the discard entry (it's a regular forward action)
-      expect(state.history.cursor).toBe(entriesBefore);
+      expect(state.history.entries).toHaveLength(entriesBefore);
       expect(state.isDirty).toBe(false);
+      expect(state.isEditing).toBe(false);
     });
 
-    it("DRAFT_DELETED is undoable - undo restores pre-discard data", () => {
-      let state = stateWithDraft();
-      state = datasetReducer(state, { type: "SET_FACT", id: "test_fact", fact: { ...baseFact, core: false } });
-      expect(state.dataset?.data.facts.test_fact.core).toBe(false);
-
-      // Discard
-      state = datasetReducer(state, { type: "DRAFT_DELETED" });
-      expect(state.dataset?.data.facts.test_fact.core).toBe(true); // reverted to live
-
-      // Undo the discard - should restore the edited state
-      state = datasetReducer(state, { type: "UNDO", cursor: 0 });
-      expect(state.dataset?.data.facts.test_fact.core).toBe(false);
-      expect(state.isDirty).toBe(true);
-
-      // Redo the discard - should revert back to live
-      state = datasetReducer(state, { type: "REDO", cursor: 1 });
-      expect(state.dataset?.data.facts.test_fact.core).toBe(true);
-      expect(state.isDirty).toBe(false);
-      expect(state.history.cursor).toBe(1);
-    });
-
-    it("new edit after DRAFT_DELETED truncates discard from future", () => {
+    it("new edit after DRAFT_DELETED truncates future entries", () => {
       let state = stateWithDraft();
       state = datasetReducer(state, { type: "SET_FACT", id: "test_fact", fact: { ...baseFact, core: false } });
 
-      // Discard, then undo it
       state = datasetReducer(state, { type: "DRAFT_DELETED" });
       state = datasetReducer(state, { type: "UNDO", cursor: 0 });
 
-      // New edit - should truncate the discard entry
       state = datasetReducer(state, {
         type: "SET_QUESTION",
         index: 0,
         question: { ...baseQuestion, label: "After discard" }
       });
       expect(state.history.entries).toHaveLength(2);
-      expect(state.history.entries[1].description).toBe("Edited question #1");
+      expect(state.history.entries[1].description).toBe('Edited question "#1"');
       expect(state.history.cursor).toBe(1);
     });
   });

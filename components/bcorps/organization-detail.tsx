@@ -18,6 +18,7 @@ type OrganizationDetailProps = {
 export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
   const {
     setPlan,
+    setOrgId,
     setOrgName,
     populateState,
     isDirty,
@@ -83,6 +84,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
         setPlanLocal(planData);
         setAlreadyDoingActions(alreadyDoing);
         setPlan(planData);
+        setOrgId(orgId);
         setOrgName(merged.name);
         setPlanCount(planData.length);
         setAlreadyDoingCount(alreadyDoing?.length ?? 0);
@@ -95,7 +97,17 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
       }
     }
     load();
-  }, [orgId, setPlan, setOrgName, setPlanCount, setAlreadyDoingCount, setBcorpFormData, setBcorpFormReasoning]);
+    return () => setOrgId("");
+  }, [
+    orgId,
+    setPlan,
+    setOrgId,
+    setOrgName,
+    setPlanCount,
+    setAlreadyDoingCount,
+    setBcorpFormData,
+    setBcorpFormReasoning
+  ]);
 
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
   if (loadError) return <div className="text-destructive">{loadError}</div>;
