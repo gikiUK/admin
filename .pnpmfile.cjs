@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const localPackages = {
-  "@giki/facts-engine": path.resolve(__dirname, "../api/packages/facts-engine")
+  "@gikiuk/facts-engine": path.resolve(__dirname, "../api/packages/facts-engine")
 };
 
 function readPackage(pkg) {

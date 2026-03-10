@@ -4,7 +4,7 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-pnpmfileChecksum: sha256-lEwNI/bOVKMz6OFBbGKKtcWOg2FPkf37CAAk0kI71rI=
+pnpmfileChecksum: sha256-O+oLUNtCgYEJCqSyqSVO8KHZnzanh/p5oOEnj5wPMjI=
 
 importers:
 
@@ -13,7 +13,7 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.78.0
         version: 0.78.0(zod@3.25.76)
-      '@giki/facts-engine':
+      '@gikiuk/facts-engine':
         specifier: link:/Users/iHiD/Code/giki/api/packages/facts-engine
         version: link:../api/packages/facts-engine
       '@sentry/nextjs':
