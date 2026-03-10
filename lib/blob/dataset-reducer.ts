@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { buildChangeEntry, type ChangeEntry, replayChanges } from "./change-log";
 import type { MutationAction } from "./dataset-mutations";
 import { applyAction } from "./dataset-mutations";
@@ -237,7 +238,7 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         : appendToHistory(
             state.history,
             {
-              id: crypto.randomUUID(),
+              id: uuidv4(),
               timestamp: Date.now(),
               action: null,
               description: "Discarded draft",
@@ -259,7 +260,7 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
 
     case "DRAFT_PUBLISHED": {
       const publishEntry: ChangeEntry = {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         timestamp: Date.now(),
         action: null,
         description: "Published to live",

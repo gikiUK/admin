@@ -299,7 +299,7 @@ describe("history reducer", () => {
         question: { ...baseQuestion, label: "After discard" }
       });
       expect(state.history.entries).toHaveLength(2);
-      expect(state.history.entries[1].description).toBe("Edited question #1");
+      expect(state.history.entries[1].description).toBe('Edited question "#1"');
       expect(state.history.cursor).toBe(1);
     });
   });

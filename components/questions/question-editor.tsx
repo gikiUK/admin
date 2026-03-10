@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DebouncedInput, DebouncedTextarea } from "@/components/ui/debounced-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -87,7 +88,7 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
         </Button>
       </div>
 
-      <h1 className="text-2xl font-semibold tracking-tight">Edit: Q{questionIndex + 1}</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Edit: {question.key ?? `Q${questionIndex + 1}`}</h1>
 
       {/* Properties */}
       <Card className={!question.enabled ? "opacity-50" : undefined}>
@@ -95,6 +96,15 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
           <h2 className="text-sm font-semibold">Properties</h2>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="q-key">Key</Label>
+            <DebouncedInput
+              id="q-key"
+              value={question.key ?? ""}
+              onCommit={(v) => dispatchUpdate({ key: v || undefined })}
+              placeholder="unique_snake_case_key"
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="q-label">Label</Label>
             <DebouncedInput
@@ -128,6 +138,16 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="q-onboarding"
+              checked={question.onboarding ?? false}
+              onCheckedChange={(v) => dispatchUpdate({ onboarding: v === true || undefined })}
+            />
+            <Label htmlFor="q-onboarding" className="font-normal">
+              Onboarding
+            </Label>
           </div>
         </CardContent>
       </Card>
@@ -184,6 +204,7 @@ function NewQuestionEditor() {
   const allFactIds = blob ? Object.keys(blob.facts) : [];
   const constantGroupNames = blob ? Object.keys(blob.constants) : [];
 
+  const [key, setKey] = useState("");
   const [label, setLabel] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<QuestionType>("boolean_state");
@@ -194,6 +215,7 @@ function NewQuestionEditor() {
   const [showWhen, setShowWhen] = useState<BlobCondition | undefined>(undefined);
   const [hideWhen, setHideWhen] = useState<BlobCondition | undefined>(undefined);
   const [unknowable, setUnknowable] = useState(false);
+  const [onboarding, setOnboarding] = useState(false);
 
   function handleTypeChange(newType: QuestionType) {
     setType(newType);
@@ -212,13 +234,15 @@ function NewQuestionEditor() {
 
   function handleCreate() {
     const payload: BlobQuestion = {
+      key: key || undefined,
       label,
       type,
       enabled: true,
       description: description || undefined,
       show_when: showWhen,
       hide_when: hideWhen,
-      unknowable: unknowable || undefined
+      unknowable: unknowable || undefined,
+      onboarding: onboarding || undefined
     };
 
     if (type === "boolean_state") {
@@ -253,6 +277,15 @@ function NewQuestionEditor() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="q-key">Key</Label>
+            <Input
+              id="q-key"
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+              placeholder="unique_snake_case_key"
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="q-label">Label</Label>
             <Input id="q-label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Question text" />
           </div>
@@ -280,6 +313,12 @@ function NewQuestionEditor() {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox id="q-onboarding" checked={onboarding} onCheckedChange={(v) => setOnboarding(v === true)} />
+            <Label htmlFor="q-onboarding" className="font-normal">
+              Onboarding
+            </Label>
           </div>
         </CardContent>
       </Card>

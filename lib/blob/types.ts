@@ -29,6 +29,7 @@ export type BlobOption = {
 };
 
 export type BlobQuestion = {
+  key?: string;
   type: QuestionType;
   label: string;
   description?: string;
@@ -39,6 +40,7 @@ export type BlobQuestion = {
   show_when?: BlobCondition;
   hide_when?: BlobCondition;
   unknowable?: boolean;
+  onboarding?: boolean;
   enabled: boolean;
 };
 
