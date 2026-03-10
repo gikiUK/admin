@@ -4,6 +4,8 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+pnpmfileChecksum: sha256-lEwNI/bOVKMz6OFBbGKKtcWOg2FPkf37CAAk0kI71rI=
+
 importers:
 
   .:
@@ -11,6 +13,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.78.0
         version: 0.78.0(zod@3.25.76)
+      '@giki/facts-engine':
+        specifier: link:/Users/iHiD/Code/giki/api/packages/facts-engine
+        version: link:../api/packages/facts-engine
       '@sentry/nextjs':
         specifier: ^10
         version: 10.38.0(@opentelemetry/context-async-hooks@2.5.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.5.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.5.1(@opentelemetry/api@1.9.0))(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.105.2)

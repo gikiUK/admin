@@ -3,4 +3,10 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 pnpm install --frozen-lockfile
+
+# Build local facts-engine package if linked
+if [ -d "../api/packages/facts-engine" ]; then
+  (cd ../api/packages/facts-engine && pnpm build)
+fi
+
 exec pnpm run dev
