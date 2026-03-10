@@ -31,7 +31,7 @@ describe("findSourcelessFacts", () => {
   it("fact set by enabled question is not sourceless", () => {
     const data = makeData({
       facts: { heat_pump: { type: "boolean_state", core: true, enabled: true } },
-      questions: [{ type: "boolean_state", label: "Q", fact: "heat_pump", enabled: true }]
+      questions: [{ key: "q", type: "boolean_state", label: "Q", fact: "heat_pump", enabled: true }]
     });
     expect(findSourcelessFacts(["heat_pump"], data)).toEqual([]);
   });
@@ -69,7 +69,7 @@ describe("findSourcelessFacts", () => {
   it("rule with disabled question still counts as sourceless", () => {
     const data = makeData({
       facts: { heat_pump: { type: "boolean_state", core: true, enabled: true } },
-      questions: [{ type: "boolean_state", label: "Q", fact: "heat_pump", enabled: false }]
+      questions: [{ key: "q", type: "boolean_state", label: "Q", fact: "heat_pump", enabled: false }]
     });
     expect(findSourcelessFacts(["heat_pump"], data)).toEqual(["heat_pump"]);
   });
@@ -82,7 +82,14 @@ describe("checkUndefinedRefs", () => {
     const data = makeData({
       facts: { heat_pump: { type: "boolean_state", core: true, enabled: true } },
       questions: [
-        { type: "boolean_state", label: "Q", fact: "heat_pump", show_when: { heat_pump: true }, enabled: true }
+        {
+          key: "q",
+          type: "boolean_state",
+          label: "Q",
+          fact: "heat_pump",
+          show_when: { heat_pump: true },
+          enabled: true
+        }
       ]
     });
     expect(checkUndefinedRefs(data).issues).toHaveLength(0);

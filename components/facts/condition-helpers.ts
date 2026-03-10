@@ -1,4 +1,4 @@
-import type { AnyCondition, BlobCondition, FactType, SimpleCondition } from "@/lib/blob/types";
+import type { AllCondition, AnyCondition, BlobCondition, FactType, SimpleCondition } from "@/lib/blob/types";
 
 export type ConditionMode = "single" | "and" | "or";
 
@@ -6,8 +6,13 @@ export function isAnyCondition(c: BlobCondition): c is AnyCondition {
   return "any" in c;
 }
 
+export function isAllCondition(c: BlobCondition): c is AllCondition {
+  return "all" in c;
+}
+
 export function getMode(c: BlobCondition): ConditionMode {
   if (isAnyCondition(c)) return "or";
+  if (isAllCondition(c)) return "and";
   return Object.keys(c).length > 1 ? "and" : "single";
 }
 
@@ -26,8 +31,11 @@ function mergeSimple(conditions: SimpleCondition[]): SimpleCondition {
 }
 
 export function getSubs(c: BlobCondition, mode: ConditionMode): SimpleCondition[] {
-  if (mode === "or") return (c as AnyCondition).any;
-  if (mode === "and") return splitSimple(c as SimpleCondition);
+  if (mode === "or") return (c as AnyCondition).any as SimpleCondition[];
+  if (mode === "and") {
+    if (isAllCondition(c)) return (c as AllCondition).all as SimpleCondition[];
+    return splitSimple(c as SimpleCondition);
+  }
   return [c as SimpleCondition];
 }
 

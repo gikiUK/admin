@@ -7,7 +7,14 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { ConstantsLookup, FactsLookup } from "@/lib/blob/resolve";
 import { resolveConstantId } from "@/lib/blob/resolve";
-import type { Action, AnyCondition, BlobActionCondition, BlobCondition, SimpleCondition } from "@/lib/blob/types";
+import type {
+  Action,
+  AllCondition,
+  AnyCondition,
+  BlobActionCondition,
+  BlobCondition,
+  SimpleCondition
+} from "@/lib/blob/types";
 import { cn, formatFactName } from "@/lib/utils";
 
 type ActionCardProps = {
@@ -23,8 +30,13 @@ function isAnyCondition(c: BlobCondition): c is AnyCondition {
   return "any" in c;
 }
 
+function isAllCondition(c: BlobCondition): c is AllCondition {
+  return "all" in c;
+}
+
 function isEmptyCondition(c: BlobCondition): boolean {
   if (isAnyCondition(c)) return c.any.length === 0;
+  if (isAllCondition(c)) return c.all.length === 0;
   return Object.keys(c).length === 0;
 }
 
@@ -33,11 +45,11 @@ function ResolvedValue({
   value,
   facts,
   constants
-}: { factKey: string; value: string | boolean | number | number[] | string[] } & LookupProps) {
+}: { factKey: string; value: SimpleCondition[string] } & LookupProps) {
   if (Array.isArray(value)) {
     return (
       <div className="flex flex-wrap gap-1">
-        {value.map((item) => (
+        {(value as (string | number)[]).map((item) => (
           <Badge key={String(item)} variant="secondary" className="text-xs font-normal">
             {resolveConstantId(item, factKey, facts, constants)}
           </Badge>
@@ -47,6 +59,9 @@ function ResolvedValue({
   }
   if (typeof value === "boolean") {
     return <span className="text-xs font-medium">{value ? "true" : "false"}</span>;
+  }
+  if (typeof value === "object") {
+    return <span className="text-xs font-medium">{JSON.stringify(value)}</span>;
   }
   return <span className="text-xs font-medium">{resolveConstantId(value, factKey, facts, constants)}</span>;
 }
@@ -83,7 +98,16 @@ function ConditionBlock({
           {condition.any.map((sub, i) => (
             <div key={`any-${i}-${Object.keys(sub).join("-")}`} className="space-y-1">
               {i > 0 && <span className="text-xs italic text-muted-foreground">or</span>}
-              <ConditionEntries entries={sub} facts={facts} constants={constants} />
+              <ConditionEntries entries={sub as SimpleCondition} facts={facts} constants={constants} />
+            </div>
+          ))}
+        </div>
+      ) : isAllCondition(condition) ? (
+        <div className="space-y-2 pl-2">
+          {condition.all.map((sub, i) => (
+            <div key={`all-${i}-${Object.keys(sub).join("-")}`} className="space-y-1">
+              {i > 0 && <span className="text-xs italic text-muted-foreground">and</span>}
+              <ConditionEntries entries={sub as SimpleCondition} facts={facts} constants={constants} />
             </div>
           ))}
         </div>
@@ -129,14 +153,14 @@ function ConditionDetail({ condition, facts, constants }: { condition: BlobActio
   );
 }
 
+function conditionEntryCount(c: BlobCondition): number {
+  if (isAnyCondition(c)) return c.any.length;
+  if (isAllCondition(c)) return c.all.length;
+  return Object.keys(c).length;
+}
+
 function conditionKeyCount(condition: BlobActionCondition): number {
-  const inc = isAnyCondition(condition.include_when)
-    ? condition.include_when.any.length
-    : Object.keys(condition.include_when).length;
-  const exc = isAnyCondition(condition.exclude_when)
-    ? condition.exclude_when.any.length
-    : Object.keys(condition.exclude_when).length;
-  return inc + exc;
+  return conditionEntryCount(condition.include_when) + conditionEntryCount(condition.exclude_when);
 }
 
 export function ActionCard({ action, condition, facts, constants }: ActionCardProps) {

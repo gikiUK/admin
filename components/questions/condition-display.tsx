@@ -3,12 +3,16 @@
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { resolveConstantId } from "@/lib/blob/resolve";
-import type { AnyCondition, BlobCondition, SimpleCondition } from "@/lib/blob/types";
+import type { AllCondition, AnyCondition, BlobCondition, SimpleCondition } from "@/lib/blob/types";
 import { useDataset } from "@/lib/blob/use-dataset";
 import { cn, formatFactName } from "@/lib/utils";
 
 function isAnyCondition(condition: BlobCondition): condition is AnyCondition {
   return "any" in condition;
+}
+
+function isAllCondition(condition: BlobCondition): condition is AllCondition {
+  return "all" in condition;
 }
 
 type Props = {
@@ -90,7 +94,21 @@ export function ConditionDisplay({ condition, highlightFacts }: Props) {
         {condition.any.map((c, i) => (
           <span key={`condition-${Object.keys(c).join("-")}-${i}`} className="flex items-center gap-1">
             {i > 0 && <span className="text-xs text-muted-foreground">|</span>}
-            {renderSimple(c)}
+            {renderSimple(c as SimpleCondition)}
+          </span>
+        ))}
+      </div>
+    );
+  }
+
+  if (isAllCondition(condition)) {
+    return (
+      <div className="flex flex-wrap items-center gap-1">
+        <span className="text-xs text-muted-foreground">all of:</span>
+        {condition.all.map((c, i) => (
+          <span key={`condition-${Object.keys(c).join("-")}-${i}`} className="flex items-center gap-1">
+            {i > 0 && <span className="text-xs text-muted-foreground">&</span>}
+            {renderSimple(c as SimpleCondition)}
           </span>
         ))}
       </div>

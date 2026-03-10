@@ -184,6 +184,7 @@ function NewQuestionEditor() {
   const allFactIds = blob ? Object.keys(blob.facts) : [];
   const constantGroupNames = blob ? Object.keys(blob.constants) : [];
 
+  const [key, setKey] = useState("");
   const [label, setLabel] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<QuestionType>("boolean_state");
@@ -212,6 +213,7 @@ function NewQuestionEditor() {
 
   function handleCreate() {
     const payload: BlobQuestion = {
+      key,
       label,
       type,
       enabled: true,
@@ -252,6 +254,10 @@ function NewQuestionEditor() {
           <h2 className="text-sm font-semibold">Properties</h2>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="q-key">Key</Label>
+            <Input id="q-key" value={key} onChange={(e) => setKey(e.target.value)} placeholder="unique_question_key" />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="q-label">Label</Label>
             <Input id="q-label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Question text" />
@@ -329,7 +335,7 @@ function NewQuestionEditor() {
         <Button variant="outline" asChild>
           <Link href="/data/questions">Cancel</Link>
         </Button>
-        <Button onClick={handleCreate} disabled={!label.trim()}>
+        <Button onClick={handleCreate} disabled={!key.trim() || !label.trim()}>
           Create
         </Button>
       </div>
