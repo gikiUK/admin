@@ -111,7 +111,7 @@ export type Dataset = DatasetMeta & DatasetBlob;
 // ── Action (from /admin/actions, not part of dataset) ────
 
 export type Action = {
-  id: number;
+  uuid: string;
   title: string;
   enabled: boolean;
 };
