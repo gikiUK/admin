@@ -1,6 +1,5 @@
 // ── Re-export shared types from @gikiuk/facts-engine ────
 export type {
-  Action,
   AllCondition,
   Answer,
   AnyCondition,
@@ -24,6 +23,14 @@ export type {
   SimpleCondition,
   TestCase
 } from "@gikiuk/facts-engine";
+
+// ── Action (from /admin/actions, not part of dataset) ────
+// Local override: package Action still has id: number; uuid added here until package is updated.
+export type Action = {
+  uuid: string;
+  title: string;
+  enabled: boolean;
+};
 
 import type { BlobRule, FactType, QuestionType } from "@gikiuk/facts-engine";
 
