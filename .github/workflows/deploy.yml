@@ -32,6 +32,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
+      - name: Authenticate GitHub Packages
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" >> ~/.npmrc
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 

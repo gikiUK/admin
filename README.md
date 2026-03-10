@@ -30,6 +30,13 @@ The dev server runs at [http://localhost:3112](http://localhost:3112).
 | `pnpm run test`         | Run Jest tests               |
 | `npx tsc --noEmit`      | TypeScript type checking     |
 
+## Facts Engine Package
+
+The `@gikiuk/facts-engine` package provides the facts engine logic (condition evaluation, rule derivation, question visibility) and all blob types. It is published to GitHub Packages from the API repo (`../api/packages/facts-engine/`).
+
+- Installed from GitHub Packages. Auth via `NODE_AUTH_TOKEN` (Cloudflare secret for deploy, `~/.npmrc` for local).
+- **Types:** Import blob types from `@gikiuk/facts-engine` (e.g. `DatasetData`, `BlobQuestion`, `BlobCondition`).
+
 ## Deployment
 
 ### Sentry
