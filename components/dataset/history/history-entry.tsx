@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, ExternalLink, Flag, Undo2 } from "lucide-react";
+import { Clock, ExternalLink, Undo2 } from "lucide-react";
 import Link from "next/link";
 import type { ChangeEntry } from "@/lib/blob/change-log";
 import type { BlobQuestion } from "@/lib/blob/types";
@@ -12,11 +12,9 @@ function TimelineDot({ entry, isCurrent }: { entry: ChangeEntry; isCurrent: bool
   let bg = "bg-border";
   if (isCurrent) bg = "bg-primary text-primary-foreground";
   else if (entry.isRevert) bg = "bg-blue-100 dark:bg-blue-900";
-  else if (entry.isDiscard) bg = "bg-orange-100 dark:bg-orange-900";
 
   let icon = <Clock className={`size-3 ${isCurrent ? "" : "text-muted-foreground"}`} />;
-  if (!isCurrent && entry.isDiscard) icon = <Flag className="size-3 text-orange-600 dark:text-orange-400" />;
-  else if (!isCurrent && entry.isRevert) icon = <Undo2 className="size-3 text-blue-600 dark:text-blue-400" />;
+  if (!isCurrent && entry.isRevert) icon = <Undo2 className="size-3 text-blue-600 dark:text-blue-400" />;
 
   return (
     <div className="flex flex-col items-center">

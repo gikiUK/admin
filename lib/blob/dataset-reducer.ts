@@ -145,13 +145,8 @@ function buildRevertMutation(
   return null;
 }
 
-/** Append a new entry to history. Lifecycle entries are inserted without truncating or moving cursor. */
 function appendToHistory(history: HistoryState, entry: ChangeEntry, currentData: DatasetData): HistoryState {
   const base = history.base ?? structuredClone(currentData);
-  if (entry.isLifecycle) {
-    // Lifecycle markers don't truncate future entries or move the cursor
-    return { entries: [...history.entries, entry], cursor: history.cursor, base };
-  }
   const entries = [...history.entries.slice(0, history.cursor + 1), entry];
   return { entries, cursor: entries.length - 1, base };
 }

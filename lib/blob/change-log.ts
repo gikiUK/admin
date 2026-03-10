@@ -24,9 +24,6 @@ export type ChangeEntry = {
   entityBefore?: unknown;
   entityAfter?: unknown;
   isRevert?: boolean;
-  isLifecycle?: boolean;
-  /** When true, replaying this entry resets data back to the history base (used by "discard draft"). */
-  isDiscard?: boolean;
 };
 
 function formatValue(v: unknown): string {
