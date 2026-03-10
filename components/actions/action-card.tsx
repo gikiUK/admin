@@ -157,7 +157,7 @@ export function ActionCard({ action, condition, facts, constants }: ActionCardPr
             </Badge>
           )}
           <Badge variant="secondary" className="font-mono text-xs">
-            {action.uuid.slice(0, 8)}
+            {action.uuid.slice(-8)}
           </Badge>
         </div>
       </CardHeader>
