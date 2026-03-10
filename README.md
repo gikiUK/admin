@@ -30,6 +30,14 @@ The dev server runs at [http://localhost:3112](http://localhost:3112).
 | `pnpm run test`         | Run Jest tests               |
 | `npx tsc --noEmit`      | TypeScript type checking     |
 
+## Facts Engine Package
+
+The `@giki/facts-engine` package provides the facts engine logic (condition evaluation, rule derivation, question visibility) and all blob types. It is published to GitHub Packages from the API repo (`../api/packages/facts-engine/`).
+
+- **Locally:** `.pnpmfile.cjs` automatically links to `../api/packages/facts-engine` when the directory exists. The `bin/dev` script builds the package before starting Next.js.
+- **Deploy:** Installed from GitHub Packages using `NODE_AUTH_TOKEN` (configured as a Cloudflare secret).
+- **Types:** Import blob types from `@giki/facts-engine` (e.g. `DatasetData`, `BlobQuestion`, `BlobCondition`).
+
 ## Deployment
 
 ### Sentry
