@@ -1,6 +1,6 @@
 import type { FormulaOrTerm } from "logic-solver";
 import Logic from "logic-solver";
-import type { AnyCondition, BlobCondition, SimpleCondition } from "@/lib/blob/types";
+import type { AllCondition, AnyCondition, BlobCondition, SimpleCondition } from "@/lib/blob/types";
 
 export function factVar(id: string, suffix: string): string {
   return `fact:${id}:${suffix}`;
@@ -16,7 +16,7 @@ function resolveValueName(factKey: string, value: string | number, idToName: Map
 
 function encodeKeyValue(
   key: string,
-  value: string | boolean | number | number[] | string[],
+  value: SimpleCondition[string],
   idToName: Map<string, string>
 ): FormulaOrTerm | null {
   if (typeof value === "boolean") {
@@ -53,6 +53,13 @@ export function encodeCondition(
       .map((c) => encodeCondition(c, vars, idToName))
       .filter(Boolean) as FormulaOrTerm[];
     return subs.length > 0 ? Logic.or(...subs) : null;
+  }
+
+  if ("all" in condition) {
+    const subs = (condition as AllCondition).all
+      .map((c) => encodeCondition(c, vars, idToName))
+      .filter(Boolean) as FormulaOrTerm[];
+    return subs.length > 0 ? Logic.and(...subs) : null;
   }
 
   const simple = condition as SimpleCondition;

@@ -11,6 +11,7 @@ function clone<T>(value: T): T {
 
 const baseFact: BlobFact = { type: "boolean_state", core: true, enabled: true };
 const baseQuestion: BlobQuestion = {
+  key: "test_question",
   type: "boolean_state",
   label: "Test question",
   fact: "test_fact",
@@ -91,7 +92,7 @@ describe("history reducer", () => {
 
     it("resolves ADD_QUESTION entityRef to correct index", () => {
       const state = stateWithDraft();
-      const newQ: BlobQuestion = { type: "boolean_state", label: "New Q", enabled: true };
+      const newQ: BlobQuestion = { key: "new_q", type: "boolean_state", label: "New Q", enabled: true };
       const next = datasetReducer(state, { type: "ADD_QUESTION", question: newQ });
 
       const entry = next.history.entries[0];
@@ -267,7 +268,7 @@ describe("history reducer", () => {
         question: { ...baseQuestion, label: "After discard" }
       });
       expect(state.history.entries).toHaveLength(2);
-      expect(state.history.entries[1].description).toBe('Edited question "#1"');
+      expect(state.history.entries[1].description).toBe('Edited question "test_question"');
       expect(state.history.cursor).toBe(1);
     });
   });

@@ -39,8 +39,20 @@ const contradictoryRulesData: DatasetData = {
     ]
   },
   questions: [
-    { type: "boolean_state", label: "Do you have a gas boiler?", fact: "has_gas_boiler", enabled: true },
-    { type: "boolean_state", label: "Do you have renewables?", fact: "has_renewables", enabled: true }
+    {
+      key: "gas_boiler",
+      type: "boolean_state",
+      label: "Do you have a gas boiler?",
+      fact: "has_gas_boiler",
+      enabled: true
+    },
+    {
+      key: "renewables",
+      type: "boolean_state",
+      label: "Do you have renewables?",
+      fact: "has_renewables",
+      enabled: true
+    }
   ],
   rules: [
     { sets: "heating_type", value: "gas", source: "general", when: { has_gas_boiler: true }, enabled: true },
@@ -73,7 +85,13 @@ const hotspotSuppressionData: DatasetData = {
     ]
   },
   questions: [
-    { type: "boolean_state", label: "Significant investments?", fact: "has_significant_investments", enabled: true }
+    {
+      key: "investments",
+      type: "boolean_state",
+      label: "Significant investments?",
+      fact: "has_significant_investments",
+      enabled: true
+    }
   ],
   rules: [
     {
@@ -153,7 +171,7 @@ const unreachableActionData: DatasetData = {
  */
 const reachableActionData: DatasetData = {
   ...unreachableActionData,
-  questions: [{ type: "boolean_state", label: "Do you use solar?", fact: "uses_solar", enabled: true }]
+  questions: [{ key: "solar", type: "boolean_state", label: "Do you use solar?", fact: "uses_solar", enabled: true }]
 };
 
 /**
@@ -176,7 +194,9 @@ const impossibleConditionData: DatasetData = {
     has_office: { type: "boolean_state", core: true, enabled: true }
   },
   constants: {},
-  questions: [{ type: "boolean_state", label: "Do you have an office?", fact: "has_office", enabled: true }],
+  questions: [
+    { key: "office", type: "boolean_state", label: "Do you have an office?", fact: "has_office", enabled: true }
+  ],
   rules: [],
   action_conditions: {
     action_impossible: {
@@ -201,7 +221,7 @@ const deadFactAnyOfData: DatasetData = {
     any_of_fact: { type: "boolean_state", core: true, enabled: true }
   },
   constants: {},
-  questions: [{ type: "boolean_state", label: "Q", fact: "active_fact", enabled: true }],
+  questions: [{ key: "q", type: "boolean_state", label: "Q", fact: "active_fact", enabled: true }],
   rules: [
     {
       sets: "active_fact",
@@ -226,7 +246,7 @@ const deadFactData: DatasetData = {
     legacy_metric: { type: "boolean_state", core: false, enabled: true }
   },
   constants: {},
-  questions: [{ type: "boolean_state", label: "Q", fact: "active_fact", enabled: true }],
+  questions: [{ key: "q", type: "boolean_state", label: "Q", fact: "active_fact", enabled: true }],
   rules: [],
   action_conditions: {
     action_1: { enabled: true, include_when: { active_fact: true }, exclude_when: {} }
@@ -264,7 +284,7 @@ const includeExcludeOverlapData: DatasetData = {
     has_fleet: { type: "boolean_state", core: true, enabled: true }
   },
   constants: {},
-  questions: [{ type: "boolean_state", label: "Do you have a fleet?", fact: "has_fleet", enabled: true }],
+  questions: [{ key: "fleet", type: "boolean_state", label: "Do you have a fleet?", fact: "has_fleet", enabled: true }],
   rules: [],
   action_conditions: {
     action_fleet: {
@@ -294,6 +314,7 @@ const unreachableQuestionShowWhenData: DatasetData = {
   constants: {},
   questions: [
     {
+      key: "solar_setup",
       type: "boolean_state",
       label: "Are you satisfied with your solar setup?",
       fact: "answer_fact",
@@ -325,6 +346,7 @@ const alwaysHiddenQuestionData: DatasetData = {
   constants: {},
   questions: [
     {
+      key: "always_hidden",
       type: "boolean_state",
       label: "A question that is always hidden",
       fact: "answer_fact",

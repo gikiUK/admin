@@ -234,7 +234,7 @@ function NewQuestionEditor() {
 
   function handleCreate() {
     const payload: BlobQuestion = {
-      key: key || undefined,
+      key,
       label,
       type,
       enabled: true,
@@ -368,7 +368,7 @@ function NewQuestionEditor() {
         <Button variant="outline" asChild>
           <Link href="/data/questions">Cancel</Link>
         </Button>
-        <Button onClick={handleCreate} disabled={!label.trim()}>
+        <Button onClick={handleCreate} disabled={!key.trim() || !label.trim()}>
           Create
         </Button>
       </div>

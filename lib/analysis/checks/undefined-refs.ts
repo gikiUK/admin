@@ -1,13 +1,14 @@
-import type { AnyCondition, BlobCondition, DatasetData, SimpleCondition } from "@/lib/blob/types";
+import type { AllCondition, AnyCondition, BlobCondition, DatasetData, SimpleCondition } from "@/lib/blob/types";
 import type { AnalysisIssue, CheckResult, IssueRef } from "../types";
 
-type ConditionEntry = { key: string; value: string | boolean | number | number[] | string[] };
+type ConditionEntry = { key: string; value: SimpleCondition[string] };
 
 function extractEntries(condition: BlobCondition): ConditionEntry[] {
   if ("any" in condition) {
-    return (condition as AnyCondition).any.flatMap((sub) =>
-      Object.entries(sub).map(([key, value]) => ({ key, value }))
-    );
+    return (condition as AnyCondition).any.flatMap((sub) => extractEntries(sub));
+  }
+  if ("all" in condition) {
+    return (condition as AllCondition).all.flatMap((sub) => extractEntries(sub));
   }
   return Object.entries(condition as SimpleCondition).map(([key, value]) => ({ key, value }));
 }
