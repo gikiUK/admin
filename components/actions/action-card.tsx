@@ -98,7 +98,7 @@ function ConditionBlock({
           {condition.any.map((sub, i) => (
             <div key={`any-${i}-${Object.keys(sub).join("-")}`} className="space-y-1">
               {i > 0 && <span className="text-xs italic text-muted-foreground">or</span>}
-              <ConditionEntries entries={sub as SimpleCondition} facts={facts} constants={constants} />
+              <ConditionBlock label="" condition={sub} facts={facts} constants={constants} />
             </div>
           ))}
         </div>
@@ -107,7 +107,7 @@ function ConditionBlock({
           {condition.all.map((sub, i) => (
             <div key={`all-${i}-${Object.keys(sub).join("-")}`} className="space-y-1">
               {i > 0 && <span className="text-xs italic text-muted-foreground">and</span>}
-              <ConditionEntries entries={sub as SimpleCondition} facts={facts} constants={constants} />
+              <ConditionBlock label="" condition={sub} facts={facts} constants={constants} />
             </div>
           ))}
         </div>

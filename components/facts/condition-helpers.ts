@@ -30,10 +30,10 @@ function mergeSimple(conditions: SimpleCondition[]): SimpleCondition {
   return merged;
 }
 
-export function getSubs(c: BlobCondition, mode: ConditionMode): SimpleCondition[] {
-  if (mode === "or") return (c as AnyCondition).any as SimpleCondition[];
+export function getSubs(c: BlobCondition, mode: ConditionMode): BlobCondition[] {
+  if (mode === "or") return (c as AnyCondition).any;
   if (mode === "and") {
-    if (isAllCondition(c)) return (c as AllCondition).all as SimpleCondition[];
+    if (isAllCondition(c)) return (c as AllCondition).all;
     return splitSimple(c as SimpleCondition);
   }
   return [c as SimpleCondition];

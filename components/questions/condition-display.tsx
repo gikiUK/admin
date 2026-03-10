@@ -94,7 +94,7 @@ export function ConditionDisplay({ condition, highlightFacts }: Props) {
         {condition.any.map((c, i) => (
           <span key={`condition-${Object.keys(c).join("-")}-${i}`} className="flex items-center gap-1">
             {i > 0 && <span className="text-xs text-muted-foreground">|</span>}
-            {renderSimple(c as SimpleCondition)}
+            <ConditionDisplay condition={c} highlightFacts={highlightFacts} />
           </span>
         ))}
       </div>
@@ -108,7 +108,7 @@ export function ConditionDisplay({ condition, highlightFacts }: Props) {
         {condition.all.map((c, i) => (
           <span key={`condition-${Object.keys(c).join("-")}-${i}`} className="flex items-center gap-1">
             {i > 0 && <span className="text-xs text-muted-foreground">&</span>}
-            {renderSimple(c as SimpleCondition)}
+            <ConditionDisplay condition={c} highlightFacts={highlightFacts} />
           </span>
         ))}
       </div>
