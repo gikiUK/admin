@@ -34,8 +34,7 @@ The dev server runs at [http://localhost:3112](http://localhost:3112).
 
 The `@gikiuk/facts-engine` package provides the facts engine logic (condition evaluation, rule derivation, question visibility) and all blob types. It is published to GitHub Packages from the API repo (`../api/packages/facts-engine/`).
 
-- **Locally:** `.pnpmfile.cjs` automatically links to `../api/packages/facts-engine` when the directory exists. The `bin/dev` script builds the package before starting Next.js.
-- **Deploy:** Installed from GitHub Packages using `NODE_AUTH_TOKEN` (configured as a Cloudflare secret).
+- Installed from GitHub Packages. Auth via `NODE_AUTH_TOKEN` (Cloudflare secret for deploy, `~/.npmrc` for local).
 - **Types:** Import blob types from `@gikiuk/facts-engine` (e.g. `DatasetData`, `BlobQuestion`, `BlobCondition`).
 
 ## Deployment
