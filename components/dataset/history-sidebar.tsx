@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { useDataset } from "@/lib/blob/use-dataset";
 import { useHistorySidebar } from "@/lib/history-sidebar-context";
 import { HistoryEntry } from "./history/history-entry";
-import { LifecycleMarker } from "./history/lifecycle-marker";
 
 export function HistorySidebar() {
   const { open, setOpen } = useHistorySidebar();
@@ -67,9 +66,6 @@ export function HistorySidebar() {
             <div className="space-y-1">
               {[...entries].reverse().map((entry, reversedIdx) => {
                 const realIndex = entries.length - 1 - reversedIdx;
-                if (entry.isLifecycle) {
-                  return <LifecycleMarker key={entry.id} entry={entry} />;
-                }
                 return (
                   <HistoryEntry
                     key={entry.id}

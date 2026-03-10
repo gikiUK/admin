@@ -228,46 +228,17 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
       };
     }
 
-    case "DRAFT_DELETED": {
-      // If the cursor already points at a discard entry (e.g. we redo'd to it),
-      // the auto-drop is just a side effect of history traversal - don't duplicate.
-      const currentEntry = state.history.entries[state.history.cursor];
-      const alreadyAtDiscard = currentEntry?.isDiscard === true;
-      const hist = alreadyAtDiscard
-        ? state.history
-        : appendToHistory(
-            state.history,
-            {
-              id: uuidv4(),
-              timestamp: Date.now(),
-              action: null,
-              description: "Discarded draft",
-              details: [],
-              isDiscard: true
-            },
-            state.dataset?.data ?? ({} as DatasetData)
-          );
+    case "DRAFT_DELETED":
       return {
         ...state,
         draft: null,
         dataset: state.live,
         original: state.live ? structuredClone(state.live.data) : null,
         isDirty: false,
-        isEditing: false,
-        history: hist
+        isEditing: false
       };
-    }
 
-    case "DRAFT_PUBLISHED": {
-      const publishEntry: ChangeEntry = {
-        id: uuidv4(),
-        timestamp: Date.now(),
-        action: null,
-        description: "Published to live",
-        details: [],
-        isLifecycle: true
-      };
-      const hist = appendToHistory(state.history, publishEntry, state.dataset?.data ?? ({} as DatasetData));
+    case "DRAFT_PUBLISHED":
       return {
         ...state,
         live: action.payload,
@@ -276,10 +247,8 @@ export function datasetReducer(state: DatasetState, action: DatasetAction): Data
         original: structuredClone(action.payload.data),
         isDirty: false,
         saving: false,
-        isEditing: false,
-        history: { ...hist, cursor: hist.entries.length - 1 }
+        isEditing: false
       };
-    }
 
     case "QUEUE_MUTATION":
       return { ...state, pendingMutations: [...state.pendingMutations, action.mutation] };

@@ -207,8 +207,5 @@ function describeAction(action: MutationAction): string {
 }
 
 export function replayChanges(base: DatasetData, entries: ChangeEntry[]): DatasetData {
-  return entries.reduce(
-    (data, entry) => (entry.isDiscard ? structuredClone(base) : entry.action ? applyAction(data, entry.action) : data),
-    base
-  );
+  return entries.reduce((data, entry) => (entry.action ? applyAction(data, entry.action) : data), base);
 }
