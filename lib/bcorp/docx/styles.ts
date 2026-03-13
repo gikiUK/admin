@@ -1,4 +1,4 @@
-import type { IParagraphOptions, IRunOptions, IStylesOptions, ITableCellOptions } from "docx";
+import type { IParagraphOptions, IRunOptions, IStylesOptions } from "docx";
 import {
   AlignmentType,
   BorderStyle,
