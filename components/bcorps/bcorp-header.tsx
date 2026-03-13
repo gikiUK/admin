@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, ArrowLeft, Check, FileText, Loader2, PenLine, Save, Sparkles } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, FileDown, FileText, Loader2, PenLine, Save, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -51,6 +51,7 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
   const busy = saveState === "saving" || populateState === "populating";
   const populateDisabled = busy || allAiFilled;
   const [pdfState, setPdfState] = useState<"idle" | "generating" | "error">("idle");
+  const [docxState, setDocxState] = useState<"idle" | "generating" | "error">("idle");
   const [confirmBack, setConfirmBack] = useState(false);
   const popstateDeltaRef = useRef<number>(0);
   const router = useRouter();
@@ -96,6 +97,39 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
       setPdfState("idle");
     } catch {
       setPdfState("error");
+    }
+  }
+
+  async function handleGenerateDocx() {
+    setDocxState("generating");
+    try {
+      if (isDirty) {
+        await saveRef.current?.();
+      }
+      const jwtRes = await fetch(getApiUrl("/internal/jwt_token"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" }
+      });
+      if (!jwtRes.ok) throw new Error("Failed to get JWT token");
+      const { token: jwt } = await jwtRes.json();
+
+      const res = await fetch("/api/bcorp/docx", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orgId, orgName: name, jwt })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${name} - B Corp Climate Action Report.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setDocxState("idle");
+    } catch {
+      setDocxState("error");
     }
   }
 
@@ -184,6 +218,21 @@ export function BcorpHeader({ orgId }: { orgId: string }) {
               </Button>
             </TooltipTrigger>
             <TooltipContent>{pdfState === "error" ? "Failed - try again" : "Generate PDF report"}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={busy || docxState === "generating"}
+                onClick={handleGenerateDocx}
+                className="!h-[32px] text-[17px] rounded-[5px] shadow-[0_0_5px_rgba(0,0,0,0.2)]"
+              >
+                <FileDown className="size-3.5" />
+                {docxState === "generating" ? "Generating..." : "Docx Report"}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{docxState === "error" ? "Failed - try again" : "Generate Word report"}</TooltipContent>
           </Tooltip>
 
           <Tooltip>
