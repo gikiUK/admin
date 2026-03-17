@@ -1,5 +1,6 @@
 // ── Re-export shared types from @gikiuk/facts-engine ────
 export type {
+  Action,
   AllCondition,
   Answer,
   AnyCondition,
@@ -23,14 +24,6 @@ export type {
   SimpleCondition,
   TestCase
 } from "@gikiuk/facts-engine";
-
-// ── Action (from /admin/actions, not part of dataset) ────
-export type Action = {
-  id: number;
-  uuid: string;
-  title: string;
-  enabled: boolean;
-};
 
 import type { BlobRule, FactType, QuestionType } from "@gikiuk/facts-engine";
 
