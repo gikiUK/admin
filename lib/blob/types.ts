@@ -25,8 +25,8 @@ export type {
 } from "@gikiuk/facts-engine";
 
 // ── Action (from /admin/actions, not part of dataset) ────
-// Local override: package Action still has id: number; uuid added here until package is updated.
 export type Action = {
+  id: number;
   uuid: string;
   title: string;
   enabled: boolean;

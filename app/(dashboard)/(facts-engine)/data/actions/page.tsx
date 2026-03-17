@@ -72,14 +72,14 @@ export default function ActionsPage() {
     gap: ROW_GAP
   });
 
-  // Scroll to hash anchor (e.g. #a-<uuid>) once actions load
+  // Scroll to hash anchor (e.g. #a-85) once actions load
   const didScrollToHash = useRef(false);
   useEffect(() => {
     if (loading || didScrollToHash.current || filtered.length === 0) return;
-    const hash = window.location.hash; // e.g. "#a-<uuid>"
+    const hash = window.location.hash; // e.g. "#a-85"
     if (!hash.startsWith("#a-")) return;
-    const actionUuid = hash.slice(3);
-    const index = filtered.findIndex((a) => a.uuid === actionUuid);
+    const actionId = hash.slice(3); // "85"
+    const index = filtered.findIndex((a) => String(a.id) === actionId);
     if (index >= 0) {
       didScrollToHash.current = true;
       virtualizer.scrollToIndex(index, { align: "center" });
@@ -125,13 +125,18 @@ export default function ActionsPage() {
               const action = filtered[row.index];
               return (
                 <div
-                  key={action.uuid}
+                  key={action.id}
                   ref={virtualizer.measureElement}
                   data-index={row.index}
                   className="absolute left-0 top-0 w-full"
                   style={{ transform: `translateY(${row.start}px)` }}
                 >
-                  <ActionCard action={action} condition={conditions[action.uuid]} facts={facts} constants={constants} />
+                  <ActionCard
+                    action={action}
+                    condition={conditions[String(action.id)]}
+                    facts={facts}
+                    constants={constants}
+                  />
                 </div>
               );
             })}
