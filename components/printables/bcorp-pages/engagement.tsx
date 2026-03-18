@@ -2,14 +2,13 @@ import { GOVERNANCE_CATEGORIES } from "@/components/bcorps/use-bcorp-form";
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
 
 export function Engagement({ data, plan }: BcorpPageProps) {
-  console.log(data);
-  const hasEngagement = data.engagement && data.engagement.trim() !== "";
+  const engagementActions = plan.filter((a) => a.tal_action.ghg_scope?.includes("Engagement"));
+  const governanceActions = plan.filter((a) => a.tal_action.ghg_scope?.includes("Governance"));
+
+  const hasEngagement = engagementActions.length > 0 && data.engagement && data.engagement.trim() !== "";
   const hasGovernment = data.government && data.government.trim() !== "";
 
   if (!hasEngagement && !hasGovernment) return null;
-
-  const engagementActions = plan.filter((a) => a.tal_action.ghg_scope?.includes("Engagement"));
-  const governanceActions = plan.filter((a) => a.tal_action.ghg_scope?.includes("Governance"));
 
   const govByCategory: Record<string, string[]> = {};
   for (const a of governanceActions) {
