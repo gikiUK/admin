@@ -28,6 +28,7 @@ export function BcorpDataForm({ orgId, initialData }: BcorpDataFormProps) {
 
   const engagementActions = plan.filter((a) => a.tal_action.ghg_scope?.includes("Engagement"));
   const governanceActions = plan.filter((a) => a.tal_action.ghg_scope?.includes("Governance"));
+
   const disclosureActions = plan.filter((a) =>
     (a.tal_action.themes ?? []).includes("Governance disclosure and reporting")
   );
