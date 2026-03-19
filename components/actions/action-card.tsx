@@ -170,18 +170,18 @@ export function ActionCard({ action, condition, facts, constants }: ActionCardPr
   const dismissCount = condition?.dismiss_options?.length ?? 0;
 
   return (
-    <Card id={`a-${action.uuid}`} className={cn("gap-0 py-0 transition-colors", !action.enabled && "opacity-50")}>
+    <Card id={`a-${action.id}`} className={cn("gap-0 py-0 transition-colors", !action.enabled && "opacity-50")}>
       <CardHeader className="flex flex-row items-center justify-between gap-2 px-4 py-3">
         <span className="text-sm font-medium">{action.title}</span>
         <div className="flex items-center gap-1.5">
-          <EntityIssueIndicator type="action" id={action.uuid} />
+          <EntityIssueIndicator type="action" id={String(action.id)} />
           {!action.enabled && (
             <Badge variant="outline" className="text-xs">
               disabled
             </Badge>
           )}
           <Badge variant="secondary" className="font-mono text-xs">
-            {action.uuid.slice(-8)}
+            #{action.id}
           </Badge>
         </div>
       </CardHeader>

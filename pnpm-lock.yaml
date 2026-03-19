@@ -12,8 +12,8 @@ importers:
         specifier: ^0.78.0
         version: 0.78.0(zod@3.25.76)
       '@gikiuk/facts-engine':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.5.0
+        version: 0.5.0
       '@sentry/nextjs':
         specifier: ^10
         version: 10.43.0(@opentelemetry/context-async-hooks@2.6.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.6.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.6.0(@opentelemetry/api@1.9.0))(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.105.4)
@@ -1103,8 +1103,8 @@ packages:
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
 
-  '@gikiuk/facts-engine@0.3.0':
-    resolution: {integrity: sha512-w3XLl6U/Y+RD06919wBpw6TNUyS59MjyiztBmC4M3W01/3zyXjVj4PMEWtJeRQv6eDrVXJ6hbFYa7IYy2gnurQ==, tarball: https://npm.pkg.github.com/download/@gikiuk/facts-engine/0.3.0/e29757a9122b633f0510d1d6b20013f515935e86}
+  '@gikiuk/facts-engine@0.5.0':
+    resolution: {integrity: sha512-uuoKCZOa1hfJa8HXne9UWg1RkKMJfJb+KiPXkq4ur6t/tzx4n3o4VrVES02OkBI445kFiyi66xELbKm/Q3djuQ==, tarball: https://npm.pkg.github.com/download/@gikiuk/facts-engine/0.5.0/50fa4fadad9a78a14c77a369be46c10a149e4b18}
 
   '@hono/node-server@1.19.11':
     resolution: {integrity: sha512-dr8/3zEaB+p0D2n/IUrlPF1HZm586qgJNXK1a9fhg/PzdtkK7Ksd5l312tJX2yBuALqDYBlG20QEbayqPyxn+g==}
@@ -7539,7 +7539,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
-  '@gikiuk/facts-engine@0.3.0': {}
+  '@gikiuk/facts-engine@0.5.0': {}
 
   '@hono/node-server@1.19.11(hono@4.12.6)':
     dependencies:
