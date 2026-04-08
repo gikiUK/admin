@@ -1,19 +1,7 @@
-import type { AnyCondition, BlobCondition, DatasetData, SimpleCondition } from "@/lib/blob/types";
+import type { DatasetData } from "@/lib/blob/types";
+import { extractConditionFacts } from "./condition-utils";
 
-/** Extract all fact IDs referenced in a condition */
-export function extractConditionFacts(condition: BlobCondition): string[] {
-  if ("any" in condition) {
-    return (condition as AnyCondition).any.flatMap((c) =>
-      Object.entries(c).flatMap(([key, value]) =>
-        key === "any_of" && Array.isArray(value) ? (value as string[]) : [key]
-      )
-    );
-  }
-  const simple = condition as SimpleCondition;
-  return Object.entries(simple).flatMap(([key, value]) =>
-    key === "any_of" && Array.isArray(value) ? (value as string[]) : [key]
-  );
-}
+export { extractConditionFacts };
 
 /** Return fact IDs that have no source - no enabled question or rule sets them */
 export function findSourcelessFacts(factIds: string[], data: DatasetData): string[] {
