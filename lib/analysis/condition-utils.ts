@@ -1,8 +1,9 @@
 import type { BlobCondition } from "@/lib/blob/types";
 
-// A BlobCondition is a flat hash where keys are either fact names or combinators ("any"/"all").
-// Combinator values are arrays of sub-conditions: strings (shorthand for { fact: true })
-// or nested condition objects. This mirrors the facts-engine evaluateCondition semantics.
+// A BlobCondition is a flat hash where keys are either fact names or combinators ("any"/"all"/"any_of").
+// "any" and "all" values are arrays of sub-conditions: strings (shorthand for { fact: true })
+// or nested condition objects. "any_of" values are always flat arrays of fact ID strings — never
+// nested objects. This mirrors the facts-engine evaluateCondition semantics.
 
 /** Collect all fact IDs referenced in a condition, recursing into any/all sub-conditions. */
 export function collectFactKeys(condition: BlobCondition, out: Set<string>): void {
