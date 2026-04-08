@@ -1,14 +1,6 @@
+import { collectFactKeys } from "@/lib/analysis/condition-utils";
 import { assignCategory, getCategoryLabel, getCategoryOrder } from "@/lib/data/fact-categories";
-import type {
-  AnyCondition,
-  BlobCondition,
-  BlobQuestion,
-  DatasetData,
-  EnrichedFact,
-  FactCategory,
-  FactQuestionSource,
-  SimpleCondition
-} from "./types";
+import type { BlobCondition, BlobQuestion, DatasetData, EnrichedFact, FactCategory, FactQuestionSource } from "./types";
 
 // ── Question thread types ────────────────────────────────
 
@@ -44,15 +36,10 @@ function findSetByQuestion(factId: string, questions: BlobQuestion[]): FactQuest
 function countActionRefs(data: DatasetData): Record<string, number> {
   const counts: Record<string, number> = {};
   function countCondition(condition: BlobCondition) {
-    if ("any" in condition) {
-      for (const c of (condition as AnyCondition).any) countCondition(c);
-      return;
-    }
-    for (const [key, value] of Object.entries(condition as SimpleCondition)) {
-      if (key === "any") continue;
-      if (typeof value === "boolean" || typeof value === "string" || Array.isArray(value)) {
-        counts[key] = (counts[key] ?? 0) + 1;
-      }
+    const keys = new Set<string>();
+    collectFactKeys(condition, keys);
+    for (const key of keys) {
+      counts[key] = (counts[key] ?? 0) + 1;
     }
   }
   for (const ac of Object.values(data.action_conditions)) {
@@ -111,10 +98,9 @@ export function computeEnrichedFacts(data: DatasetData): FactCategory[] {
 // ── Question thread ──────────────────────────────────────
 
 function extractFacts(condition: BlobCondition): string[] {
-  if ("any" in condition) {
-    return (condition as AnyCondition).any.flatMap((c) => Object.keys(c));
-  }
-  return Object.keys(condition as SimpleCondition);
+  const keys = new Set<string>();
+  collectFactKeys(condition, keys);
+  return [...keys];
 }
 
 export function computeQuestionThread(questions: BlobQuestion[]): ThreadNode[] {

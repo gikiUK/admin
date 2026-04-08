@@ -1,28 +1,10 @@
-import type { AnyCondition, BlobCondition, DatasetData, SimpleCondition } from "@/lib/blob/types";
+import type { BlobCondition, DatasetData } from "@/lib/blob/types";
+import { collectFactKeys } from "../condition-utils";
 import type { CheckResult } from "../types";
 
 function collectConditionKeys(condition: BlobCondition): Set<string> {
   const keys = new Set<string>();
-  if ("any" in condition) {
-    for (const sub of (condition as AnyCondition).any) {
-      for (const [key, value] of Object.entries(sub)) {
-        if (key === "any_of" && Array.isArray(value)) {
-          for (const f of value as string[]) keys.add(f);
-        } else {
-          keys.add(key);
-        }
-      }
-    }
-  } else {
-    const simple = condition as SimpleCondition;
-    for (const [key, value] of Object.entries(simple)) {
-      if (key === "any_of" && Array.isArray(value)) {
-        for (const f of value as string[]) keys.add(f);
-      } else {
-        keys.add(key);
-      }
-    }
-  }
+  collectFactKeys(condition, keys);
   return keys;
 }
 

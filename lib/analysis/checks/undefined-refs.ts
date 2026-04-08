@@ -1,16 +1,26 @@
-import type { AllCondition, AnyCondition, BlobCondition, DatasetData, SimpleCondition } from "@/lib/blob/types";
+import type { BlobCondition, DatasetData, SimpleCondition } from "@/lib/blob/types";
 import type { AnalysisIssue, CheckResult, IssueRef } from "../types";
 
 type ConditionEntry = { key: string; value: SimpleCondition[string] };
 
+// Walks the condition hash, recursing into any/all combinator arrays.
+// Sub-conditions that are strings are shorthand for { fact: true }.
 function extractEntries(condition: BlobCondition): ConditionEntry[] {
-  if ("any" in condition) {
-    return (condition as AnyCondition).any.flatMap((sub) => extractEntries(sub));
+  const entries: ConditionEntry[] = [];
+  for (const [key, value] of Object.entries(condition)) {
+    if ((key === "any" || key === "all") && Array.isArray(value)) {
+      for (const sub of value) {
+        if (typeof sub === "string") {
+          entries.push({ key: sub, value: true });
+        } else if (typeof sub === "object" && sub !== null) {
+          entries.push(...extractEntries(sub as BlobCondition));
+        }
+      }
+    } else {
+      entries.push({ key, value: value as SimpleCondition[string] });
+    }
   }
-  if ("all" in condition) {
-    return (condition as AllCondition).all.flatMap((sub) => extractEntries(sub));
-  }
-  return Object.entries(condition as SimpleCondition).map(([key, value]) => ({ key, value }));
+  return entries;
 }
 
 function resolveConstantIdentifiers(valuesRef: string, data: DatasetData): Set<string> {
