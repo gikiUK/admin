@@ -1,3 +1,4 @@
+import { collectFactKeys } from "@/lib/analysis/condition-utils";
 import { assignCategory, getCategoryLabel, getCategoryOrder } from "@/lib/data/fact-categories";
 import type { BlobCondition, BlobQuestion, DatasetData, EnrichedFact, FactCategory, FactQuestionSource } from "./types";
 
@@ -30,25 +31,6 @@ function findSetByQuestion(factId: string, questions: BlobQuestion[]): FactQuest
     }
   }
   return undefined;
-}
-
-// A BlobCondition is a flat hash. Keys are either fact names or combinators ("any"/"all").
-// Combinator values are arrays of sub-conditions: strings (shorthand for { fact: true })
-// or nested condition objects.
-function collectFactKeys(condition: BlobCondition, out: Set<string>): void {
-  for (const [key, value] of Object.entries(condition)) {
-    if ((key === "any" || key === "all") && Array.isArray(value)) {
-      for (const sub of value) {
-        if (typeof sub === "string") {
-          out.add(sub);
-        } else if (typeof sub === "object" && sub !== null) {
-          collectFactKeys(sub as BlobCondition, out);
-        }
-      }
-    } else {
-      out.add(key);
-    }
-  }
 }
 
 function countActionRefs(data: DatasetData): Record<string, number> {

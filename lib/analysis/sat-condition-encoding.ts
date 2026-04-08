@@ -56,7 +56,7 @@ export function encodeCondition(
   const parts: FormulaOrTerm[] = [];
 
   for (const [key, value] of Object.entries(condition)) {
-    if (key === "any" && Array.isArray(value)) {
+    if ((key === "any" || key === "any_of") && Array.isArray(value)) {
       const subs = value
         .map((sub) => encodeCondition(normalizeSubCondition(sub), vars, idToName))
         .filter(Boolean) as FormulaOrTerm[];
