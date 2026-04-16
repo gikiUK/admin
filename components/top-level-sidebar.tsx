@@ -1,6 +1,6 @@
 "use client";
 
-import { Award, LogOut, Zap } from "lucide-react";
+import { Award, LogOut, Table2, Zap } from "lucide-react";
 import Link from "next/link";
 import {
   Sidebar,
@@ -32,6 +32,14 @@ export function TopLevelSidebar({ pathname, logout }: TopLevelSidebarProps) {
               <Link href="/bcorps">
                 <Award />
                 <span>BCorps</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={pathname.startsWith("/airtable")}>
+              <Link href="/airtable">
+                <Table2 />
+                <span>Airtable</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
