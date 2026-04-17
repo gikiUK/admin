@@ -22,7 +22,7 @@ export function DownloadablesTable({ downloadables, onChange }: DownloadablesTab
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
+              <TableHead className="max-w-[300px]">Title</TableHead>
               <TableHead>Enabled</TableHead>
               <TableHead>File</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -38,7 +38,7 @@ export function DownloadablesTable({ downloadables, onChange }: DownloadablesTab
             ) : (
               downloadables.map((downloadable) => (
                 <TableRow key={downloadable.key}>
-                  <TableCell>
+                  <TableCell className="max-w-[300px]">
                     <div className="font-medium">{downloadable.title}</div>
                     {downloadable.description && (
                       <div className="text-xs text-muted-foreground line-clamp-2">{downloadable.description}</div>
