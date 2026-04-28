@@ -90,6 +90,11 @@ export async function publishDraft(): Promise<Dataset> {
   return unwrapDataset(res);
 }
 
+export async function seedQuestions(): Promise<Dataset> {
+  const res = await api<DatasetResponse>("/admin/facts_datasets/seed_questions", { method: "POST" });
+  return unwrapDataset(res);
+}
+
 // ── Action operations ───────────────────────────────────
 
 type ActionsResponse = { actions: Action[] };
