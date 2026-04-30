@@ -81,10 +81,17 @@ export default function WorkshopPage() {
   return (
     <div className="space-y-8">
       <PageHeader title={workshop.title} description={`Invite code: ${workshop.invite_code}`} />
-      <Button variant="outline" size="sm" onClick={copyInviteUrl}>
-        <Link className="size-3.5" />
-        Copy invite URL
-      </Button>
+      <button
+        type="button"
+        onClick={copyInviteUrl}
+        className="inline-flex items-center gap-3 rounded-lg border bg-muted/40 px-3 py-2 transition-colors hover:bg-muted"
+      >
+        <span className="font-mono text-xs text-muted-foreground">{inviteUrl}</span>
+        <span className="flex shrink-0 items-center gap-1 text-xs font-medium">
+          <Link className="size-3" />
+          Copy
+        </span>
+      </button>
       <WorkshopDetailsForm initial={workshop} onSave={handleSaveDetails} />
       <InviteesPanel workshopUuid={uuid} invitees={invitees} onChange={loadInvitees} />
       <CompaniesPanel companies={companies} />
