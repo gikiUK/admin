@@ -2,7 +2,6 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Workshop } from "@/lib/workshops/api";
@@ -13,15 +12,10 @@ function formatDate(value: string): string {
   return new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
 
-type Props = { workshops: Workshop[] };
+type Props = { workshops: Workshop[]; page: number; totalPages: number; onPageChange: (p: number) => void };
 
-export function WorkshopsTable({ workshops }: Props) {
+export function WorkshopsTable({ workshops, page, totalPages, onPageChange }: Props) {
   const router = useRouter();
-  const [page, setPage] = useState(0);
-
-  const pageCount = Math.max(1, Math.ceil(workshops.length / PAGE_SIZE));
-  const current = Math.min(page, pageCount - 1);
-  const items = workshops.slice(current * PAGE_SIZE, (current + 1) * PAGE_SIZE);
 
   return (
     <div className="space-y-4">
@@ -37,14 +31,14 @@ export function WorkshopsTable({ workshops }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.length === 0 ? (
+            {workshops.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground">
                   No workshops found.
                 </TableCell>
               </TableRow>
             ) : (
-              items.map((w) => (
+              workshops.map((w) => (
                 <TableRow
                   key={w.uuid}
                   className="cursor-pointer hover:bg-muted/50"
@@ -65,27 +59,27 @@ export function WorkshopsTable({ workshops }: Props) {
         <span>
           {workshops.length === 0
             ? "No results"
-            : `${current * PAGE_SIZE + 1}–${Math.min((current + 1) * PAGE_SIZE, workshops.length)} of ${workshops.length}`}
+            : `${(page - 1) * PAGE_SIZE + 1}–${(page - 1) * PAGE_SIZE + workshops.length}`}
         </span>
         <div className="flex items-center gap-1">
           <Button
             variant="outline"
             size="icon"
             className="size-8"
-            onClick={() => setPage((p) => p - 1)}
-            disabled={current === 0}
+            onClick={() => onPageChange(page - 1)}
+            disabled={page <= 1}
           >
             <ChevronLeft className="size-4" />
           </Button>
           <span className="px-2">
-            {current + 1} / {pageCount}
+            {page} / {totalPages}
           </span>
           <Button
             variant="outline"
             size="icon"
             className="size-8"
-            onClick={() => setPage((p) => p + 1)}
-            disabled={current >= pageCount - 1}
+            onClick={() => onPageChange(page + 1)}
+            disabled={page >= totalPages}
           >
             <ChevronRight className="size-4" />
           </Button>

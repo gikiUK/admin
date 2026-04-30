@@ -32,11 +32,13 @@ export function EmailSection({ title, description, initialBody, sendLabel, onSav
   const [sending, setSending] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const onSaveRef = useRef(onSave);
+  const hasEdited = useRef(false);
   useEffect(() => {
     onSaveRef.current = onSave;
   }, [onSave]);
 
   useEffect(() => {
+    if (!hasEdited.current) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
       setSaveState("saving");
@@ -75,7 +77,10 @@ export function EmailSection({ title, description, initialBody, sendLabel, onSav
         <Textarea
           rows={6}
           value={body}
-          onChange={(e) => setBody(e.target.value)}
+          onChange={(e) => {
+            hasEdited.current = true;
+            setBody(e.target.value);
+          }}
           placeholder="Write your email here. Use {title}, {datetime}, {streaming_url} as placeholders."
         />
       </CardContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -35,8 +36,12 @@ export function InviteesPanel({ workshopUuid, invitees, onChange }: Props) {
   }
 
   async function handleRemove(inviteeUuid: string) {
-    await removeInvitee(workshopUuid, inviteeUuid);
-    onChange();
+    try {
+      await removeInvitee(workshopUuid, inviteeUuid);
+      onChange();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to remove invitee");
+    }
   }
 
   return (

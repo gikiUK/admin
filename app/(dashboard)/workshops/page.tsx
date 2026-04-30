@@ -9,20 +9,25 @@ import { fetchWorkshops, type Workshop } from "@/lib/workshops/api";
 
 export default function WorkshopsPage() {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const load = useCallback(() => {
+  const load = useCallback((p: number) => {
     setLoading(true);
-    fetchWorkshops()
-      .then((data) => setWorkshops(data.workshops))
+    fetchWorkshops(p)
+      .then((data) => {
+        setWorkshops(data.workshops);
+        setTotalPages(data.meta.total_pages);
+      })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    load(page);
+  }, [load, page]);
 
   return (
     <div className="space-y-6">
@@ -37,7 +42,9 @@ export default function WorkshopsPage() {
       />
       {loading && <p className="text-muted-foreground text-sm">Loading…</p>}
       {error && <p className="text-destructive text-sm">{error}</p>}
-      {!loading && !error && <WorkshopsTable workshops={workshops} />}
+      {!loading && !error && (
+        <WorkshopsTable workshops={workshops} page={page} totalPages={totalPages} onPageChange={setPage} />
+      )}
     </div>
   );
 }
