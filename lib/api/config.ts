@@ -20,6 +20,16 @@ export function getApiConfig() {
 export function getApiUrl(path: string): string {
   const config = getApiConfig();
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
-
   return `${config.baseUrl}${cleanPath}`;
+}
+
+const FRONTEND_URL = {
+  development: process.env.NEXT_PUBLIC_FRONTEND_URL || "http://local.gikiactions.com:3111",
+  production: process.env.NEXT_PUBLIC_FRONTEND_URL || "https://gikiactions.com"
+} as const;
+
+export function getFrontendUrl(path: string): string {
+  const base = process.env.NODE_ENV === "development" ? FRONTEND_URL.development : FRONTEND_URL.production;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${cleanPath}`;
 }
