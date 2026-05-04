@@ -1,7 +1,9 @@
 "use client";
 
-import { Award, Download, LogOut, Table2, Video, Zap } from "lucide-react";
-import Link from "next/link";
+import { LogOut } from "lucide-react";
+import { isPathActive, SIDEBAR_MENU } from "@/components/sidebar/menu-config";
+import { SidebarCollapsibleGroup } from "@/components/sidebar/sidebar-collapsible-group";
+import { SidebarLink } from "@/components/sidebar/sidebar-link";
 import {
   Sidebar,
   SidebarContent,
@@ -27,46 +29,32 @@ export function TopLevelSidebar({ pathname, logout }: TopLevelSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/bcorps")}>
-              <Link href="/bcorps">
-                <Award />
-                <span>BCorps</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/airtable")}>
-              <Link href="/airtable">
-                <Table2 />
-                <span>Airtable</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/downloads")}>
-              <Link href="/downloads">
-                <Download />
-                <span>Downloads</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/workshops")}>
-              <Link href="/workshops">
-                <Video />
-                <span>Workshops</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/data") || pathname.startsWith("/docs")}>
-              <Link href="/data/facts">
-                <Zap />
-                <span>Facts Engine</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {SIDEBAR_MENU.map((item) => {
+            if (item.kind === "link") {
+              return (
+                <SidebarLink
+                  key={item.href}
+                  href={item.href}
+                  label={item.label}
+                  icon={item.icon}
+                  isActive={isPathActive(pathname, item.matchPaths)}
+                />
+              );
+            }
+            return (
+              <SidebarCollapsibleGroup
+                key={item.label}
+                label={item.label}
+                icon={item.icon}
+                items={item.items.map((sub) => ({
+                  href: sub.href,
+                  label: sub.label,
+                  icon: sub.icon,
+                  isActive: isPathActive(pathname, sub.matchPaths)
+                }))}
+              />
+            );
+          })}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
