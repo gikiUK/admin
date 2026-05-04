@@ -17,49 +17,63 @@ export type MenuGroup = {
 
 export type MenuItem = MenuLink | MenuGroup;
 
-export const SIDEBAR_MENU: MenuItem[] = [
+export type MenuSection = {
+  label?: string;
+  items: MenuItem[];
+};
+
+export const SIDEBAR_MENU: MenuSection[] = [
   {
-    kind: "link",
-    href: "/bcorps",
-    label: "BCorps",
-    icon: Award,
-    matchPaths: ["/bcorps"]
-  },
-  {
-    kind: "link",
-    href: "/workshops",
-    label: "Workshops",
-    icon: Video,
-    matchPaths: ["/workshops"]
-  },
-  {
-    kind: "group",
-    label: "Data",
-    icon: Database,
     items: [
       {
-        href: "/airtable",
-        label: "Airtable",
-        icon: Table2,
-        matchPaths: ["/airtable"]
+        kind: "link",
+        href: "/workshops",
+        label: "Workshops",
+        icon: Video,
+        matchPaths: ["/workshops"]
       },
       {
-        href: "/analytics",
-        label: "Analytics",
-        icon: BarChart3,
-        matchPaths: ["/analytics"]
-      },
+        kind: "group",
+        label: "Data",
+        icon: Database,
+        items: [
+          {
+            href: "/airtable",
+            label: "Airtable",
+            icon: Table2,
+            matchPaths: ["/airtable"]
+          },
+          {
+            href: "/analytics",
+            label: "Analytics",
+            icon: BarChart3,
+            matchPaths: ["/analytics"]
+          },
+          {
+            href: "/downloads",
+            label: "Downloads",
+            icon: Download,
+            matchPaths: ["/downloads"]
+          },
+          {
+            href: "/data/facts",
+            label: "Facts Engine",
+            icon: Zap,
+            matchPaths: ["/data", "/docs"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    label: "Legacy",
+    items: [
       {
-        href: "/downloads",
-        label: "Downloads",
-        icon: Download,
-        matchPaths: ["/downloads"]
-      },
-      {
-        href: "/data/facts",
-        label: "Facts Engine",
-        icon: Zap,
-        matchPaths: ["/data", "/docs"]
+        kind: "link",
+        href: "/bcorps",
+        label: "BCorps",
+        icon: Award,
+        matchPaths: ["/bcorps"]
       }
     ]
   }

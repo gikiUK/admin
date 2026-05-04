@@ -1,9 +1,9 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { isPathActive, SIDEBAR_MENU } from "@/components/sidebar/menu-config";
-import { SidebarCollapsibleGroup } from "@/components/sidebar/sidebar-collapsible-group";
-import { SidebarLink } from "@/components/sidebar/sidebar-link";
+import { Fragment } from "react";
+import { SIDEBAR_MENU } from "@/components/sidebar/menu-config";
+import { SidebarMenuSection } from "@/components/sidebar/sidebar-menu-section";
 import {
   Sidebar,
   SidebarContent,
@@ -11,7 +11,8 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
+  SidebarMenuItem,
+  SidebarSeparator
 } from "@/components/ui/sidebar";
 
 interface TopLevelSidebarProps {
@@ -28,34 +29,12 @@ export function TopLevelSidebar({ pathname, logout }: TopLevelSidebarProps) {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu>
-          {SIDEBAR_MENU.map((item) => {
-            if (item.kind === "link") {
-              return (
-                <SidebarLink
-                  key={item.href}
-                  href={item.href}
-                  label={item.label}
-                  icon={item.icon}
-                  isActive={isPathActive(pathname, item.matchPaths)}
-                />
-              );
-            }
-            return (
-              <SidebarCollapsibleGroup
-                key={item.label}
-                label={item.label}
-                icon={item.icon}
-                items={item.items.map((sub) => ({
-                  href: sub.href,
-                  label: sub.label,
-                  icon: sub.icon,
-                  isActive: isPathActive(pathname, sub.matchPaths)
-                }))}
-              />
-            );
-          })}
-        </SidebarMenu>
+        {SIDEBAR_MENU.map((section, index) => (
+          <Fragment key={section.label ?? `section-${index}`}>
+            {index > 0 && <SidebarSeparator className="mx-0 w-full" />}
+            <SidebarMenuSection section={section} pathname={pathname} />
+          </Fragment>
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
