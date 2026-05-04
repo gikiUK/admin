@@ -35,6 +35,8 @@ export type AnalyticsSummary = {
     last_activity_at: string | null;
     not_started_count: number;
   }>;
+  events_over_time?: Array<{ date: string; count: number }>;
+  top_action_types?: Array<{ action_type: string; count: number }>;
 };
 
 export function fetchEvents(filter: EventsFilter): Promise<Paginated<AnalyticsEvent>> {

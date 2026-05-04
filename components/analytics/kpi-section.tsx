@@ -2,31 +2,18 @@
 
 import { Activity, Building2, CheckCircle2, ListChecks, ListPlus, TrendingUp, UserPlus, Users } from "lucide-react";
 import { KpiCard } from "@/components/analytics/kpi-card";
-import { PendingBackend } from "@/components/analytics/pending-backend";
-import { useSummary } from "@/lib/analytics/use-summary";
+import type { AnalyticsSummary } from "@/lib/analytics/api";
 
 type KpiSectionProps = {
-  from: string;
-  to: string;
+  data: AnalyticsSummary | null;
+  isLoading: boolean;
 };
 
 function formatPercent(value: number): string {
   return `${(value * 100).toFixed(0)}%`;
 }
 
-export function KpiSection({ from, to }: KpiSectionProps) {
-  const state = useSummary(from, to);
-
-  if (state.status === "pending-backend") {
-    return <PendingBackend endpoint="GET /admin/analytics/summary" />;
-  }
-  if (state.status === "error") {
-    return <div className="text-sm text-destructive">{state.message}</div>;
-  }
-
-  const data = state.status === "ready" ? state.data : null;
-  const isLoading = state.status === "loading";
-
+export function KpiSection({ data, isLoading }: KpiSectionProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <KpiCard

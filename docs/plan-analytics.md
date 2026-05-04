@@ -149,6 +149,53 @@ backend gaps tracked as follow-ups.
 - [ ] **Backend wiring blocked** — same `/admin/analytics/summary`
       dependency.
 
+### 1.4b Event-stream derivations (off `analytics_events` only)
+- [x] `recharts` + shadcn `chart` component installed (no other chart
+      lib precedent in the repo; recharts is the shadcn default).
+- [x] `events-time-series.tsx` — per-day events bar chart over the
+      selected range. Pure derivation off `analytics_events.created_at`
+      group-by-day. Card titled "Activity".
+- [x] `top-action-types.tsx` — horizontal-bar leaderboard of top 10
+      `action_type` values in range. Pure derivation off
+      `analytics_events.action_type`.
+- [x] `AnalyticsSummary` TS type extended with `events_over_time` and
+      `top_action_types`.
+- [x] `plan-analytics-summary-endpoint.md` updated with both fields,
+      densification rule (emit zero rows for empty days), and SQL
+      guidance (`DATE(created_at AT TIME ZONE 'UTC')` for stable
+      buckets). **Backend shipped.**
+
+### 1.5 Page restructure: tabs
+Mature analytics products (Mixpanel/Amplitude/PostHog/GA4) split by
+*question being answered*, not by data shape. Applied here:
+
+- [x] Tabs introduced via shadcn `Tabs` (line variant): **Overview**,
+      **Activity**, **Breakdowns**, **Events**.
+- [x] Active tab is URL-driven (`?tab=`) via existing `useUrlState`,
+      defaulting to `overview`. Date range stays page-level (single
+      global control).
+- [x] **Single shared `useSummary` hit at the page level** — sections
+      are now presentational (data-in-via-props). Tab switches are
+      instant; no refetch.
+- [x] Tab containers: `overview-tab.tsx`, `activity-tab.tsx`,
+      `breakdowns-section.tsx` (already existed, now data-only),
+      `EventsExplorer` inlined into the events tab (no need to wrap
+      a single component).
+- [x] Loading / pending-backend / error states handled at the page,
+      not duplicated per tab.
+
+### 1.6 Activity-tab filters + granularity (deferred)
+State-of-the-art analytics: trend charts let you slice by event name
+and pick day/week/month bucketing. Both need a small backend change.
+- [ ] API: accept `event_names[]` query param and filter
+      `events_over_time` accordingly.
+- [ ] API: accept `granularity=day|week|month` and switch
+      `DATE_TRUNC(...)`.
+- [ ] UI: multi-select event filter + granularity toggle on the
+      Activity tab; both reflected in the URL.
+- [ ] UI: ability to compare multiple series on the same chart
+      (Mixpanel-style) — depends on the multi-select.
+
 ### 1.5 Backend support for phase 1
 - [ ] **Out of scope for the admin PR.** Tracked in
       [plan-analytics-api-gaps.md](./plan-analytics-api-gaps.md):

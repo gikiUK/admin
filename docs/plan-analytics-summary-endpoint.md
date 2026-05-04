@@ -55,6 +55,14 @@ Match this exactly — the admin-side TS type
       "last_activity_at": "2026-02-01T12:00:00Z",
       "not_started_count": 5
     }
+  ],
+  "events_over_time": [
+    { "date": "2026-04-04", "count": 12 },
+    { "date": "2026-04-05", "count": 17 }
+  ],
+  "top_action_types": [
+    { "action_type": "user_logged_in", "count": 184 },
+    { "action_type": "tracked_action_status_updated", "count": 92 }
   ]
 }
 ```
@@ -85,6 +93,17 @@ Notes for each field:
   with no events at all (`last_activity_at = null`) provided they
   have a not_started action. Cap at 50 rows, ordered by
   `not_started_count DESC`.
+- `events_over_time`: one row per day in `[from, to)`, in chronological
+  order. `date` is an ISO-8601 date string (`YYYY-MM-DD`) in UTC.
+  `count` is the number of `analytics_events` rows whose `created_at`
+  falls in that day. **Always emit a row for every day in range, even
+  if `count = 0`** — the frontend chart relies on this for an even
+  x-axis. Pure derivation off `analytics_events.created_at`, no joins.
+- `top_action_types`: top 10 distinct `analytics_events.action_type`
+  values in `[from, to)` by row count, descending. Pure derivation off
+  `analytics_events`, no joins. Distinct from
+  `top_completed_action_types` — that one filters to
+  tracked-action *completions*; this one is the raw event-name leaderboard.
 
 ### Errors
 
@@ -230,7 +249,9 @@ class AnalyticsSummary::Compute
       avg_completion_rate: avg_completion_rate,
       status_distribution: status_distribution,
       top_completed_action_types: top_completed_action_types,
-      at_risk_orgs: at_risk_orgs
+      at_risk_orgs: at_risk_orgs,
+      events_over_time: events_over_time,
+      top_action_types: top_action_types
     }
   end
 
@@ -320,11 +341,46 @@ class AnalyticsSummary::Compute
       first(AT_RISK_LIMIT)
   end
 
+  def events_over_time
+    counts = in_range(AnalyticsEvent).
+      group(Arel.sql("DATE(created_at AT TIME ZONE 'UTC')")).
+      count
+
+    # Densify: emit a row for every day in range, even zeros.
+    start_date = from.utc.to_date
+    end_date   = (to.utc - 1.second).to_date # half-open window
+    (start_date..end_date).map do |date|
+      { date: date.iso8601, count: counts[date] || 0 }
+    end
+  end
+
+  def top_action_types
+    in_range(AnalyticsEvent).
+      group(:action_type).
+      order(Arel.sql("COUNT(*) DESC")).
+      limit(TOP_COMPLETED_LIMIT).
+      count.
+      map { |action_type, count| { action_type:, count: } }
+  end
+
   def in_range(scope)
     scope.where("created_at >= ? AND created_at < ?", from, to)
   end
 end
 ```
+
+Notes for the two new metrics:
+
+- `events_over_time`: bucketed by UTC day. The
+  `DATE(created_at AT TIME ZONE 'UTC')` cast guarantees stable buckets
+  regardless of server timezone — Rails' default
+  `Time.zone.today` would shift on a non-UTC server. The densify pass
+  is non-negotiable; without it the frontend chart has gaps.
+- `top_action_types`: reuses `TOP_COMPLETED_LIMIT` (10). Different
+  from `top_completed_action_types`: that one is restricted to
+  tracked-action `status_changed → completed` events on the
+  `Company::TrackedActionEvent` table; this one is the raw event-name
+  leaderboard off `analytics_events`.
 
 Things to double-check during implementation:
 
@@ -373,6 +429,10 @@ One test per metric is overkill. Group into ~5 cases:
 - `test "returns at-risk orgs with stale activity and not_started"`
   — three companies: one fresh, one stale with not_started, one stale
   but all completed; assert only the second is returned.
+- `test "events_over_time emits a row for every day in range, including zeros"`
+  — seed events on day 1 and day 3 of a 3-day range, assert all three
+  dates present with correct counts.
+- `test "top_action_types groups by action_type and orders by count desc"`.
 
 Use `travel_to` for timestamp determinism.
 
@@ -424,7 +484,8 @@ should not bloat this PR.
 
 - [ ] `GET /admin/analytics/summary?from=<iso>&to=<iso>` returns 200
       with the documented shape.
-- [ ] All 11 top-level fields populated.
+- [ ] All 13 top-level fields populated (incl. `events_over_time` and
+      `top_action_types`).
 - [ ] Returns 400 for missing/invalid `from`/`to`.
 - [ ] Returns 403 for non-admin users (via `Admin::BaseController`).
 - [ ] Controller test + command test passing.
