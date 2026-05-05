@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,8 @@ import {
   type OrgStatus,
   type OrgTrackedAction
 } from "@/lib/analytics/api";
+import { type FactFormatter, makeFactFormatter } from "@/lib/analytics/fact-formatter";
+import { useLiveDataset } from "@/lib/analytics/use-live-dataset";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<OrgStatus, string> = {
@@ -46,7 +48,7 @@ function formatPercent(value: number): string {
   return `${Math.round(value * 100)}%`;
 }
 
-function formatFactValue(value: unknown): string {
+function formatRawFactValue(value: unknown): string {
   if (value === null || value === undefined) return "—";
   if (typeof value === "boolean") return value ? "true" : "false";
   if (Array.isArray(value)) return value.length === 0 ? "[]" : value.join(", ");
@@ -88,6 +90,7 @@ export function OrgDetail({ slug, onBack }: OrgDetailProps) {
       {data && (
         <>
           <OrgHeader org={data} />
+          <PlanSummarySection org={data} />
           <FactsSection facts={data.facts} />
           <MembersSection members={data.members} />
           <TrackedActionsSection actions={data.tracked_actions} />
@@ -137,7 +140,112 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
   );
 }
 
+const STATUS_BAR_SEGMENTS: Array<{ key: string; label: string; className: string }> = [
+  { key: "completed", label: "Completed", className: "bg-emerald-500" },
+  { key: "in_progress", label: "In progress", className: "bg-sky-500" },
+  { key: "not_started", label: "Not started", className: "bg-muted-foreground/40" },
+  { key: "rejected", label: "Not relevant", className: "bg-rose-500" },
+  { key: "archived", label: "Archived", className: "bg-muted-foreground/20" }
+];
+
+const PRE_GIKI_BAR_SEGMENTS: Array<{ key: string; label: string; className: string }> = [
+  { key: "already_doing", label: "Already doing", className: "bg-violet-500" },
+  { key: "previously_done", label: "Previously done", className: "bg-violet-500/50" }
+];
+
+function PlanSummarySection({ org }: { org: AnalyticsOrganizationDetail }) {
+  const actions = org.tracked_actions;
+  const total = actions.length;
+  const byStatus = actions.reduce<Record<string, number>>((acc, a) => {
+    acc[a.status] = (acc[a.status] ?? 0) + 1;
+    return acc;
+  }, {});
+  const byPreGiki = actions.reduce<Record<string, number>>((acc, a) => {
+    if (a.pre_giki_status) acc[a.pre_giki_status] = (acc[a.pre_giki_status] ?? 0) + 1;
+    return acc;
+  }, {});
+  const preGikiTotal = (byPreGiki.already_doing ?? 0) + (byPreGiki.previously_done ?? 0);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Plan</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <StackedBar
+          title="Action status"
+          total={total}
+          totalLabel={`${total.toLocaleString()} actions`}
+          segments={STATUS_BAR_SEGMENTS.map((s) => ({ ...s, count: byStatus[s.key] ?? 0 }))}
+          rightLabel={total > 0 ? `${formatPercent(org.completion_rate)} complete` : undefined}
+        />
+        {preGikiTotal > 0 && (
+          <StackedBar
+            title="Onboarding pre-giki"
+            total={preGikiTotal}
+            totalLabel={`${preGikiTotal.toLocaleString()} of ${total.toLocaleString()} flagged`}
+            segments={PRE_GIKI_BAR_SEGMENTS.map((s) => ({ ...s, count: byPreGiki[s.key] ?? 0 }))}
+          />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+type StackedBarSegment = { key: string; label: string; className: string; count: number };
+
+function StackedBar({
+  title,
+  total,
+  totalLabel,
+  segments,
+  rightLabel
+}: {
+  title: string;
+  total: number;
+  totalLabel: string;
+  segments: StackedBarSegment[];
+  rightLabel?: string;
+}) {
+  const visible = segments.filter((s) => s.count > 0);
+  return (
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between text-xs">
+        <span className="font-medium text-foreground">{title}</span>
+        <span className="text-muted-foreground">
+          {totalLabel}
+          {rightLabel && <span className="ml-2 text-foreground">· {rightLabel}</span>}
+        </span>
+      </div>
+      <div className="flex h-3 w-full overflow-hidden rounded-full bg-muted">
+        {total === 0
+          ? null
+          : visible.map((s) => (
+              <div
+                key={s.key}
+                className={cn("h-full", s.className)}
+                style={{ width: `${(s.count / total) * 100}%` }}
+                title={`${s.label}: ${s.count}`}
+              />
+            ))}
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        {segments.map((s) => (
+          <span key={s.key} className={cn("inline-flex items-center gap-1.5", s.count === 0 && "opacity-40")}>
+            <span className={cn("inline-block size-2 rounded-sm", s.className)} />
+            <span>{s.label}</span>
+            <span className="font-mono text-foreground">{s.count}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function FactsSection({ facts }: { facts: OrgFact[] }) {
+  const { data: dataset, loading: datasetLoading } = useLiveDataset();
+  const formatter = useMemo<FactFormatter | null>(() => (dataset ? makeFactFormatter(dataset.data) : null), [dataset]);
+
   return (
     <Card>
       <CardHeader>
@@ -146,18 +254,66 @@ function FactsSection({ facts }: { facts: OrgFact[] }) {
       <CardContent>
         {facts.length === 0 ? (
           <p className="text-sm text-muted-foreground">No facts derived for this organisation yet.</p>
+        ) : formatter ? (
+          <FactsByCategory facts={facts} formatter={formatter} />
         ) : (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {facts.map((fact) => (
-              <div key={fact.key} className="rounded-md border p-2">
-                <div className="font-mono text-xs text-muted-foreground">{fact.key}</div>
-                <div className="mt-0.5 break-words text-sm">{formatFactValue(fact.value)}</div>
-              </div>
-            ))}
-          </div>
+          <FactsRawList facts={facts} loading={datasetLoading} />
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function FactsByCategory({ facts, formatter }: { facts: OrgFact[]; formatter: FactFormatter }) {
+  const grouped = useMemo(() => {
+    const map = new Map<string, ReturnType<FactFormatter>[]>();
+    for (const f of facts) {
+      const display = formatter(f.key, f.value);
+      const list = map.get(display.category) ?? [];
+      list.push(display);
+      map.set(display.category, list);
+    }
+    return Array.from(map.entries())
+      .map(([category, items]) => ({
+        category,
+        items: items.slice().sort((a, b) => a.label.localeCompare(b.label))
+      }))
+      .sort((a, b) => a.category.localeCompare(b.category));
+  }, [facts, formatter]);
+
+  return (
+    <div className="space-y-5">
+      {grouped.map(({ category, items }) => (
+        <div key={category} className="space-y-2">
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{category}</div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => (
+              <div key={item.key} className="rounded-md border p-2.5">
+                <div className="text-sm font-medium leading-tight">{item.label}</div>
+                <div className="mt-1 break-words text-sm text-foreground">{item.valueLabel}</div>
+                <div className="mt-1 font-mono text-[10px] text-muted-foreground/70">{item.key}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FactsRawList({ facts, loading }: { facts: OrgFact[]; loading: boolean }) {
+  return (
+    <div className="space-y-2">
+      {loading && <p className="text-xs text-muted-foreground">Loading dataset for fact labels…</p>}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {facts.map((fact) => (
+          <div key={fact.key} className="rounded-md border p-2">
+            <div className="font-mono text-xs text-muted-foreground">{fact.key}</div>
+            <div className="mt-0.5 break-words text-sm">{formatRawFactValue(fact.value)}</div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
