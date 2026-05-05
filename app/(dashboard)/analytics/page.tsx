@@ -3,21 +3,25 @@
 import { useMemo } from "react";
 import { ActivityTab } from "@/components/analytics/activity-tab";
 import { BreakdownsSection } from "@/components/analytics/breakdowns-section";
+import { ConversionTab } from "@/components/analytics/conversion-tab";
 import { DateRangePicker, DEFAULT_PRESET, isPreset, presetToRange } from "@/components/analytics/date-range-picker";
 import { EventsExplorer } from "@/components/analytics/events-explorer";
-import { OverviewTab } from "@/components/analytics/overview-tab";
+import { OrgsTab } from "@/components/analytics/orgs-tab";
 import { PendingBackend } from "@/components/analytics/pending-backend";
+import { UsersTab } from "@/components/analytics/users-tab";
 import { PageHeader } from "@/components/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSummary } from "@/lib/analytics/use-summary";
 import { useUrlState } from "@/lib/use-url-state";
 
-const TABS = ["overview", "activity", "breakdowns", "events"] as const;
+const TABS = ["activity", "users", "orgs", "conversion", "breakdowns", "events"] as const;
 type TabId = (typeof TABS)[number];
 
 const TAB_LABEL: Record<TabId, string> = {
-  overview: "Overview",
   activity: "Activity",
+  users: "Users",
+  orgs: "Orgs",
+  conversion: "Conversion",
   breakdowns: "Breakdowns",
   events: "Events"
 };
@@ -34,7 +38,7 @@ export default function AnalyticsPage() {
   const { from, to } = useMemo(() => presetToRange(preset), [preset]);
 
   const rawTab = searchParams.get("tab");
-  const activeTab: TabId = isTabId(rawTab) ? rawTab : "overview";
+  const activeTab: TabId = isTabId(rawTab) ? rawTab : "activity";
 
   const summary = useSummary(from, to);
 
@@ -55,9 +59,18 @@ export default function AnalyticsPage() {
           ))}
         </TabsList>
 
-        <TabsContent value="overview">
-          <OverviewTab
-            data={summary.status === "ready" ? summary.data : null}
+        <TabsContent value="users">
+          <UsersTab
+            summary={summary.status === "ready" ? summary.data : null}
+            isLoading={summary.status === "loading"}
+          />
+          {summary.status === "pending-backend" && <PendingBackend endpoint="GET /admin/analytics/summary" />}
+          {summary.status === "error" && <div className="text-sm text-destructive">{summary.message}</div>}
+        </TabsContent>
+
+        <TabsContent value="orgs">
+          <OrgsTab
+            summary={summary.status === "ready" ? summary.data : null}
             isLoading={summary.status === "loading"}
           />
           {summary.status === "pending-backend" && <PendingBackend endpoint="GET /admin/analytics/summary" />}
@@ -67,6 +80,13 @@ export default function AnalyticsPage() {
         <TabsContent value="activity">
           {summary.status === "ready" && <ActivityTab data={summary.data} />}
           {summary.status === "loading" && <div className="text-sm text-muted-foreground">Loading activity…</div>}
+          {summary.status === "pending-backend" && <PendingBackend endpoint="GET /admin/analytics/summary" />}
+          {summary.status === "error" && <div className="text-sm text-destructive">{summary.message}</div>}
+        </TabsContent>
+
+        <TabsContent value="conversion">
+          {summary.status === "ready" && <ConversionTab data={summary.data} />}
+          {summary.status === "loading" && <div className="text-sm text-muted-foreground">Loading conversion…</div>}
           {summary.status === "pending-backend" && <PendingBackend endpoint="GET /admin/analytics/summary" />}
           {summary.status === "error" && <div className="text-sm text-destructive">{summary.message}</div>}
         </TabsContent>

@@ -1,10 +1,10 @@
 "use client";
 
-import { Activity, Building2, CheckCircle2, ListChecks, ListPlus, TrendingUp, UserPlus, Users } from "lucide-react";
+import { Building2, CheckCircle2, Clock, ListChecks, ListPlus, TrendingUp, Users } from "lucide-react";
 import { KpiCard } from "@/components/analytics/kpi-card";
 import type { AnalyticsSummary } from "@/lib/analytics/api";
 
-type KpiSectionProps = {
+type OrgKpisProps = {
   data: AnalyticsSummary | null;
   isLoading: boolean;
 };
@@ -13,35 +13,22 @@ function formatPercent(value: number): string {
   return `${(value * 100).toFixed(0)}%`;
 }
 
-export function KpiSection({ data, isLoading }: KpiSectionProps) {
+export function OrgKpis({ data, isLoading }: OrgKpisProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <KpiCard
-        label="DAU"
-        icon={Activity}
-        value={data ? data.active_users.dau : isLoading ? "…" : null}
-        hint="Distinct users with any event today"
-      />
-      <KpiCard
-        label="WAU"
-        icon={Activity}
-        value={data ? data.active_users.wau : isLoading ? "…" : null}
-        hint="Weekly active (proxy via event log)"
-      />
-      <KpiCard
-        label="MAU"
-        icon={Activity}
-        value={data ? data.active_users.mau : isLoading ? "…" : null}
-        hint="Monthly active (proxy via event log)"
-      />
       <KpiCard
         label="Active orgs"
         icon={Building2}
         value={data ? data.active_orgs : isLoading ? "…" : null}
         hint="Distinct companies with any event in range"
       />
-      <KpiCard label="New signups" icon={UserPlus} value={data ? data.new_signups : isLoading ? "…" : null} />
       <KpiCard label="New companies" icon={Users} value={data ? data.new_companies : isLoading ? "…" : null} />
+      <KpiCard
+        label="Trial orgs"
+        icon={Clock}
+        value={data ? data.trial_orgs : isLoading ? "…" : null}
+        hint="Companies currently in trial"
+      />
       <KpiCard
         label="Actions added"
         icon={ListPlus}

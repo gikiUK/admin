@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { EventsFilter } from "@/lib/analytics/api";
+import { ACTION_TYPES, type EventsFilter } from "@/lib/analytics/api";
 
 const ORDER_OPTIONS: Array<{ value: NonNullable<EventsFilter["order"]>; label: string }> = [
   { value: "newest", label: "Newest first" },
   { value: "oldest", label: "Oldest first" }
 ];
+
+const ALL_EVENTS = "__all__";
 
 type EventFiltersProps = {
   filter: EventsFilter;
@@ -23,11 +25,22 @@ export function EventFilters({ filter, onChange, onReset }: EventFiltersProps) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <FilterField label="Event">
-        <DebouncedInput
-          placeholder="action_type"
-          value={filter.action_type ?? ""}
-          onCommit={(value) => onChange({ action_type: value || undefined })}
-        />
+        <Select
+          value={filter.action_type ?? ALL_EVENTS}
+          onValueChange={(value) => onChange({ action_type: value === ALL_EVENTS ? undefined : value })}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="All events" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL_EVENTS}>All events</SelectItem>
+            {ACTION_TYPES.map((type) => (
+              <SelectItem key={type} value={type}>
+                {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </FilterField>
       <FilterField label="Company ID">
         <DebouncedInput

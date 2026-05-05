@@ -22,7 +22,11 @@ function formatTick(value: string): string {
 }
 
 export function EventsTimeSeries({ data }: EventsTimeSeriesProps) {
-  const total = useMemo(() => data.reduce((sum, point) => sum + point.count, 0), [data]);
+  const trimmed = useMemo(() => {
+    const firstNonZero = data.findIndex((point) => point.count > 0);
+    return firstNonZero === -1 ? data : data.slice(firstNonZero);
+  }, [data]);
+  const total = useMemo(() => trimmed.reduce((sum, point) => sum + point.count, 0), [trimmed]);
 
   return (
     <Card>
@@ -31,11 +35,11 @@ export function EventsTimeSeries({ data }: EventsTimeSeriesProps) {
         <span className="text-sm text-muted-foreground tabular-nums">{total.toLocaleString()} total</span>
       </CardHeader>
       <CardContent>
-        {data.length === 0 ? (
+        {trimmed.length === 0 || total === 0 ? (
           <div className="text-sm text-muted-foreground">No events in range.</div>
         ) : (
           <ChartContainer config={CHART_CONFIG} className="h-[240px] w-full">
-            <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <BarChart data={trimmed} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis
                 dataKey="date"
