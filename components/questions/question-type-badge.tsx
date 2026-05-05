@@ -11,6 +11,10 @@ const typeConfig: Record<QuestionType, { label: string; className: string }> = {
     label: "Multi Select",
     className: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
   },
+  "multi-checkbox": {
+    label: "Multi Checkbox",
+    className: "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200"
+  },
   "checkbox-radio-hybrid": {
     label: "Hybrid",
     className: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
