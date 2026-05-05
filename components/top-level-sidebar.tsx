@@ -1,7 +1,9 @@
 "use client";
 
-import { Award, Download, LogOut, Table2, Video, Zap } from "lucide-react";
-import Link from "next/link";
+import { LogOut } from "lucide-react";
+import { Fragment } from "react";
+import { SIDEBAR_MENU } from "@/components/sidebar/menu-config";
+import { SidebarMenuSection } from "@/components/sidebar/sidebar-menu-section";
 import {
   Sidebar,
   SidebarContent,
@@ -9,7 +11,8 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
+  SidebarMenuItem,
+  SidebarSeparator
 } from "@/components/ui/sidebar";
 
 interface TopLevelSidebarProps {
@@ -26,48 +29,12 @@ export function TopLevelSidebar({ pathname, logout }: TopLevelSidebarProps) {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/bcorps")}>
-              <Link href="/bcorps">
-                <Award />
-                <span>BCorps</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/airtable")}>
-              <Link href="/airtable">
-                <Table2 />
-                <span>Airtable</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/downloads")}>
-              <Link href="/downloads">
-                <Download />
-                <span>Downloads</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/workshops")}>
-              <Link href="/workshops">
-                <Video />
-                <span>Workshops</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/data") || pathname.startsWith("/docs")}>
-              <Link href="/data/facts">
-                <Zap />
-                <span>Facts Engine</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        {SIDEBAR_MENU.map((section, index) => (
+          <Fragment key={section.label ?? `section-${index}`}>
+            {index > 0 && <SidebarSeparator className="mx-0 w-full" />}
+            <SidebarMenuSection section={section} pathname={pathname} />
+          </Fragment>
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
