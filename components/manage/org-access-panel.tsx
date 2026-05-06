@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -38,6 +38,14 @@ export function OrgAccessPanel({ company, onUpdate }: OrgAccessPanelProps) {
   const [trialDate, setTrialDate] = useState(toDateInputValue(company.trial_ends_at));
   const [premiumDate, setPremiumDate] = useState(toDateInputValue(company.gifted_premium_until));
   const [pendingAction, setPendingAction] = useState<string | null>(null);
+
+  useEffect(() => {
+    setTrialDate(toDateInputValue(company.trial_ends_at));
+  }, [company.trial_ends_at]);
+
+  useEffect(() => {
+    setPremiumDate(toDateInputValue(company.gifted_premium_until));
+  }, [company.gifted_premium_until]);
 
   const trialDirty = trialDate !== toDateInputValue(company.trial_ends_at);
   const premiumDirty = premiumDate !== toDateInputValue(company.gifted_premium_until);

@@ -1,4 +1,5 @@
 import { apiFetch, buildQuery, type Paginated } from "@/lib/api/client";
+import type { MembershipRole } from "@/lib/manage/api";
 
 export const ACTION_TYPES = [
   "user_signed_up",
@@ -205,7 +206,7 @@ export type OrgMember = {
   id: number;
   email: string;
   name: string;
-  role: string;
+  role: MembershipRole;
   joined_at: string;
   event_count: number;
   last_active_at: string | null;

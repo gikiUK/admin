@@ -114,7 +114,7 @@ export function OrgMembersPanel({ slug, onMembershipChange }: OrgMembersPanelPro
                       <TableCell>
                         <Select
                           value={member.role}
-                          onValueChange={(next) => handleRoleChange(member, next as MembershipRole)}
+                          onValueChange={(next: MembershipRole) => handleRoleChange(member, next)}
                           disabled={pending === member.id}
                         >
                           <SelectTrigger className="h-8 w-[120px] text-xs capitalize">
