@@ -33,8 +33,9 @@ export type AnalyticsEvent = {
   action_type: string;
   created_at: string;
   details: Record<string, unknown>;
-  user: { id: number; name: string } | null;
-  company: { id: number; name: string } | null;
+  about_user: { id: number; name: string } | null;
+  about_company: { id: number; name: string } | null;
+  acting_user: { id: number; name: string } | null;
 };
 
 export type EventsFilter = {

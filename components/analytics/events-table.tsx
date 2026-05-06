@@ -23,13 +23,14 @@ export function EventsTable({ events }: EventsTableProps) {
             <TableHead>Event</TableHead>
             <TableHead>User</TableHead>
             <TableHead>Company</TableHead>
+            <TableHead>Acting user</TableHead>
             <TableHead>Details</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {events.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground">
+              <TableCell colSpan={6} className="text-center text-muted-foreground">
                 No events found.
               </TableCell>
             </TableRow>
@@ -42,8 +43,9 @@ export function EventsTable({ events }: EventsTableProps) {
                     {event.action_type}
                   </Badge>
                 </TableCell>
-                <TableCell>{event.user?.name ?? "—"}</TableCell>
-                <TableCell>{event.company?.name ?? "—"}</TableCell>
+                <TableCell>{event.about_user?.name ?? "—"}</TableCell>
+                <TableCell>{event.about_company?.name ?? "—"}</TableCell>
+                <TableCell>{event.acting_user?.name ?? "—"}</TableCell>
                 <TableCell>
                   <EventDetails details={event.details} />
                 </TableCell>
