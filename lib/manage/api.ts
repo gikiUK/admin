@@ -105,3 +105,62 @@ export function updateMembershipRole(
     }
   );
 }
+
+export type ManagedUserCompany = {
+  id: number;
+  slug: string;
+  name: string;
+  role: MembershipRole;
+  membership_id: number;
+};
+
+export type ManagedUser = {
+  id: number;
+  email: string;
+  name: string;
+  signed_up_at: string;
+  confirmed_at: string | null;
+  last_active_at: string | null;
+  email_bounced_at: string | null;
+  companies: ManagedUserCompany[];
+};
+
+export function fetchUser(id: number): Promise<{ user: ManagedUser }> {
+  return apiFetch<{ user: ManagedUser }>(`/admin/users/${id}`);
+}
+
+export type UpdateUserPayload = {
+  name?: string;
+  email?: string;
+};
+
+export function updateUser(id: number, payload: UpdateUserPayload): Promise<{ user: ManagedUser }> {
+  return apiFetch<{ user: ManagedUser }>(`/admin/users/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function deleteUser(id: number): Promise<Record<string, never>> {
+  return apiFetch<Record<string, never>>(`/admin/users/${id}`, {
+    method: "DELETE"
+  });
+}
+
+export function confirmUser(id: number): Promise<{ user: ManagedUser }> {
+  return apiFetch<{ user: ManagedUser }>(`/admin/users/${id}/confirm`, {
+    method: "POST"
+  });
+}
+
+export function sendPasswordReset(id: number): Promise<Record<string, never>> {
+  return apiFetch<Record<string, never>>(`/admin/users/${id}/send_password_reset`, {
+    method: "POST"
+  });
+}
+
+export function clearEmailBounce(id: number): Promise<{ user: ManagedUser }> {
+  return apiFetch<{ user: ManagedUser }>(`/admin/users/${id}/clear_email_bounce`, {
+    method: "POST"
+  });
+}
