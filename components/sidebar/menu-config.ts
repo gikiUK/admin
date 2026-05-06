@@ -1,4 +1,16 @@
-import { Award, BarChart3, Database, Download, type LucideIcon, Table2, Video, Zap } from "lucide-react";
+import {
+  Award,
+  BarChart3,
+  Building2,
+  Database,
+  Download,
+  type LucideIcon,
+  Settings,
+  Table2,
+  // Users,
+  Video,
+  Zap
+} from "lucide-react";
 
 export type MenuLink = {
   kind: "link";
@@ -33,6 +45,32 @@ export const SIDEBAR_MENU: MenuSection[] = [
         matchPaths: ["/workshops"]
       },
       {
+        kind: "link",
+        href: "/analytics",
+        label: "Analytics",
+        icon: BarChart3,
+        matchPaths: ["/analytics"]
+      },
+      {
+        kind: "group",
+        label: "Manage",
+        icon: Settings,
+        items: [
+          {
+            href: "/manage/organisations",
+            label: "Organisations",
+            icon: Building2,
+            matchPaths: ["/manage/organisations"]
+          }
+          // {
+          //   href: "/manage/users",
+          //   label: "Users",
+          //   icon: Users,
+          //   matchPaths: ["/manage/users"]
+          // }
+        ]
+      },
+      {
         kind: "group",
         label: "Data",
         icon: Database,
@@ -42,12 +80,6 @@ export const SIDEBAR_MENU: MenuSection[] = [
             label: "Airtable",
             icon: Table2,
             matchPaths: ["/airtable"]
-          },
-          {
-            href: "/analytics",
-            label: "Analytics",
-            icon: BarChart3,
-            matchPaths: ["/analytics"]
           },
           {
             href: "/downloads",

@@ -1,4 +1,5 @@
 import { apiFetch, buildQuery, type Paginated } from "@/lib/api/client";
+import type { MembershipRole } from "@/lib/manage/api";
 
 export const ACTION_TYPES = [
   "user_signed_up",
@@ -33,8 +34,9 @@ export type AnalyticsEvent = {
   action_type: string;
   created_at: string;
   details: Record<string, unknown>;
-  user: { id: number; name: string } | null;
-  company: { id: number; name: string } | null;
+  about_user: { id: number; name: string } | null;
+  about_company: { id: number; name: string } | null;
+  acting_user: { id: number; name: string } | null;
 };
 
 export type EventsFilter = {
@@ -204,7 +206,7 @@ export type OrgMember = {
   id: number;
   email: string;
   name: string;
-  role: string;
+  role: MembershipRole;
   joined_at: string;
   event_count: number;
   last_active_at: string | null;
