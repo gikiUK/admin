@@ -24,7 +24,11 @@ export default function ManageUserPage() {
 
   const load = useCallback(
     (showLoading = true) => {
-      if (!Number.isFinite(userId)) return;
+      if (!Number.isFinite(userId)) {
+        setError({ message: "Invalid user ID.", notFound: true });
+        setLoading(false);
+        return;
+      }
       if (showLoading) setLoading(true);
       setError(null);
       fetchUser(userId)
