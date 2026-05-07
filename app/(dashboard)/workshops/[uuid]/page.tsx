@@ -60,7 +60,7 @@ export default function WorkshopPage() {
   if (loading) return <p className="text-muted-foreground text-sm p-6">Loading…</p>;
   if (error || !workshop) return <p className="text-destructive text-sm p-6">{error || "Not found"}</p>;
 
-  const inviteUrl = getFrontendUrl(`/workshops/${workshop.invite_code}`);
+  const inviteUrl = getFrontendUrl(`/auth/workshop/${workshop.invite_code}`);
 
   function copyInviteUrl() {
     if (navigator.clipboard) {
