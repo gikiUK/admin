@@ -10,6 +10,7 @@ import { OrgMembersPanel } from "@/components/manage/org-members-panel";
 import { OrgNamePanel } from "@/components/manage/org-name-panel";
 import { OrgOnboardingPanel } from "@/components/manage/org-onboarding-panel";
 import { OrgSummaryCard } from "@/components/manage/org-summary-card";
+import { OrgTagsPanel } from "@/components/manage/org-tags-panel";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api/client";
@@ -65,6 +66,7 @@ export default function ManageOrganisationPage() {
           <PageHeader title={company.name} description={company.deleted_at ? "Deleted organisation" : undefined} />
           <OrgSummaryCard company={company} />
           <OrgNamePanel company={company} onUpdate={setCompany} />
+          <OrgTagsPanel company={company} onUpdate={setCompany} />
           <OrgAccessPanel company={company} onUpdate={setCompany} />
           <OrgMembersPanel slug={company.slug} onMembershipChange={refresh} />
           <OrgOnboardingPanel company={company} onUpdate={setCompany} />
