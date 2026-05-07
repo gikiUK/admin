@@ -86,6 +86,29 @@ export type Membership = {
   role: MembershipRole;
 };
 
+export type MembershipsFilter = {
+  page?: number;
+  per?: number;
+};
+
+export function fetchMemberships(slug: string, filter: MembershipsFilter = {}): Promise<Paginated<Membership>> {
+  return apiFetch<Paginated<Membership>>(
+    `/admin/companies/${encodeURIComponent(slug)}/memberships${buildQuery(filter)}`
+  );
+}
+
+export type CreateMembershipPayload = {
+  user_id: number;
+  role: MembershipRole;
+};
+
+export function createMembership(slug: string, payload: CreateMembershipPayload): Promise<{ membership: Membership }> {
+  return apiFetch<{ membership: Membership }>(`/admin/companies/${encodeURIComponent(slug)}/memberships`, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
 export function deleteMembership(slug: string, membershipId: number): Promise<Record<string, never>> {
   return apiFetch<Record<string, never>>(`/admin/companies/${encodeURIComponent(slug)}/memberships/${membershipId}`, {
     method: "DELETE"
