@@ -160,7 +160,7 @@ export function sendPasswordReset(id: number): Promise<Record<string, never>> {
 }
 
 export function clearEmailBounce(id: number): Promise<{ user: ManagedUser }> {
-  return apiFetch<{ user: ManagedUser }>(`/admin/users/${id}/clear_email_bounce`, {
+  return apiFetch<{ user: ManagedUser }>(`/admin/users/${id}/reset_bounced_email`, {
     method: "POST"
   });
 }

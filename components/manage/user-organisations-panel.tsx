@@ -1,7 +1,7 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -26,6 +26,7 @@ type UserOrganisationsPanelProps = {
 };
 
 export function UserOrganisationsPanel({ user, onMembershipChange }: UserOrganisationsPanelProps) {
+  const router = useRouter();
   const [pending, setPending] = useState<number | null>(null);
 
   async function handleRemove(company: ManagedUserCompany) {
@@ -65,18 +66,17 @@ export function UserOrganisationsPanel({ user, onMembershipChange }: UserOrganis
                 </TableRow>
               ) : (
                 user.companies.map((company) => (
-                  <TableRow key={company.membership_id}>
+                  <TableRow
+                    key={company.membership_id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => router.push(`/manage/organisations/${encodeURIComponent(company.slug)}`)}
+                  >
                     <TableCell>
-                      <Link
-                        href={`/manage/organisations/${encodeURIComponent(company.slug)}`}
-                        className="font-medium hover:underline"
-                      >
-                        {company.name}
-                      </Link>
+                      <div className="font-medium">{company.name}</div>
                       <div className="text-xs text-muted-foreground">{company.slug}</div>
                     </TableCell>
                     <TableCell className="text-sm capitalize">{company.role}</TableCell>
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button

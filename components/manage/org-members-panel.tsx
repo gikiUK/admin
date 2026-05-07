@@ -1,6 +1,7 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -32,6 +33,7 @@ function formatDate(value: string | null): string {
 }
 
 export function OrgMembersPanel({ slug, onMembershipChange }: OrgMembersPanelProps) {
+  const router = useRouter();
   const [members, setMembers] = useState<OrgMember[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -108,10 +110,14 @@ export function OrgMembersPanel({ slug, onMembershipChange }: OrgMembersPanelPro
                   </TableRow>
                 ) : (
                   members.map((member) => (
-                    <TableRow key={member.id}>
+                    <TableRow
+                      key={member.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => router.push(`/manage/users/${member.id}`)}
+                    >
                       <TableCell className="font-medium">{member.name || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{member.email}</TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <Select
                           value={member.role}
                           onValueChange={(next: MembershipRole) => handleRoleChange(member, next)}
@@ -133,7 +139,7 @@ export function OrgMembersPanel({ slug, onMembershipChange }: OrgMembersPanelPro
                       <TableCell className="text-xs text-muted-foreground">
                         {formatDate(member.last_active_at)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
