@@ -5,10 +5,15 @@ export const ACTION_TYPES = [
   "user_signed_up",
   "user_logged_in",
   "user_deleted",
+  "user_confirmed",
   "email_confirmed",
+  "email_changed",
+  "password_reset_sent",
+  "bounced_email_reset",
   "company_created",
   "company_deleted",
   "onboarding_question_answered",
+  "onboarding_reset",
   "tracked_action_created",
   "tracked_action_deleted",
   "tracked_action_status_changed",
@@ -23,6 +28,7 @@ export const ACTION_TYPES = [
   "invitation_declined",
   "invitation_revoked",
   "invitation_role_changed",
+  "membership_created",
   "membership_role_changed",
   "membership_removed"
 ] as const;

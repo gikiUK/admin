@@ -6,6 +6,7 @@ import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ACTION_TYPES, type EventsFilter } from "@/lib/analytics/api";
+import { getEventDisplay } from "@/lib/analytics/event-display";
 
 const ORDER_OPTIONS: Array<{ value: NonNullable<EventsFilter["order"]>; label: string }> = [
   { value: "newest", label: "Newest first" },
@@ -36,7 +37,7 @@ export function EventFilters({ filter, onChange, onReset }: EventFiltersProps) {
             <SelectItem value={ALL_EVENTS}>All events</SelectItem>
             {ACTION_TYPES.map((type) => (
               <SelectItem key={type} value={type}>
-                {type}
+                {getEventDisplay(type).label}
               </SelectItem>
             ))}
           </SelectContent>

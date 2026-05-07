@@ -17,6 +17,19 @@ import { useUrlState } from "@/lib/use-url-state";
 const TABS = ["activity", "users", "orgs", "conversion", "breakdowns", "events"] as const;
 type TabId = (typeof TABS)[number];
 
+const TAB_SCOPED_PARAMS = [
+  "page",
+  "query",
+  "tier",
+  "status",
+  "order",
+  "action_type",
+  "company_id",
+  "user_id",
+  "org",
+  "event"
+] as const;
+
 const TAB_LABEL: Record<TabId, string> = {
   activity: "Activity",
   users: "Users",
@@ -50,7 +63,14 @@ export default function AnalyticsPage() {
         action={<DateRangePicker value={preset} onChange={(next) => set({ range: next })} />}
       />
 
-      <Tabs value={activeTab} onValueChange={(value) => set({ tab: value })}>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          const patch: Record<string, string | undefined> = { tab: value };
+          for (const key of TAB_SCOPED_PARAMS) patch[key] = undefined;
+          set(patch);
+        }}
+      >
         <TabsList variant="line">
           {TABS.map((tab) => (
             <TabsTrigger key={tab} value={tab}>
