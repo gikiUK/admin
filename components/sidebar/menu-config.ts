@@ -7,7 +7,7 @@ import {
   type LucideIcon,
   Settings,
   Table2,
-  // Users,
+  Users,
   Video,
   Zap
 } from "lucide-react";
@@ -61,13 +61,13 @@ export const SIDEBAR_MENU: MenuSection[] = [
             label: "Organisations",
             icon: Building2,
             matchPaths: ["/manage/organisations"]
+          },
+          {
+            href: "/manage/users",
+            label: "Users",
+            icon: Users,
+            matchPaths: ["/manage/users"]
           }
-          // {
-          //   href: "/manage/users",
-          //   label: "Users",
-          //   icon: Users,
-          //   matchPaths: ["/manage/users"]
-          // }
         ]
       },
       {
