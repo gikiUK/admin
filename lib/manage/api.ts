@@ -17,6 +17,7 @@ export type ManagedCompany = {
   in_trial: boolean;
   gifted_premium_until: string | null;
   access_status: OrgAccessStatus;
+  tags: string[];
   created_at: string;
   deleted_at: string | null;
 };
@@ -63,6 +64,20 @@ export function ungiftPremium(slug: string): Promise<{ company: ManagedCompany }
 export function deleteCompany(slug: string): Promise<Record<string, never>> {
   return apiFetch<Record<string, never>>(`/admin/companies/${encodeURIComponent(slug)}`, {
     method: "DELETE"
+  });
+}
+
+export function addOrgTag(slug: string, tag: string): Promise<{ company: ManagedCompany }> {
+  return apiFetch<{ company: ManagedCompany }>(`/admin/companies/${encodeURIComponent(slug)}/tags`, {
+    method: "POST",
+    body: JSON.stringify({ tag })
+  });
+}
+
+export function removeOrgTag(slug: string, tag: string): Promise<{ company: ManagedCompany }> {
+  return apiFetch<{ company: ManagedCompany }>(`/admin/companies/${encodeURIComponent(slug)}/tags`, {
+    method: "DELETE",
+    body: JSON.stringify({ tag })
   });
 }
 
