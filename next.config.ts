@@ -3,7 +3,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
-  reactCompiler: true
+  reactCompiler: true,
+  async redirects() {
+    return [
+      {
+        source: "/analytics",
+        destination: "/analytics/activity",
+        permanent: false
+      }
+    ];
+  }
 };
 
 // Only use Sentry build wrapper in production to avoid build overhead in dev/test
