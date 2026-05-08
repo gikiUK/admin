@@ -48,7 +48,11 @@ export type AnalyticsEvent = {
 export type EventsFilter = {
   action_type?: string;
   company_id?: string;
+  /** Display-only label for the picked company. Not sent to the API. */
+  company_label?: string;
   user_id?: string;
+  /** Display-only label for the picked user. Not sent to the API. */
+  user_label?: string;
   from?: string;
   to?: string;
   order?: "newest" | "oldest";

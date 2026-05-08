@@ -296,7 +296,7 @@ export function EventsTimeSeries({
           <div className="space-y-2">
             <div className="flex h-6 items-center justify-between">
               <span className="text-xs text-muted-foreground">
-                {zoom ? "Drag the slider below to adjust • Click Reset to clear" : "Drag on the chart to zoom"}
+                {zoom ? "Drag the slider below to adjust" : "Drag on the chart to zoom"}
               </span>
               {zoom && (
                 <Button variant="ghost" size="sm" className="h-6 gap-1 px-2 text-xs" onClick={resetZoom}>
