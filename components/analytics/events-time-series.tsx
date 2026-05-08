@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
-import { Area, AreaChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { Undo2 } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Area, AreaChart, Brush, CartesianGrid, Line, LineChart, ReferenceArea, XAxis, YAxis } from "recharts";
 import { EventSeriesPicker } from "@/components/analytics/event-series-picker";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import {
@@ -22,6 +24,8 @@ export type ChartMode = "line" | "stacked";
 
 type RawPoint = { date: string; by_type: Record<string, number> };
 
+export type ChartClickPayload = { date: string; seriesKey: string | null };
+
 type EventsTimeSeriesProps = {
   data: RawPoint[];
   previousData: RawPoint[] | null;
@@ -33,7 +37,26 @@ type EventsTimeSeriesProps = {
   onModeChange: (next: ChartMode) => void;
   onSmoothChange: (next: boolean) => void;
   onCompareChange: (next: boolean) => void;
+  onPointClick?: (payload: ChartClickPayload) => void;
 };
+
+type ChartState = {
+  activeLabel?: string | number;
+  activeTooltipIndex?: number | string | null;
+  activePayload?: Array<{ dataKey?: string | number }>;
+};
+
+function toIndex(value: number | string | null | undefined): number | null {
+  if (value == null) return null;
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function isInsideBrush(target: EventTarget | null): boolean {
+  return target instanceof Element && target.closest(".recharts-brush") !== null;
+}
+
+type ZoomRange = { startIndex: number; endIndex: number } | null;
 
 function formatTick(value: string): string {
   const date = new Date(value);
@@ -45,6 +68,8 @@ function trimLeadingZeros(points: ChartPoint[], keys: string[]): ChartPoint[] {
   return firstNonZero === -1 ? points : points.slice(firstNonZero);
 }
 
+const DRAG_THRESHOLD = 6;
+
 export function EventsTimeSeries({
   data,
   previousData,
@@ -55,7 +80,8 @@ export function EventsTimeSeries({
   onSelectedChange,
   onModeChange,
   onSmoothChange,
-  onCompareChange
+  onCompareChange,
+  onPointClick
 }: EventsTimeSeriesProps) {
   const seriesDefs: SeriesDef[] = useMemo(() => {
     if (selected.length === 0) return [ALL_SERIES_DEF];
@@ -117,6 +143,117 @@ export function EventsTimeSeries({
   }, [grandTotal, previousTotal]);
 
   const isEmpty = trimmed.length === 0 || grandTotal === 0;
+  const showBrush = trimmed.length >= 14;
+
+  const [zoom, setZoom] = useState<ZoomRange>(null);
+  const [dragRange, setDragRange] = useState<{ from: string; to: string } | null>(null);
+  const dragStartRef = useRef<{ x: number; index: number; label: string } | null>(null);
+
+  const resetZoom = useCallback(() => {
+    setZoom(null);
+    setDragRange(null);
+    dragStartRef.current = null;
+  }, []);
+
+  const handleBrushChange = useCallback(
+    (range: { startIndex?: number; endIndex?: number } | null) => {
+      if (!range || range.startIndex === undefined || range.endIndex === undefined) return;
+      if (range.startIndex === 0 && range.endIndex === trimmed.length - 1) {
+        setZoom(null);
+        return;
+      }
+      setZoom({ startIndex: range.startIndex, endIndex: range.endIndex });
+    },
+    [trimmed.length]
+  );
+
+  const handleMouseDown = useCallback((state: ChartState | null, event: React.MouseEvent) => {
+    if (isInsideBrush(event.target)) return;
+    if (!state || state.activeLabel === undefined) return;
+    const index = toIndex(state.activeTooltipIndex);
+    if (index === null) return;
+    dragStartRef.current = {
+      x: event.clientX,
+      index,
+      label: String(state.activeLabel)
+    };
+    setDragRange(null);
+  }, []);
+
+  const handleMouseMove = useCallback((state: ChartState | null, event: React.MouseEvent) => {
+    const start = dragStartRef.current;
+    if (!start || !state?.activeLabel) return;
+    const dx = Math.abs(event.clientX - start.x);
+    if (dx < DRAG_THRESHOLD) return;
+    const nextLabel = String(state.activeLabel);
+    const [from, to] = nextLabel < start.label ? [nextLabel, start.label] : [start.label, nextLabel];
+    setDragRange({ from, to });
+  }, []);
+
+  const handleMouseUp = useCallback(
+    (state: ChartState | null, event: React.MouseEvent) => {
+      const start = dragStartRef.current;
+      dragStartRef.current = null;
+      if (isInsideBrush(event.target)) {
+        setDragRange(null);
+        return;
+      }
+      const dx = start ? Math.abs(event.clientX - start.x) : 0;
+
+      const endIdx = toIndex(state?.activeTooltipIndex);
+      if (start && dx >= DRAG_THRESHOLD && endIdx !== null) {
+        const a = start.index;
+        const b = endIdx;
+        const startIndex = Math.min(a, b);
+        const endIndex = Math.max(a, b);
+        if (startIndex !== endIndex) {
+          setZoom({ startIndex, endIndex });
+        }
+        setDragRange(null);
+        return;
+      }
+
+      setDragRange(null);
+      // Treated as a click — fire onPointClick with the active label.
+      if (onPointClick && state?.activeLabel) {
+        const date = String(state.activeLabel);
+        const top = state.activePayload?.[0];
+        const rawKey = typeof top?.dataKey === "string" ? top.dataKey : null;
+        const seriesKey = rawKey && !rawKey.startsWith("prev_") ? rawKey : null;
+        onPointClick({ date, seriesKey });
+      }
+    },
+    [onPointClick]
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    dragStartRef.current = null;
+    setDragRange(null);
+  }, []);
+
+  const cursorClass = onPointClick || trimmed.length > 1 ? "cursor-crosshair" : undefined;
+
+  const chartHeightClass = showBrush ? "h-[340px]" : "h-[280px]";
+
+  const refArea = dragRange ? (
+    <ReferenceArea x1={dragRange.from} x2={dragRange.to} strokeOpacity={0} fill="var(--primary)" fillOpacity={0.08} />
+  ) : null;
+
+  const brushProps = showBrush
+    ? {
+        dataKey: "date" as const,
+        height: 32,
+        travellerWidth: 10,
+        stroke: "var(--primary)",
+        fill: "var(--muted)",
+        fillOpacity: 0.5,
+        tickFormatter: formatTick,
+        startIndex: zoom?.startIndex ?? 0,
+        endIndex: zoom?.endIndex ?? Math.max(trimmed.length - 1, 0),
+        onChange: handleBrushChange,
+        y: undefined as number | undefined
+      }
+    : null;
 
   return (
     <Card>
@@ -156,93 +293,129 @@ export function EventsTimeSeries({
         {isEmpty ? (
           <div className="text-sm text-muted-foreground">No events in range.</div>
         ) : (
-          <ChartContainer config={chartConfig} className="h-[280px] w-full">
-            {showStacked ? (
-              <AreaChart data={trimmed} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-                <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  minTickGap={32}
-                  tickFormatter={formatTick}
-                />
-                <YAxis tickLine={false} axisLine={false} tickMargin={8} width={40} allowDecimals={false} />
-                <ChartTooltip
-                  cursor={{ stroke: "var(--border)" }}
-                  content={
-                    <ChartTooltipContent labelFormatter={(value) => formatTick(String(value))} indicator="dot" />
-                  }
-                />
-                <defs>
-                  {seriesDefs.map((series) => (
-                    <linearGradient key={series.key} id={`fill-${series.key}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={`var(--color-${series.key})`} stopOpacity={0.55} />
-                      <stop offset="95%" stopColor={`var(--color-${series.key})`} stopOpacity={0.1} />
-                    </linearGradient>
-                  ))}
-                </defs>
-                {seriesDefs.map((series) => (
-                  <Area
-                    key={series.key}
-                    type="monotone"
-                    dataKey={series.key}
-                    stroke={`var(--color-${series.key})`}
-                    fill={`url(#fill-${series.key})`}
-                    strokeWidth={2}
-                    stackId="stack"
-                    isAnimationActive={false}
+          <div className="space-y-2">
+            <div className="flex h-6 items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {zoom ? "Drag the slider below to adjust • Click Reset to clear" : "Drag on the chart to zoom"}
+              </span>
+              {zoom && (
+                <Button variant="ghost" size="sm" className="h-6 gap-1 px-2 text-xs" onClick={resetZoom}>
+                  <Undo2 className="size-3" />
+                  Reset zoom
+                </Button>
+              )}
+            </div>
+            <ChartContainer
+              config={chartConfig}
+              className={`${chartHeightClass} w-full select-none ${cursorClass ?? ""}`.trim()}
+            >
+              {showStacked ? (
+                <AreaChart
+                  data={trimmed}
+                  margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    minTickGap={32}
+                    tickFormatter={formatTick}
+                    height={showBrush ? 48 : 30}
                   />
-                ))}
-              </AreaChart>
-            ) : (
-              <LineChart data={trimmed} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-                <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  minTickGap={32}
-                  tickFormatter={formatTick}
-                />
-                <YAxis tickLine={false} axisLine={false} tickMargin={8} width={40} allowDecimals={false} />
-                <ChartTooltip
-                  cursor={{ stroke: "var(--border)" }}
-                  content={
-                    <ChartTooltipContent labelFormatter={(value) => formatTick(String(value))} indicator="line" />
-                  }
-                />
-                {compareActive &&
-                  seriesDefs.map((series) => (
-                    <Line
-                      key={`prev-${series.key}`}
+                  <YAxis tickLine={false} axisLine={false} tickMargin={8} width={40} allowDecimals={false} />
+                  <ChartTooltip
+                    cursor={{ stroke: "var(--border)" }}
+                    content={
+                      <ChartTooltipContent labelFormatter={(value) => formatTick(String(value))} indicator="dot" />
+                    }
+                  />
+                  <defs>
+                    {seriesDefs.map((series) => (
+                      <linearGradient key={series.key} id={`fill-${series.key}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={`var(--color-${series.key})`} stopOpacity={0.55} />
+                        <stop offset="95%" stopColor={`var(--color-${series.key})`} stopOpacity={0.1} />
+                      </linearGradient>
+                    ))}
+                  </defs>
+                  {seriesDefs.map((series) => (
+                    <Area
+                      key={series.key}
                       type="monotone"
-                      dataKey={previousKeyFor(series.key)}
+                      dataKey={series.key}
                       stroke={`var(--color-${series.key})`}
-                      strokeOpacity={0.4}
-                      strokeDasharray="4 4"
-                      strokeWidth={1.5}
-                      dot={false}
+                      fill={`url(#fill-${series.key})`}
+                      strokeWidth={2}
+                      stackId="stack"
                       isAnimationActive={false}
                     />
                   ))}
-                {seriesDefs.map((series) => (
-                  <Line
-                    key={series.key}
-                    type="monotone"
-                    dataKey={series.key}
-                    stroke={`var(--color-${series.key})`}
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={{ r: 4 }}
-                    isAnimationActive={false}
+                  {refArea}
+                  {brushProps && <Brush {...brushProps} />}
+                </AreaChart>
+              ) : (
+                <LineChart
+                  data={trimmed}
+                  margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    minTickGap={32}
+                    tickFormatter={formatTick}
+                    height={showBrush ? 48 : 30}
                   />
-                ))}
-              </LineChart>
-            )}
-          </ChartContainer>
+                  <YAxis tickLine={false} axisLine={false} tickMargin={8} width={40} allowDecimals={false} />
+                  <ChartTooltip
+                    cursor={{ stroke: "var(--border)" }}
+                    content={
+                      <ChartTooltipContent labelFormatter={(value) => formatTick(String(value))} indicator="line" />
+                    }
+                  />
+                  {compareActive &&
+                    seriesDefs.map((series) => (
+                      <Line
+                        key={`prev-${series.key}`}
+                        type="monotone"
+                        dataKey={previousKeyFor(series.key)}
+                        stroke={`var(--color-${series.key})`}
+                        strokeOpacity={0.4}
+                        strokeDasharray="4 4"
+                        strokeWidth={1.5}
+                        dot={false}
+                        isAnimationActive={false}
+                      />
+                    ))}
+                  {seriesDefs.map((series) => (
+                    <Line
+                      key={series.key}
+                      type="monotone"
+                      dataKey={series.key}
+                      stroke={`var(--color-${series.key})`}
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 4 }}
+                      isAnimationActive={false}
+                    />
+                  ))}
+                  {refArea}
+                  {brushProps && <Brush {...brushProps} />}
+                </LineChart>
+              )}
+            </ChartContainer>
+          </div>
         )}
       </CardContent>
     </Card>

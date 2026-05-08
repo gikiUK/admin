@@ -49,6 +49,8 @@ export type EventsFilter = {
   action_type?: string;
   company_id?: string;
   user_id?: string;
+  from?: string;
+  to?: string;
   order?: "newest" | "oldest";
   page?: number;
   per?: number;

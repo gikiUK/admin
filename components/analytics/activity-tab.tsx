@@ -4,14 +4,14 @@ import { useCallback, useMemo } from "react";
 import { AtRiskOrgs } from "@/components/analytics/at-risk-orgs";
 import { DEFAULT_PRESET, isPreset, presetToRange, previousRange } from "@/components/analytics/date-range-picker";
 import { EmailHealth } from "@/components/analytics/email-health";
-import type { ChartMode } from "@/components/analytics/events-time-series";
+import type { ChartClickPayload, ChartMode } from "@/components/analytics/events-time-series";
 import { EventsTimeSeries } from "@/components/analytics/events-time-series";
 import { InvitationsFunnel } from "@/components/analytics/invitations-funnel";
 import { StatusDistribution } from "@/components/analytics/status-distribution";
 import { TopActionTypes } from "@/components/analytics/top-action-types";
 import { TopCompletedActions } from "@/components/analytics/top-completed-actions";
 import type { AnalyticsSummary } from "@/lib/analytics/api";
-import { parseSelection, type SeriesId, serializeSelection } from "@/lib/analytics/event-series";
+import { getSeriesByKey, parseSelection, type SeriesId, serializeSelection } from "@/lib/analytics/event-series";
 import { usePreviousSeries } from "@/lib/analytics/use-previous-series";
 import { useUrlState } from "@/lib/use-url-state";
 
@@ -67,6 +67,26 @@ export function ActivityTab({ data }: ActivityTabProps) {
     [set]
   );
 
+  const handlePointClick = useCallback(
+    ({ date, seriesKey }: ChartClickPayload) => {
+      const dayStart = new Date(`${date}T00:00:00.000Z`);
+      if (Number.isNaN(dayStart.getTime())) return;
+      const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+      const series = seriesKey ? getSeriesByKey(seriesKey) : undefined;
+      const actionType =
+        series && series.kind === "type" && series.id.startsWith("type:") ? series.id.slice("type:".length) : undefined;
+      set({
+        tab: "events",
+        from: dayStart.toISOString(),
+        to: dayEnd.toISOString(),
+        action_type: actionType,
+        page: undefined,
+        event: undefined
+      });
+    },
+    [set]
+  );
+
   const rawSeries = data.events_over_time_by_type ?? [];
 
   return (
@@ -82,6 +102,7 @@ export function ActivityTab({ data }: ActivityTabProps) {
         onModeChange={handleModeChange}
         onSmoothChange={handleSmoothChange}
         onCompareChange={handleCompareChange}
+        onPointClick={handlePointClick}
       />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <StatusDistribution distribution={data.status_distribution} />

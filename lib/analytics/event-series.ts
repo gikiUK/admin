@@ -192,6 +192,16 @@ export function totalsFor(raw: RawPoint[], selected: SeriesDef[]): Record<Series
 
 export const ALL_SERIES_DEF = ALL_SERIES;
 
+const SERIES_BY_KEY: Map<string, SeriesDef> = new Map([
+  [ALL_SERIES.key, ALL_SERIES],
+  ...CATEGORY_SERIES.map((s) => [s.key, s] as const),
+  ...TYPE_SERIES.map((s) => [s.key, s] as const)
+]);
+
+export function getSeriesByKey(key: string): SeriesDef | undefined {
+  return SERIES_BY_KEY.get(key);
+}
+
 /** Action-type labels covered by a series, for tooltips. */
 export function coveredEventLabels(series: SeriesDef): string[] {
   if (series.kind === "type") return [series.label];

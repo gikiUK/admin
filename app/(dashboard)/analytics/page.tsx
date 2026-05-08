@@ -31,7 +31,9 @@ const TAB_SCOPED_PARAMS = [
   "series",
   "chart",
   "smooth",
-  "compare"
+  "compare",
+  "from",
+  "to"
 ] as const;
 
 const TAB_LABEL: Record<TabId, string> = {
