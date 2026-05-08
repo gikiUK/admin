@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ALL_SERIES_DEF, CATEGORY_SERIES, type SeriesId, TYPE_SERIES } from "@/lib/analytics/event-series";
 import { ChipWithTooltip } from "./chip-with-tooltip";
-import { isAllActive } from "./selection";
 
 const FADE_MASK = "linear-gradient(to right, black calc(100% - 24px), transparent 100%)";
 
@@ -16,9 +15,10 @@ type Props = {
 };
 
 export function SeriesStrip({ selected, onToggle, onClear }: Props) {
-  const allActive = isAllActive(selected);
   const selectedSet = useMemo(() => new Set(selected), [selected]);
   const selectedTypes = useMemo(() => TYPE_SERIES.filter((s) => selectedSet.has(s.id)), [selectedSet]);
+  const allActive = selectedSet.has("all");
+  const hasNonDefaultSelection = selected.length > 1 || (selected.length === 1 && !allActive);
 
   return (
     <div
@@ -35,14 +35,14 @@ export function SeriesStrip({ selected, onToggle, onClear }: Props) {
           <ChipWithTooltip
             key={series.id}
             series={series}
-            active={!allActive && selectedSet.has(series.id)}
+            active={selectedSet.has(series.id)}
             onClick={() => onToggle(series.id)}
           />
         ))}
         {selectedTypes.map((series) => (
           <ChipWithTooltip key={series.id} series={series} active onClick={() => onToggle(series.id)} removable />
         ))}
-        {!allActive && (
+        {hasNonDefaultSelection && (
           <Button
             variant="ghost"
             size="sm"

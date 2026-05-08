@@ -107,8 +107,17 @@ export function isSeriesId(value: string): value is SeriesId {
   return SERIES_BY_ID.has(value as SeriesId);
 }
 
+const DEFAULT_SELECTION: SeriesId[] = ["all"];
+const EMPTY_SENTINEL = "none";
+
+/**
+ * URL key absent → default selection (`["all"]`).
+ * URL key === "none" → explicit empty selection.
+ * URL key === "all,cat:user" → those series.
+ */
 export function parseSelection(raw: string | null | undefined): SeriesId[] {
-  if (!raw) return [];
+  if (raw === null || raw === undefined) return DEFAULT_SELECTION;
+  if (raw === EMPTY_SENTINEL) return [];
   const seen = new Set<SeriesId>();
   const out: SeriesId[] = [];
   for (const part of raw.split(",")) {
@@ -121,8 +130,8 @@ export function parseSelection(raw: string | null | undefined): SeriesId[] {
   return out;
 }
 
-export function serializeSelection(ids: SeriesId[]): string | undefined {
-  return ids.length === 0 ? undefined : ids.join(",");
+export function serializeSelection(ids: SeriesId[]): string {
+  return ids.length === 0 ? EMPTY_SENTINEL : ids.join(",");
 }
 
 export type ChartPoint = { date: string } & Record<string, number | string>;

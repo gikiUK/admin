@@ -1,6 +1,6 @@
 "use client";
 
-import { Undo2 } from "lucide-react";
+import { Inbox, MousePointerClick, Undo2 } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Area, AreaChart, Brush, CartesianGrid, Line, LineChart, ReferenceArea, XAxis, YAxis } from "recharts";
 import { EventSeriesPicker } from "@/components/analytics/event-series-picker";
@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import {
-  ALL_SERIES_DEF,
   aggregate,
   type ChartPoint,
   getSeries,
@@ -84,13 +83,12 @@ export function EventsTimeSeries({
   onPointClick
 }: EventsTimeSeriesProps) {
   const seriesDefs: SeriesDef[] = useMemo(() => {
-    if (selected.length === 0) return [ALL_SERIES_DEF];
     const resolved: SeriesDef[] = [];
     for (const id of selected) {
       const def = getSeries(id);
       if (def) resolved.push(def);
     }
-    return resolved.length > 0 ? resolved : [ALL_SERIES_DEF];
+    return resolved;
   }, [selected]);
 
   const showStacked = mode === "stacked" && seriesDefs.length > 1;
@@ -142,7 +140,9 @@ export function EventsTimeSeries({
     return (grandTotal - previousTotal) / previousTotal;
   }, [grandTotal, previousTotal]);
 
-  const isEmpty = trimmed.length === 0 || grandTotal === 0;
+  const hasNoSelection = seriesDefs.length === 0;
+  const hasNoData = !hasNoSelection && (trimmed.length === 0 || grandTotal === 0);
+  const hasData = !hasNoSelection && !hasNoData;
   const showBrush = trimmed.length >= 14;
 
   const [zoom, setZoom] = useState<ZoomRange>(null);
@@ -261,8 +261,10 @@ export function EventsTimeSeries({
         <div className="flex items-baseline justify-between gap-2">
           <CardTitle className="text-base">Activity</CardTitle>
           <div className="flex items-baseline gap-2 text-sm">
-            <span className="text-muted-foreground tabular-nums">{grandTotal.toLocaleString()} total</span>
-            {delta !== null && (
+            {!hasNoSelection && (
+              <span className="text-muted-foreground tabular-nums">{grandTotal.toLocaleString()} total</span>
+            )}
+            {!hasNoSelection && delta !== null && (
               <span
                 className={
                   delta === 0
@@ -290,9 +292,23 @@ export function EventsTimeSeries({
         />
       </CardHeader>
       <CardContent>
-        {isEmpty ? (
-          <div className="text-sm text-muted-foreground">No events in range.</div>
-        ) : (
+        {hasNoSelection && (
+          <ChartPlaceholder
+            icon={MousePointerClick}
+            title="No series selected"
+            description="Pick an event group above to start charting."
+            heightClass={chartHeightClass}
+          />
+        )}
+        {hasNoData && (
+          <ChartPlaceholder
+            icon={Inbox}
+            title="No events in this selection"
+            description="Try a different date range, or pick another event group."
+            heightClass={chartHeightClass}
+          />
+        )}
+        {hasData && (
           <div className="space-y-2">
             <div className="flex h-6 items-center justify-between">
               <span className="text-xs text-muted-foreground">
@@ -419,5 +435,22 @@ export function EventsTimeSeries({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+type ChartPlaceholderProps = {
+  icon: typeof Inbox;
+  title: string;
+  description: string;
+  heightClass: string;
+};
+
+function ChartPlaceholder({ icon: Icon, title, description, heightClass }: ChartPlaceholderProps) {
+  return (
+    <div className={`flex ${heightClass} flex-col items-center justify-center gap-2 text-center`}>
+      <Icon className="size-8 text-muted-foreground/60" aria-hidden />
+      <div className="text-sm font-medium text-foreground">{title}</div>
+      <div className="max-w-xs text-xs text-muted-foreground">{description}</div>
+    </div>
   );
 }

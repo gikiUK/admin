@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import type { SeriesId } from "@/lib/analytics/event-series";
 import { AddEventPopover } from "./add-event-popover";
 import { ChartControls } from "./chart-controls";
-import { isAllActive, toggleSeries } from "./selection";
+import { toggleSeries } from "./selection";
 import { SeriesStrip } from "./series-strip";
 
 type Props = {
@@ -32,15 +32,14 @@ export function EventSeriesPicker({
   onCompareChange,
   compareDisabled
 }: Props) {
-  const allActive = isAllActive(selected);
-  const stackDisabled = allActive || selected.length <= 1;
+  const stackDisabled = selected.length <= 1;
 
   const handleToggle = useCallback(
     (id: SeriesId) => onSelectedChange(toggleSeries(selected, id)),
     [selected, onSelectedChange]
   );
 
-  const handleClear = useCallback(() => onSelectedChange([]), [onSelectedChange]);
+  const handleClear = useCallback(() => onSelectedChange(["all"]), [onSelectedChange]);
 
   return (
     <TooltipProvider delayDuration={200}>
