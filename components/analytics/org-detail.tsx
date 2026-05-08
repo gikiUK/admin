@@ -17,6 +17,7 @@ import {
 } from "@/lib/analytics/api";
 import { type FactFormatter, makeFactFormatter } from "@/lib/analytics/fact-formatter";
 import { useLiveDataset } from "@/lib/analytics/use-live-dataset";
+import { getFrontendUrl } from "@/lib/api/config";
 import { useUrlState } from "@/lib/use-url-state";
 import { cn } from "@/lib/utils";
 
@@ -240,11 +241,25 @@ function PlanSummarySection({ org }: { org: AnalyticsOrganizationDetail }) {
     return acc;
   }, {});
   const preGikiTotal = (byPreGiki.already_doing ?? 0) + (byPreGiki.previously_done ?? 0);
+  const planUrl = org.plan_uuid
+    ? getFrontendUrl(`/companies/${encodeURIComponent(org.slug)}/plans/${org.plan_uuid}`)
+    : null;
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
         <CardTitle className="text-base">Plan</CardTitle>
+        {planUrl && (
+          <Link
+            href={planUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs hover:bg-muted"
+          >
+            View plan
+            <ExternalLink className="size-3" />
+          </Link>
+        )}
       </CardHeader>
       <CardContent className="space-y-6">
         <StackedBar
