@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useMemo } from "react";
+import { createContext, type ReactNode, useContext } from "react";
 import type { AnalyticsSummary } from "@/lib/analytics/api";
 import { useSummary } from "@/lib/analytics/use-summary";
 
@@ -20,8 +20,7 @@ type ProviderProps = {
 
 export function SummaryProvider({ from, to, children }: ProviderProps) {
   const summary = useSummary(from, to);
-  const value = useMemo(() => summary, [summary]);
-  return <SummaryContext.Provider value={value}>{children}</SummaryContext.Provider>;
+  return <SummaryContext.Provider value={summary}>{children}</SummaryContext.Provider>;
 }
 
 export function useSummaryContext(): SummaryState {
