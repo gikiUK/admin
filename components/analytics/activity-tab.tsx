@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { ActivityChart, type ChartClickPayload, type ChartMode } from "@/components/analytics/activity-chart";
 import { AtRiskOrgs } from "@/components/analytics/at-risk-orgs";
@@ -23,6 +24,7 @@ function isChartMode(value: string | null): value is ChartMode {
 }
 
 export function ActivityTab({ data }: ActivityTabProps) {
+  const router = useRouter();
   const { searchParams, set } = useUrlState();
   const selected = parseSelection(searchParams.get("series"));
   const rawMode = searchParams.get("chart");
@@ -74,16 +76,14 @@ export function ActivityTab({ data }: ActivityTabProps) {
       const series = seriesKey ? getSeriesByKey(seriesKey) : undefined;
       const actionType =
         series && series.kind === "type" && series.id.startsWith("type:") ? series.id.slice("type:".length) : undefined;
-      set({
-        tab: "events",
+      const params = new URLSearchParams({
         from: dayStart.toISOString(),
-        to: dayEnd.toISOString(),
-        action_type: actionType,
-        page: undefined,
-        event: undefined
+        to: dayEnd.toISOString()
       });
+      if (actionType) params.set("action_type", actionType);
+      router.push(`/analytics/events?${params.toString()}`);
     },
-    [set]
+    [router]
   );
 
   const rawSeries = data.events_over_time_by_type ?? [];

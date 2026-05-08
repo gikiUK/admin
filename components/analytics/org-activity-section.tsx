@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { ActivityChart, type ChartClickPayload, type ChartMode } from "@/components/analytics/activity-chart";
 import {
@@ -25,6 +26,7 @@ function isChartMode(value: string | null): value is ChartMode {
 }
 
 export function OrgActivitySection({ slug, companyId, companyName }: Props) {
+  const router = useRouter();
   const { searchParams, set } = useUrlState();
 
   const rawPreset = searchParams.get("activity_range");
@@ -55,17 +57,15 @@ export function OrgActivitySection({ slug, companyId, companyName }: Props) {
       const dayStart = new Date(`${date}T00:00:00.000Z`);
       if (Number.isNaN(dayStart.getTime())) return;
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
-      set({
-        tab: "events",
+      const params = new URLSearchParams({
         from: dayStart.toISOString(),
         to: dayEnd.toISOString(),
         company_id: String(companyId),
-        company_label: companyName,
-        page: undefined,
-        event: undefined
+        company_label: companyName
       });
+      router.push(`/analytics/events?${params.toString()}`);
     },
-    [set, companyId, companyName]
+    [router, companyId, companyName]
   );
 
   return (
