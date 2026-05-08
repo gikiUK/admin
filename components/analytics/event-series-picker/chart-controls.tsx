@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarClock, Layers, LineChart as LineChartIcon, TrendingUp } from "lucide-react";
-import type { ChartMode } from "@/components/analytics/events-time-series";
+import type { ChartMode } from "@/components/analytics/activity-chart";
 import { IconToggle } from "./icon-toggle";
 
 type Props = {

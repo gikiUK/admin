@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import type { ChartMode } from "@/components/analytics/events-time-series";
+import type { ChartMode } from "@/components/analytics/activity-chart";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { SeriesId } from "@/lib/analytics/event-series";
 import { AddEventPopover } from "./add-event-popover";

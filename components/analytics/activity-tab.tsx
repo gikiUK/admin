@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+import { ActivityChart, type ChartClickPayload, type ChartMode } from "@/components/analytics/activity-chart";
 import { AtRiskOrgs } from "@/components/analytics/at-risk-orgs";
 import { DEFAULT_PRESET, isPreset, presetToRange, previousRange } from "@/components/analytics/date-range-picker";
 import { EmailHealth } from "@/components/analytics/email-health";
-import type { ChartClickPayload, ChartMode } from "@/components/analytics/events-time-series";
-import { EventsTimeSeries } from "@/components/analytics/events-time-series";
 import { InvitationsFunnel } from "@/components/analytics/invitations-funnel";
 import { StatusDistribution } from "@/components/analytics/status-distribution";
 import { TopActionTypes } from "@/components/analytics/top-action-types";
@@ -91,7 +90,7 @@ export function ActivityTab({ data }: ActivityTabProps) {
 
   return (
     <div className="space-y-4">
-      <EventsTimeSeries
+      <ActivityChart
         data={rawSeries}
         previousData={previousData}
         selected={selected}

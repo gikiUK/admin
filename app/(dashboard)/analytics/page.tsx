@@ -32,6 +32,7 @@ const TAB_SCOPED_PARAMS = [
   "chart",
   "smooth",
   "compare",
+  "activity_range",
   "from",
   "to"
 ] as const;

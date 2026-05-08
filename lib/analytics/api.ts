@@ -249,3 +249,13 @@ export function fetchOrganization(slug: string): Promise<{ organization: Analyti
     `/admin/analytics/organizations/${encodeURIComponent(slug)}`
   );
 }
+
+type ActivityResponse = {
+  events_over_time_by_type: Array<{ date: string; by_type: Record<string, number> }>;
+};
+
+export function fetchOrganizationActivity(slug: string, from: string, to: string): Promise<ActivityResponse> {
+  return apiFetch<ActivityResponse>(
+    `/admin/analytics/organizations/${encodeURIComponent(slug)}/activity${buildQuery({ from, to })}`
+  );
+}

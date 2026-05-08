@@ -2,6 +2,7 @@
 
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { OrgActivitySection } from "@/components/analytics/org-activity-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,6 +90,7 @@ export function OrgDetail({ slug, onBack }: OrgDetailProps) {
 
       {data && (
         <>
+          <OrgActivitySection slug={data.slug} companyId={data.id} companyName={data.name} />
           <OrgHeader org={data} />
           <PlanSummarySection org={data} />
           <FactsSection facts={data.facts} />
