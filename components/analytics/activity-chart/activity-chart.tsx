@@ -1,7 +1,7 @@
 "use client";
 
 import { Inbox, MousePointerClick, Undo2 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { EventSeriesPicker } from "@/components/analytics/event-series-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -60,6 +60,12 @@ export function ActivityChart({
 
   const zoom = useChartZoom({ totalLength: trimmed.length, onPointClick });
   const cursorClass = onPointClick || trimmed.length > 1 ? "cursor-crosshair" : undefined;
+
+  const seriesKeysSignature = seriesKeys.join("|");
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset zoom when the series selection changes
+  useEffect(() => {
+    zoom.reset();
+  }, [seriesKeysSignature]);
 
   return (
     <Card>
