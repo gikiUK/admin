@@ -72,6 +72,7 @@ export type AnalyticsSummary = {
     not_started_count: number;
   }>;
   events_over_time?: Array<{ date: string; count: number }>;
+  events_over_time_by_type?: Array<{ date: string; by_type: Record<string, number> }>;
   top_action_types?: Array<{ action_type: string; count: number }>;
   tier_breakdown: { standard: number; premium: number };
   subscription_status_breakdown: Record<string, number>;

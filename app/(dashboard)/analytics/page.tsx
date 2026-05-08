@@ -27,7 +27,9 @@ const TAB_SCOPED_PARAMS = [
   "company_id",
   "user_id",
   "org",
-  "event"
+  "event",
+  "series",
+  "chart"
 ] as const;
 
 const TAB_LABEL: Record<TabId, string> = {
