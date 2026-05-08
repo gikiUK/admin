@@ -143,6 +143,39 @@ export function aggregate(raw: RawPoint[], selected: SeriesDef[]): ChartPoint[] 
   });
 }
 
+/** Replace each point with the trailing N-day mean (over `key` columns only). */
+export function smoothSeries(points: ChartPoint[], keys: string[], window = 7): ChartPoint[] {
+  if (points.length === 0 || window <= 1) return points;
+  return points.map((point, index) => {
+    const start = Math.max(0, index - window + 1);
+    const slice = points.slice(start, index + 1);
+    const len = slice.length;
+    const out: ChartPoint = { date: point.date };
+    for (const key of keys) {
+      let sum = 0;
+      for (const p of slice) sum += Number(p[key] ?? 0);
+      out[key] = Math.round((sum / len) * 100) / 100;
+    }
+    return out;
+  });
+}
+
+export function previousKeyFor(key: string): string {
+  return `prev_${key}`;
+}
+
+/** Merge prior-window aggregates into the current rows under `prev_<key>`, aligned by index. */
+export function mergePreviousSeries(current: ChartPoint[], previous: ChartPoint[], keys: string[]): ChartPoint[] {
+  return current.map((point, index) => {
+    const prior = previous[index];
+    const merged: ChartPoint = { ...point };
+    for (const key of keys) {
+      merged[previousKeyFor(key)] = prior ? Number(prior[key] ?? 0) : 0;
+    }
+    return merged;
+  });
+}
+
 export function totalsFor(raw: RawPoint[], selected: SeriesDef[]): Record<SeriesId, number> {
   const out = {} as Record<SeriesId, number>;
   for (const series of selected) {
@@ -158,3 +191,11 @@ export function totalsFor(raw: RawPoint[], selected: SeriesDef[]): Record<Series
 }
 
 export const ALL_SERIES_DEF = ALL_SERIES;
+
+/** Action-type labels covered by a series, for tooltips. */
+export function coveredEventLabels(series: SeriesDef): string[] {
+  if (series.kind === "type") return [series.label];
+  return ACTION_TYPES.filter((actionType) => series.matches(actionType)).map(
+    (actionType) => getEventDisplay(actionType).label
+  );
+}
