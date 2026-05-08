@@ -1,20 +1,16 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { DEFAULT_PRESET, isPreset, presetToRange } from "@/components/analytics/date-range-picker";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { SummaryProvider } from "@/lib/analytics/summary-context";
 
-const SUMMARY_RANGE_DAYS = 30;
-
-function defaultRange(): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date();
-  from.setDate(to.getDate() - SUMMARY_RANGE_DAYS);
-  return { from: from.toISOString(), to: to.toISOString() };
-}
-
 export default function AnalyticsLayout({ children }: { children: React.ReactNode }) {
-  const { from, to } = useMemo(defaultRange, []);
+  const searchParams = useSearchParams();
+  const rawPreset = searchParams.get("range");
+  const preset = isPreset(rawPreset) ? rawPreset : DEFAULT_PRESET;
+  const { from, to } = useMemo(() => presetToRange(preset), [preset]);
 
   return (
     <SidebarInset>
