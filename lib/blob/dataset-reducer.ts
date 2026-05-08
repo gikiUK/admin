@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import { buildChangeEntry, type ChangeEntry, replayChanges } from "./change-log";
 import type { MutationAction } from "./dataset-mutations";
 import { applyAction } from "./dataset-mutations";

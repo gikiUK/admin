@@ -1,5 +1,4 @@
 import type { BcorpPageProps } from "@/components/printables/bcorp-printable-page";
-import { DocHeader } from "@/components/printables/doc-header";
 
 export function TableOfContents({ data, plan }: BcorpPageProps) {
   const hasEngagement = data.engagement && data.engagement.trim() !== "";

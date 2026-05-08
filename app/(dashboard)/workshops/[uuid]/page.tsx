@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
 import { CompaniesPanel } from "@/components/workshops/companies-panel";
 import { EmailSection } from "@/components/workshops/email-section";
 import { InviteesPanel } from "@/components/workshops/invitees-panel";
