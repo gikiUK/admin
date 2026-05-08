@@ -242,6 +242,7 @@ export type AnalyticsOrganizationDetail = AnalyticsOrganization & {
   facts: OrgFact[];
   members: OrgMember[];
   tracked_actions: OrgTrackedAction[];
+  plan_uuid: string | null;
 };
 
 export function fetchOrganization(slug: string): Promise<{ organization: AnalyticsOrganizationDetail }> {
