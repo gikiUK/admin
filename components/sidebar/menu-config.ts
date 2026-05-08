@@ -12,7 +12,6 @@ import {
   Settings,
   Table2,
   Users,
-  UsersRound,
   Video,
   Zap
 } from "lucide-react";
@@ -69,7 +68,7 @@ export const SIDEBAR_MENU: MenuSection[] = [
           {
             href: "/analytics/orgs",
             label: "Orgs",
-            icon: UsersRound,
+            icon: Building2,
             matchPaths: ["/analytics/orgs"]
           },
           {
@@ -99,7 +98,7 @@ export const SIDEBAR_MENU: MenuSection[] = [
         items: [
           {
             href: "/manage/organisations",
-            label: "Organisations",
+            label: "Orgs",
             icon: Building2,
             matchPaths: ["/manage/organisations"]
           },

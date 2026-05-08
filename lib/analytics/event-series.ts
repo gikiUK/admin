@@ -199,6 +199,21 @@ export function totalsFor(raw: RawPoint[], selected: SeriesDef[]): Record<Series
   return out;
 }
 
+/**
+ * Count of events covered by the *union* of selected series — each event is
+ * counted once even if multiple selected series match it (e.g. All + Users).
+ */
+export function unionTotal(raw: RawPoint[], selected: SeriesDef[]): number {
+  if (selected.length === 0) return 0;
+  let total = 0;
+  for (const point of raw) {
+    for (const [actionType, count] of Object.entries(point.by_type)) {
+      if (selected.some((series) => series.matches(actionType))) total += count;
+    }
+  }
+  return total;
+}
+
 export const ALL_SERIES_DEF = ALL_SERIES;
 
 const SERIES_BY_KEY: Map<string, SeriesDef> = new Map([

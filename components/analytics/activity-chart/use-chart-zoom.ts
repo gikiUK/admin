@@ -32,11 +32,13 @@ export function useChartZoom({ totalLength, onPointClick }: Args) {
   const [zoom, setZoom] = useState<ZoomRange>(null);
   const [dragRange, setDragRange] = useState<{ from: string; to: string } | null>(null);
   const dragStartRef = useRef<{ x: number; index: number; label: string } | null>(null);
+  const startedInsideBrushRef = useRef(false);
 
   const reset = useCallback(() => {
     setZoom(null);
     setDragRange(null);
     dragStartRef.current = null;
+    startedInsideBrushRef.current = false;
   }, []);
 
   const handleBrushChange = useCallback(
@@ -52,7 +54,8 @@ export function useChartZoom({ totalLength, onPointClick }: Args) {
   );
 
   const onMouseDown = useCallback((state: ChartState | null, event: React.MouseEvent) => {
-    if (isInsideBrush(event.target)) return;
+    startedInsideBrushRef.current = isInsideBrush(event.target);
+    if (startedInsideBrushRef.current) return;
     if (!state || state.activeLabel === undefined) return;
     const index = toIndex(state.activeTooltipIndex);
     if (index === null) return;
@@ -72,8 +75,10 @@ export function useChartZoom({ totalLength, onPointClick }: Args) {
   const onMouseUp = useCallback(
     (state: ChartState | null, event: React.MouseEvent) => {
       const start = dragStartRef.current;
+      const startedOnBrush = startedInsideBrushRef.current;
       dragStartRef.current = null;
-      if (isInsideBrush(event.target)) {
+      startedInsideBrushRef.current = false;
+      if (startedOnBrush || isInsideBrush(event.target)) {
         setDragRange(null);
         return;
       }
@@ -102,6 +107,7 @@ export function useChartZoom({ totalLength, onPointClick }: Args) {
 
   const onMouseLeave = useCallback(() => {
     dragStartRef.current = null;
+    startedInsideBrushRef.current = false;
     setDragRange(null);
   }, []);
 

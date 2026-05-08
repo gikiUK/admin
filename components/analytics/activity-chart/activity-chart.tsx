@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { EventSeriesPicker } from "@/components/analytics/event-series-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { totalsFor } from "@/lib/analytics/event-series";
+import { unionTotal } from "@/lib/analytics/event-series";
 import { ChartCanvas } from "./chart-canvas";
 import { ChartHeader } from "./chart-header";
 import { ChartPlaceholder } from "./chart-placeholder";
@@ -41,11 +41,10 @@ export function ActivityChart({
   const seriesKeys = useMemo(() => seriesDefs.map((s) => s.key), [seriesDefs]);
   const trimmed = useMemo(() => trimLeadingZeros(points, seriesKeys), [points, seriesKeys]);
 
-  const totals = useMemo(() => totalsFor(data, seriesDefs), [data, seriesDefs]);
-  const grandTotal = useMemo(() => Object.values(totals).reduce((sum, n) => sum + n, 0), [totals]);
+  const grandTotal = useMemo(() => unionTotal(data, seriesDefs), [data, seriesDefs]);
   const previousTotal = useMemo(() => {
     if (!compareActive || !previousData) return null;
-    return Object.values(totalsFor(previousData, seriesDefs)).reduce((sum, n) => sum + n, 0);
+    return unionTotal(previousData, seriesDefs);
   }, [previousData, compareActive, seriesDefs]);
   const delta = useMemo(() => {
     if (previousTotal === null) return null;
