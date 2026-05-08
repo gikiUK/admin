@@ -38,6 +38,17 @@ export function presetToRange(preset: DateRangePreset): { from: string; to: stri
   return { from: from.toISOString(), to: to.toISOString() };
 }
 
+/** Equal-length window ending where the current one starts. */
+export function previousRange(from: string, to: string): { from: string; to: string } {
+  const fromDate = new Date(from);
+  const toDate = new Date(to);
+  const span = toDate.getTime() - fromDate.getTime();
+  return {
+    from: new Date(fromDate.getTime() - span).toISOString(),
+    to: fromDate.toISOString()
+  };
+}
+
 type DateRangePickerProps = {
   value: DateRangePreset;
   onChange: (next: DateRangePreset) => void;

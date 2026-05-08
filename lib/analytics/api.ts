@@ -48,7 +48,13 @@ export type AnalyticsEvent = {
 export type EventsFilter = {
   action_type?: string;
   company_id?: string;
+  /** Display-only label for the picked company. Not sent to the API. */
+  company_label?: string;
   user_id?: string;
+  /** Display-only label for the picked user. Not sent to the API. */
+  user_label?: string;
+  from?: string;
+  to?: string;
   order?: "newest" | "oldest";
   page?: number;
   per?: number;
@@ -72,6 +78,7 @@ export type AnalyticsSummary = {
     not_started_count: number;
   }>;
   events_over_time?: Array<{ date: string; count: number }>;
+  events_over_time_by_type?: Array<{ date: string; by_type: Record<string, number> }>;
   top_action_types?: Array<{ action_type: string; count: number }>;
   tier_breakdown: { standard: number; premium: number };
   subscription_status_breakdown: Record<string, number>;
@@ -240,5 +247,15 @@ export type AnalyticsOrganizationDetail = AnalyticsOrganization & {
 export function fetchOrganization(slug: string): Promise<{ organization: AnalyticsOrganizationDetail }> {
   return apiFetch<{ organization: AnalyticsOrganizationDetail }>(
     `/admin/analytics/organizations/${encodeURIComponent(slug)}`
+  );
+}
+
+type ActivityResponse = {
+  events_over_time_by_type: Array<{ date: string; by_type: Record<string, number> }>;
+};
+
+export function fetchOrganizationActivity(slug: string, from: string, to: string): Promise<ActivityResponse> {
+  return apiFetch<ActivityResponse>(
+    `/admin/analytics/organizations/${encodeURIComponent(slug)}/activity${buildQuery({ from, to })}`
   );
 }

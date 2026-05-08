@@ -8,7 +8,18 @@ import { Pager } from "@/components/ui/pager";
 import { type AnalyticsEvent, type EventsFilter, fetchEvents } from "@/lib/analytics/api";
 import { useUrlState } from "@/lib/use-url-state";
 
-const FILTER_KEYS = ["action_type", "company_id", "user_id", "order", "page", "event"] as const;
+const FILTER_KEYS = [
+  "action_type",
+  "company_id",
+  "company_label",
+  "user_id",
+  "user_label",
+  "from",
+  "to",
+  "order",
+  "page",
+  "event"
+] as const;
 
 function readFilter(searchParams: URLSearchParams): EventsFilter {
   const order = searchParams.get("order");
@@ -16,7 +27,11 @@ function readFilter(searchParams: URLSearchParams): EventsFilter {
   return {
     action_type: searchParams.get("action_type") ?? undefined,
     company_id: searchParams.get("company_id") ?? undefined,
+    company_label: searchParams.get("company_label") ?? undefined,
     user_id: searchParams.get("user_id") ?? undefined,
+    user_label: searchParams.get("user_label") ?? undefined,
+    from: searchParams.get("from") ?? undefined,
+    to: searchParams.get("to") ?? undefined,
     order: order === "oldest" || order === "newest" ? order : undefined,
     page: Number.isFinite(page) && page > 0 ? page : 1
   };
@@ -25,7 +40,7 @@ function readFilter(searchParams: URLSearchParams): EventsFilter {
 export function EventsExplorer() {
   const { searchParams, set } = useUrlState();
   const filter = readFilter(searchParams);
-  const { action_type, company_id, user_id, order, page } = filter;
+  const { action_type, company_id, user_id, from, to, order, page } = filter;
 
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [meta, setMeta] = useState({ current_page: 1, total_count: 0, total_pages: 1 });
@@ -35,14 +50,14 @@ export function EventsExplorer() {
   useEffect(() => {
     setLoading(true);
     setError("");
-    fetchEvents({ action_type, company_id, user_id, order, page })
+    fetchEvents({ action_type, company_id, user_id, from, to, order, page })
       .then((response) => {
         setEvents(response.results);
         setMeta(response.meta);
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load events"))
       .finally(() => setLoading(false));
-  }, [action_type, company_id, user_id, order, page]);
+  }, [action_type, company_id, user_id, from, to, order, page]);
 
   const handleFilterChange = useCallback(
     (patch: Partial<EventsFilter>) => {

@@ -1,9 +1,13 @@
 import {
+  Activity,
   Award,
   BarChart3,
   Building2,
   Database,
   Download,
+  GitBranch,
+  Layers,
+  ListOrdered,
   type LucideIcon,
   Settings,
   Table2,
@@ -45,11 +49,47 @@ export const SIDEBAR_MENU: MenuSection[] = [
         matchPaths: ["/workshops"]
       },
       {
-        kind: "link",
-        href: "/analytics",
+        kind: "group",
         label: "Analytics",
         icon: BarChart3,
-        matchPaths: ["/analytics"]
+        items: [
+          {
+            href: "/analytics/activity",
+            label: "Activity",
+            icon: Activity,
+            matchPaths: ["/analytics/activity"]
+          },
+          {
+            href: "/analytics/users",
+            label: "Users",
+            icon: Users,
+            matchPaths: ["/analytics/users"]
+          },
+          {
+            href: "/analytics/orgs",
+            label: "Orgs",
+            icon: Building2,
+            matchPaths: ["/analytics/orgs"]
+          },
+          {
+            href: "/analytics/conversion",
+            label: "Conversion",
+            icon: GitBranch,
+            matchPaths: ["/analytics/conversion"]
+          },
+          {
+            href: "/analytics/breakdowns",
+            label: "Breakdowns",
+            icon: Layers,
+            matchPaths: ["/analytics/breakdowns"]
+          },
+          {
+            href: "/analytics/events",
+            label: "Events",
+            icon: ListOrdered,
+            matchPaths: ["/analytics/events"]
+          }
+        ]
       },
       {
         kind: "group",
@@ -58,7 +98,7 @@ export const SIDEBAR_MENU: MenuSection[] = [
         items: [
           {
             href: "/manage/organisations",
-            label: "Organisations",
+            label: "Orgs",
             icon: Building2,
             matchPaths: ["/manage/organisations"]
           },

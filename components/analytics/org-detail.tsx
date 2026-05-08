@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { OrgActivitySection } from "@/components/analytics/org-activity-section";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
@@ -16,6 +17,7 @@ import {
 } from "@/lib/analytics/api";
 import { type FactFormatter, makeFactFormatter } from "@/lib/analytics/fact-formatter";
 import { useLiveDataset } from "@/lib/analytics/use-live-dataset";
+import { useUrlState } from "@/lib/use-url-state";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<OrgStatus, string> = {
@@ -58,13 +60,22 @@ function formatRawFactValue(value: unknown): string {
 
 type OrgDetailProps = {
   slug: string;
-  onBack: () => void;
 };
 
-export function OrgDetail({ slug, onBack }: OrgDetailProps) {
+const SECTIONS = ["activity", "members", "actions", "facts"] as const;
+type SectionId = (typeof SECTIONS)[number];
+
+function isSectionId(value: string | null): value is SectionId {
+  return value !== null && (SECTIONS as readonly string[]).includes(value);
+}
+
+export function OrgDetail({ slug }: OrgDetailProps) {
   const [data, setData] = useState<AnalyticsOrganizationDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { searchParams, set } = useUrlState();
+  const rawSection = searchParams.get("section");
+  const activeSection: SectionId = isSectionId(rawSection) ? rawSection : "activity";
 
   useEffect(() => {
     setLoading(true);
@@ -77,65 +88,129 @@ export function OrgDetail({ slug, onBack }: OrgDetailProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          <ArrowLeft className="mr-1 size-4" />
-          Back to all organisations
-        </Button>
-      </div>
-
       {loading && <div className="text-sm text-muted-foreground">Loading organisation…</div>}
       {error && <div className="text-sm text-destructive">{error}</div>}
 
       {data && (
         <>
-          <OrgHeader org={data} />
-          <PlanSummarySection org={data} />
-          <FactsSection facts={data.facts} />
-          <MembersSection members={data.members} />
-          <TrackedActionsSection actions={data.tracked_actions} />
+          <OrgTitleBar org={data} />
+          <KpiStrip
+            org={data}
+            activeSection={activeSection}
+            onSelect={(next) => set({ section: next === "activity" ? undefined : next })}
+          />
+          {activeSection === "activity" && (
+            <div className="space-y-6">
+              <OrgActivitySection slug={data.slug} companyId={data.id} companyName={data.name} />
+              <PlanSummarySection org={data} />
+            </div>
+          )}
+          {activeSection === "members" && <MembersSection members={data.members} />}
+          {activeSection === "actions" && <TrackedActionsSection actions={data.tracked_actions} />}
+          {activeSection === "facts" && <FactsSection facts={data.facts} />}
         </>
       )}
     </div>
   );
 }
 
-function OrgHeader({ org }: { org: AnalyticsOrganizationDetail }) {
+function OrgTitleBar({ org }: { org: AnalyticsOrganizationDetail }) {
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-3">
-        <h2 className="text-2xl font-semibold">{org.name}</h2>
-        <Badge variant="outline" className={cn("text-xs capitalize", STATUS_STYLES[org.status])}>
-          {org.status}
-        </Badge>
-        <Badge variant="outline" className="text-xs capitalize">
-          {org.subscription_tier}
-          {org.in_trial && <span className="ml-1 text-muted-foreground">· trial</span>}
-        </Badge>
-        <span className="text-xs text-muted-foreground">{org.slug}</span>
-      </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-        <Stat label="Members" value={org.member_count.toLocaleString()} />
-        <Stat label="Events" value={org.event_count.toLocaleString()} />
-        <Stat
-          label="Actions"
-          value={`${org.tracked_actions_completed}/${org.tracked_actions_total}`}
-          hint={org.tracked_actions_total > 0 ? formatPercent(org.completion_rate) : undefined}
-        />
-        <Stat label="Signed up" value={formatDate(org.signed_up_at)} />
-        <Stat label="Upgraded" value={formatDate(org.upgraded_at)} />
-        <Stat label="Last active" value={formatDateTime(org.last_active_at)} />
-      </div>
+    <div className="flex flex-wrap items-center gap-3">
+      <h1 className="text-2xl font-semibold tracking-tight">{org.name}</h1>
+      <Badge variant="outline" className={cn("text-xs capitalize", STATUS_STYLES[org.status])}>
+        {org.status}
+      </Badge>
+      <Badge variant="outline" className="text-xs capitalize">
+        {org.subscription_tier}
+        {org.in_trial && <span className="ml-1 text-muted-foreground">· trial</span>}
+      </Badge>
+      <span className="text-xs text-muted-foreground">{org.slug}</span>
+      <Link
+        href={`/manage/organisations/${encodeURIComponent(org.slug)}`}
+        className="ml-auto inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs hover:bg-muted"
+      >
+        Manage
+        <ExternalLink className="size-3" />
+      </Link>
     </div>
   );
 }
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+type KpiStripProps = {
+  org: AnalyticsOrganizationDetail;
+  activeSection: SectionId;
+  onSelect: (next: SectionId) => void;
+};
+
+function KpiStrip({ org, activeSection, onSelect }: KpiStripProps) {
   return (
-    <div className="rounded-md border p-3">
-      <div className="text-xs text-muted-foreground">{label}</div>
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <KpiTab
+        label="Activity"
+        value={org.event_count.toLocaleString()}
+        hint="events"
+        active={activeSection === "activity"}
+        onClick={() => onSelect("activity")}
+      />
+      <KpiTab
+        label="Members"
+        value={org.member_count.toLocaleString()}
+        active={activeSection === "members"}
+        onClick={() => onSelect("members")}
+      />
+      <KpiTab
+        label="Actions"
+        value={`${org.tracked_actions_completed}/${org.tracked_actions_total}`}
+        hint={org.tracked_actions_total > 0 ? formatPercent(org.completion_rate) : undefined}
+        active={activeSection === "actions"}
+        onClick={() => onSelect("actions")}
+      />
+      <KpiTab
+        label="Facts"
+        value={org.facts.length.toLocaleString()}
+        active={activeSection === "facts"}
+        onClick={() => onSelect("facts")}
+      />
+      <KpiInfo label="Last active" value={formatDateTime(org.last_active_at)} />
+    </div>
+  );
+}
+
+type KpiTabProps = {
+  label: string;
+  value: string;
+  hint?: string;
+  active: boolean;
+  onClick: () => void;
+};
+
+const KPI_TILE_BASE = "flex h-full min-h-[84px] flex-col items-start rounded-md border p-3 text-left";
+
+function KpiTab({ label, value, hint, active, onClick }: KpiTabProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        KPI_TILE_BASE,
+        "cursor-pointer transition-colors hover:bg-muted/50",
+        active && "border-primary/40 bg-primary/5 ring-1 ring-primary/20"
+      )}
+    >
+      <div className={cn("text-xs", active ? "text-primary" : "text-muted-foreground")}>{label}</div>
       <div className="mt-1 text-sm font-medium">{value}</div>
       {hint && <div className="text-xs text-muted-foreground">{hint}</div>}
+    </button>
+  );
+}
+
+function KpiInfo({ label, value }: { label: string; value: string }) {
+  return (
+    <div className={KPI_TILE_BASE}>
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="mt-1 text-sm font-medium">{value}</div>
     </div>
   );
 }
