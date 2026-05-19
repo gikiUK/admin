@@ -7,11 +7,13 @@ import {
   Download,
   GitBranch,
   Layers,
+  Lightbulb,
   ListOrdered,
   type LucideIcon,
   Settings,
   Sparkles,
   Table2,
+  Telescope,
   Users,
   Video,
   Zap
@@ -77,6 +79,18 @@ export const SIDEBAR_MENU: MenuSection[] = [
             label: "Actions",
             icon: Sparkles,
             matchPaths: ["/analytics/actions"]
+          },
+          {
+            href: "/analytics/insights/facts",
+            label: "Facts insights",
+            icon: Lightbulb,
+            matchPaths: ["/analytics/insights/facts"]
+          },
+          {
+            href: "/analytics/insights/plan",
+            label: "Plan insights",
+            icon: Telescope,
+            matchPaths: ["/analytics/insights/plan"]
           },
           {
             href: "/analytics/conversion",

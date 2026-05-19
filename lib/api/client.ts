@@ -41,6 +41,45 @@ export function buildQuery(params: Record<string, string | number | undefined | 
   return query ? `?${query}` : "";
 }
 
+/**
+ * POSTs a JSON body to an endpoint that returns a binary attachment (e.g. text/csv)
+ * and triggers a browser download. Uses cookie auth like apiFetch.
+ */
+export async function apiDownload(path: string, body: unknown, fallbackFilename: string): Promise<void> {
+  const res = await fetch(getApiUrl(path), {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "text/csv, application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const errBody = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
+    throw new ApiError(res.status, errBody.error?.message);
+  }
+
+  const blob = await res.blob();
+  const filename = filenameFromContentDisposition(res.headers.get("content-disposition")) ?? fallbackFilename;
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function filenameFromContentDisposition(header: string | null): string | null {
+  if (!header) return null;
+  const match = header.match(/filename="?([^";]+)"?/i);
+  return match ? match[1] : null;
+}
+
 export type Paginated<T> = {
   results: T[];
   meta: {
