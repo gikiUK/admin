@@ -10,6 +10,7 @@ import {
   ListOrdered,
   type LucideIcon,
   Settings,
+  Sparkles,
   Table2,
   Users,
   Video,
@@ -70,6 +71,12 @@ export const SIDEBAR_MENU: MenuSection[] = [
             label: "Orgs",
             icon: Building2,
             matchPaths: ["/analytics/orgs"]
+          },
+          {
+            href: "/analytics/actions",
+            label: "Actions",
+            icon: Sparkles,
+            matchPaths: ["/analytics/actions"]
           },
           {
             href: "/analytics/conversion",
