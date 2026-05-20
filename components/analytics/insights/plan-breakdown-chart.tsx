@@ -2,23 +2,16 @@
 
 import { X } from "lucide-react";
 import { useMemo } from "react";
-import { Bar, BarChart, Cell, LabelList, XAxis, YAxis } from "recharts";
+import { Cell, Pie, PieChart, Tooltip } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import type { PlanBreakdown } from "@/lib/analytics/insights/insights-api";
+import { ChartContainer } from "@/components/ui/chart";
+import type { PlanBreakdown, PlanBreakdownValue } from "@/lib/analytics/insights/insights-api";
 
 type Props = {
   breakdown: PlanBreakdown;
   onRemove?: () => void;
 };
-
-const CHART_CONFIG = {
-  count: { label: "Actions", color: "var(--primary)" }
-} satisfies ChartConfig;
-
-const BAR_HEIGHT = 24;
-const Y_AXIS_WIDTH = 200;
 
 export const METADATA_KEY_LABELS: Record<string, string> = {
   impact_opportunity: "Impact opportunity",
@@ -37,25 +30,52 @@ export const METADATA_KEY_LABELS: Record<string, string> = {
   opex_or_capex: "Opex / Capex"
 };
 
-function humanize(raw: string | number | boolean | null): string {
-  if (raw === null) return "(unset)";
-  if (typeof raw === "boolean") return raw ? "Yes" : "No";
-  const s = String(raw);
-  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const PIE_SIZE = 160;
+const UNSET_COLOR = "hsl(220, 8%, 60%)";
+
+// Distinct hues spread across the wheel; lifted into the muted range so charts stay calm.
+function sliceColor(index: number, total: number): string {
+  const hue = Math.round((index * 360) / Math.max(total, 1));
+  return `hsl(${hue}, 55%, 55%)`;
 }
 
-export function PlanBreakdownChart({ breakdown, onRemove }: Props) {
-  const data = useMemo(
-    () =>
-      breakdown.values.map((v) => ({
-        ...v,
-        label: humanize(v.value)
-      })),
-    [breakdown.values]
-  );
+function humanize(raw: PlanBreakdownValue["value"]): string {
+  if (raw === null) return "(unset)";
+  if (typeof raw === "boolean") return raw ? "Yes" : "No";
+  return String(raw)
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
-  const height = Math.max(data.length * BAR_HEIGHT + 32, 120);
+type Slice = {
+  key: string;
+  label: string;
+  count: number;
+  share: number;
+  fill: string;
+};
+
+export function PlanBreakdownChart({ breakdown, onRemove }: Props) {
+  const slices: Slice[] = useMemo(() => {
+    const sorted = [...breakdown.values].sort((a, b) => b.count - a.count);
+    const realSliceCount = sorted.filter((v) => v.value !== null).length;
+    let colorIndex = 0;
+
+    return sorted.map((v) => {
+      const isUnset = v.value === null;
+      const fill = isUnset ? UNSET_COLOR : sliceColor(colorIndex++, realSliceCount);
+      return {
+        key: String(v.value),
+        label: humanize(v.value),
+        count: v.count,
+        share: v.share,
+        fill
+      };
+    });
+  }, [breakdown.values]);
+
   const title = METADATA_KEY_LABELS[breakdown.key] ?? breakdown.key;
+  const hasData = slices.length > 0 && slices.some((s) => s.count > 0);
 
   return (
     <Card>
@@ -75,45 +95,65 @@ export function PlanBreakdownChart({ breakdown, onRemove }: Props) {
         )}
       </CardHeader>
       <CardContent>
-        {data.length === 0 ? (
+        {!hasData ? (
           <div className="text-xs text-muted-foreground">No data.</div>
         ) : (
-          <ChartContainer config={CHART_CONFIG} className="w-full" style={{ height }}>
-            <BarChart layout="vertical" data={data} margin={{ top: 0, right: 64, left: 0, bottom: 0 }}>
-              <XAxis type="number" hide allowDecimals={false} />
-              <YAxis
-                type="category"
-                dataKey="label"
-                tickLine={false}
-                axisLine={false}
-                width={Y_AXIS_WIDTH}
-                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
-                interval={0}
-              />
-              <ChartTooltip cursor={{ fill: "var(--muted)" }} content={<ChartTooltipContent indicator="line" />} />
-              <Bar dataKey="count" radius={[3, 3, 3, 3]}>
-                {data.map((row) => (
-                  <Cell
-                    key={String(row.value)}
-                    fill={row.value === null ? "var(--muted-foreground)" : "var(--color-count)"}
-                  />
-                ))}
-                <LabelList
+          <div className="flex items-center gap-4">
+            <ChartContainer config={{}} className="shrink-0" style={{ width: PIE_SIZE, height: PIE_SIZE }}>
+              <PieChart>
+                <Pie
+                  data={slices}
                   dataKey="count"
-                  position="right"
-                  offset={6}
-                  fontSize={11}
-                  fill="var(--muted-foreground)"
-                  formatter={(value) => {
-                    if (typeof value !== "number") return value;
-                    const row = data.find((d) => d.count === value);
-                    const share = row ? `${(row.share * 100).toFixed(0)}%` : "";
-                    return `${value} (${share})`;
+                  nameKey="label"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={PIE_SIZE * 0.28}
+                  outerRadius={PIE_SIZE * 0.46}
+                  strokeWidth={1}
+                  stroke="var(--background)"
+                  isAnimationActive={false}
+                >
+                  {slices.map((slice) => (
+                    <Cell key={slice.key} fill={slice.fill} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  cursor={false}
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const slice = payload[0].payload as Slice;
+                    return (
+                      <div className="rounded-md border bg-popover px-2 py-1 text-xs shadow-md">
+                        <div className="font-medium">{slice.label}</div>
+                        <div className="text-muted-foreground">
+                          {slice.count} ({(slice.share * 100).toFixed(1)}%)
+                        </div>
+                      </div>
+                    );
                   }}
                 />
-              </Bar>
-            </BarChart>
-          </ChartContainer>
+              </PieChart>
+            </ChartContainer>
+
+            <ul className="flex-1 space-y-1 overflow-y-auto pr-1 text-xs" style={{ maxHeight: PIE_SIZE }}>
+              {slices.map((slice) => (
+                <li key={slice.key} className="flex items-center gap-2">
+                  <span
+                    className="inline-block size-2.5 shrink-0 rounded-sm"
+                    style={{ backgroundColor: slice.fill }}
+                    aria-hidden
+                  />
+                  <span className="flex-1 truncate" title={slice.label}>
+                    {slice.label}
+                  </span>
+                  <span className="tabular-nums text-foreground">{slice.count}</span>
+                  <span className="w-10 text-right tabular-nums text-muted-foreground">
+                    {(slice.share * 100).toFixed(0)}%
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </CardContent>
     </Card>

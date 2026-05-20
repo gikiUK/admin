@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CohortBuilder } from "@/components/analytics/insights/cohort-builder";
+import { CohortSummaryPill } from "@/components/analytics/insights/cohort-summary-pill";
 import { CsvDownloadButton } from "@/components/analytics/insights/csv-download-button";
 import { PlanBreakdownGrid } from "@/components/analytics/insights/plan-breakdown-grid";
 import { PlanFilters } from "@/components/analytics/insights/plan-filters";
@@ -35,6 +35,8 @@ export default function PlanInsightsPage() {
     [spec, includeCustom, preGiki, statusFilter]
   );
 
+  const cohortSize = overview.status === "ready" ? overview.data.cohort_size : undefined;
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -50,7 +52,7 @@ export default function PlanInsightsPage() {
         }
       />
 
-      <CohortBuilder />
+      <CohortSummaryPill cohortSize={cohortSize} />
 
       <PlanFilters
         includeCustom={includeCustom}

@@ -67,6 +67,15 @@ export function deleteCompany(slug: string): Promise<Record<string, never>> {
   });
 }
 
+/**
+ * Returns the universe of tags currently in use across all companies. Backed by
+ * GET /admin/tags in the Rails API; the frontend tolerates a 404 in case the
+ * endpoint isn't deployed yet and falls back to free-text entry.
+ */
+export function fetchTags(): Promise<{ tags: string[] }> {
+  return apiFetch<{ tags: string[] }>("/admin/tags");
+}
+
 export function addOrgTag(slug: string, tag: string): Promise<{ company: ManagedCompany }> {
   return apiFetch<{ company: ManagedCompany }>(`/admin/companies/${encodeURIComponent(slug)}/tags`, {
     method: "POST",

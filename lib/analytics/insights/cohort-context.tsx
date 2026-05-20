@@ -2,13 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { createContext, type ReactNode, useCallback, useContext, useMemo } from "react";
-import {
-  type CohortSpec,
-  DEFAULT_COHORT_SPEC,
-  decodeCohortSpec,
-  encodeCohortSpec,
-  isEmptySpec
-} from "@/lib/analytics/insights/cohort-spec";
+import { type CohortSpec, decodeCohortSpec, encodeCohortSpec } from "@/lib/analytics/insights/cohort-spec";
 
 type CohortContextValue = {
   spec: CohortSpec;
@@ -28,18 +22,22 @@ export function CohortProvider({ children }: { children: ReactNode }) {
   const setSpec = useCallback(
     (next: CohortSpec) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (isEmptySpec(next)) {
-        params.delete("cohort");
-      } else {
-        params.set("cohort", encodeCohortSpec(next));
-      }
-      const query = params.toString();
-      router.replace(query ? `?${query}` : "?", { scroll: false });
+      // Always serialize the spec — even when "empty" — so that explicit user removals
+      // (e.g. clearing the default "qa" tags_exclude) survive a reload. Falling back to
+      // DEFAULT_COHORT_SPEC happens only when there's no ?cohort param at all.
+      params.set("cohort", encodeCohortSpec(next));
+      router.replace(`?${params.toString()}`, { scroll: false });
     },
     [router, searchParams]
   );
 
-  const reset = useCallback(() => setSpec(DEFAULT_COHORT_SPEC), [setSpec]);
+  // Reset clears the URL param entirely so the next read falls back to DEFAULT_COHORT_SPEC.
+  const reset = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("cohort");
+    const query = params.toString();
+    router.replace(query ? `?${query}` : "?", { scroll: false });
+  }, [router, searchParams]);
 
   return <CohortContext.Provider value={{ spec, setSpec, reset }}>{children}</CohortContext.Provider>;
 }

@@ -1,12 +1,15 @@
 "use client";
 
 import { ChevronsUpDown, Plus } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FactBreakdownChart } from "@/components/analytics/insights/fact-breakdown-chart";
+import { NotableDifferences } from "@/components/analytics/insights/notable-differences";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
+import { isEmptySpec } from "@/lib/analytics/insights/cohort-spec";
+import { useBaselineFactsBreakdown } from "@/lib/analytics/insights/use-baseline-facts-breakdown";
 import { useFactsBreakdown } from "@/lib/analytics/insights/use-facts-breakdown";
 import { useLiveDataset } from "@/lib/analytics/use-live-dataset";
 
@@ -18,6 +21,16 @@ export function FactsBreakdownGrid() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const { data: dataset } = useLiveDataset();
   const state = useFactsBreakdown(spec, factKeys);
+  const baselineState = useBaselineFactsBreakdown(factKeys);
+
+  // Only show the baseline overlay when the cohort actually differs from the baseline
+  // (otherwise the two bars overlap and it just looks like clutter).
+  const showBaseline = !isEmptySpec(spec);
+
+  const baselineByKey = useMemo(() => {
+    if (baselineState.status !== "ready") return new Map();
+    return new Map(baselineState.data.breakdowns.map((b) => [b.key, b]));
+  }, [baselineState]);
 
   function addKey(key: string) {
     if (!factKeys.includes(key)) setFactKeys([...factKeys, key]);
@@ -30,8 +43,19 @@ export function FactsBreakdownGrid() {
 
   return (
     <div className="space-y-3">
+      {showBaseline && state.status === "ready" && baselineState.status === "ready" && (
+        <NotableDifferences cohort={state.data.breakdowns} baseline={baselineState.data.breakdowns} />
+      )}
+
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold tracking-tight">Fact breakdowns</h2>
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Fact breakdowns</h2>
+          {showBaseline && (
+            <p className="text-xs text-muted-foreground">
+              Bars show how the cohort differs from the all-orgs baseline (percentage points). Click a bar to filter.
+            </p>
+          )}
+        </div>
         <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm">
@@ -77,7 +101,12 @@ export function FactsBreakdownGrid() {
       {state.status === "ready" && state.data.breakdowns.length > 0 && (
         <div className="grid gap-3 md:grid-cols-2">
           {state.data.breakdowns.map((breakdown) => (
-            <FactBreakdownChart key={breakdown.key} breakdown={breakdown} onRemove={() => removeKey(breakdown.key)} />
+            <FactBreakdownChart
+              key={breakdown.key}
+              breakdown={breakdown}
+              baseline={showBaseline ? baselineByKey.get(breakdown.key) : undefined}
+              onRemove={() => removeKey(breakdown.key)}
+            />
           ))}
         </div>
       )}

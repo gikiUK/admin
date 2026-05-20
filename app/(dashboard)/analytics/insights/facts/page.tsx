@@ -1,6 +1,6 @@
 "use client";
 
-import { CohortBuilder } from "@/components/analytics/insights/cohort-builder";
+import { CohortSummaryPill } from "@/components/analytics/insights/cohort-summary-pill";
 import { CsvDownloadButton } from "@/components/analytics/insights/csv-download-button";
 import { FactsBreakdownGrid } from "@/components/analytics/insights/facts-breakdown-grid";
 import { InsightsKpiStrip } from "@/components/analytics/insights/insights-kpi-strip";
@@ -11,6 +11,9 @@ import { useCohortSummary } from "@/lib/analytics/insights/use-cohort-summary";
 export default function FactsInsightsPage() {
   const { spec } = useCohort();
   const summary = useCohortSummary(spec);
+
+  const cohortSize = summary.status === "ready" ? summary.data.cohort_size : undefined;
+  const totalOrgs = summary.status === "ready" ? summary.data.total_orgs_in_db : undefined;
 
   return (
     <div className="space-y-6">
@@ -27,7 +30,7 @@ export default function FactsInsightsPage() {
         }
       />
 
-      <CohortBuilder />
+      <CohortSummaryPill cohortSize={cohortSize} totalOrgs={totalOrgs} />
 
       {summary.status === "loading" && <div className="text-sm text-muted-foreground">Loading cohort summary…</div>}
       {summary.status === "error" && <div className="text-sm text-destructive">{summary.message}</div>}
