@@ -25,7 +25,7 @@ export function getApiUrl(path: string): string {
 
 const FRONTEND_URL = {
   development: process.env.NEXT_PUBLIC_FRONTEND_URL || "http://local.gikiactions.com:3111",
-  production: process.env.NEXT_PUBLIC_FRONTEND_URL || "https://gikiactions.com"
+  production: process.env.NEXT_PUBLIC_FRONTEND_URL || "https://new.gikiactions.com"
 } as const;
 
 export function getFrontendUrl(path: string): string {
