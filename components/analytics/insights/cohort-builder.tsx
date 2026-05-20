@@ -109,9 +109,7 @@ export function CohortBuilder({ embedded = false }: Props = {}) {
               <Input
                 type="date"
                 value={spec.org_filters.signed_up_from?.slice(0, 10) ?? ""}
-                onChange={(e) =>
-                  updateOrg({ signed_up_from: e.target.value ? new Date(e.target.value).toISOString() : undefined })
-                }
+                onChange={(e) => updateOrg({ signed_up_from: e.target.value || undefined })}
                 className="h-8 text-sm"
               />
             </div>
@@ -120,9 +118,7 @@ export function CohortBuilder({ embedded = false }: Props = {}) {
               <Input
                 type="date"
                 value={spec.org_filters.signed_up_to?.slice(0, 10) ?? ""}
-                onChange={(e) =>
-                  updateOrg({ signed_up_to: e.target.value ? new Date(e.target.value).toISOString() : undefined })
-                }
+                onChange={(e) => updateOrg({ signed_up_to: e.target.value || undefined })}
                 className="h-8 text-sm"
               />
             </div>

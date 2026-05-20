@@ -33,6 +33,9 @@ export default function FactsInsightsPage() {
       <CohortSummaryPill cohortSize={cohortSize} totalOrgs={totalOrgs} />
 
       {summary.status === "loading" && <div className="text-sm text-muted-foreground">Loading cohort summary…</div>}
+      {summary.status === "pending-backend" && (
+        <div className="text-sm text-muted-foreground">Cohort summary endpoint isn't available yet.</div>
+      )}
       {summary.status === "error" && <div className="text-sm text-destructive">{summary.message}</div>}
       {summary.status === "ready" && <InsightsKpiStrip data={summary.data} />}
 

@@ -64,6 +64,9 @@ export default function PlanInsightsPage() {
       />
 
       {overview.status === "loading" && <div className="text-sm text-muted-foreground">Loading plan summary…</div>}
+      {overview.status === "pending-backend" && (
+        <div className="text-sm text-muted-foreground">Plan summary endpoint isn't available yet.</div>
+      )}
       {overview.status === "error" && <div className="text-sm text-destructive">{overview.message}</div>}
       {overview.status === "ready" && (
         <>

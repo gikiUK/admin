@@ -14,15 +14,20 @@ type Props = {
   onChange: (next: string[]) => void;
 };
 
+const WORKSHOP_PAGE_SIZE = 200;
+
 export function WorkshopPicker({ selectedUuids, onChange }: Props) {
   const [workshops, setWorkshops] = useState<Workshop[] | null>(null);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    fetchWorkshops(1, 200)
+    fetchWorkshops(1, WORKSHOP_PAGE_SIZE)
       .then((res) => {
-        if (!cancelled) setWorkshops(res.workshops);
+        if (cancelled) return;
+        setWorkshops(res.workshops);
+        setTotalCount(res.meta.total_count);
       })
       .catch(() => {
         if (!cancelled) setWorkshops([]);
@@ -31,6 +36,8 @@ export function WorkshopPicker({ selectedUuids, onChange }: Props) {
       cancelled = true;
     };
   }, []);
+
+  const truncated = totalCount !== null && workshops !== null && totalCount > workshops.length;
 
   const selectedWorkshops = useMemo(() => {
     if (!workshops) return [];
@@ -93,6 +100,11 @@ export function WorkshopPicker({ selectedUuids, onChange }: Props) {
                   </CommandGroup>
                 )}
               </CommandList>
+              {truncated && (
+                <div className="border-t px-2 py-1.5 text-[11px] text-muted-foreground">
+                  Showing {workshops?.length} of {totalCount} workshops (most recent first).
+                </div>
+              )}
             </Command>
           </PopoverContent>
         </Popover>
