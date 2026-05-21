@@ -45,7 +45,8 @@ export function decodeCohortSpec(encoded: string | null): CohortSpec {
       org_filters: parsed.org_filters ?? {},
       fact_filters: parsed.fact_filters ?? []
     };
-  } catch {
+  } catch (err) {
+    console.warn("Failed to decode cohort spec from URL, falling back to default", err);
     return DEFAULT_COHORT_SPEC;
   }
 }

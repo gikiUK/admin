@@ -47,7 +47,8 @@ export function ForestPlot({ factors }: Props) {
   const height = TOP_PADDING + BOTTOM_PADDING + factors.length * ROW_HEIGHT;
 
   const xScale = (value: number) => {
-    const t = (value - domainMin) / (domainMax - domainMin);
+    const span = domainMax - domainMin;
+    const t = span > 0 ? (value - domainMin) / span : 0.5;
     return plotLeft + t * (plotRight - plotLeft);
   };
 
