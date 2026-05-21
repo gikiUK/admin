@@ -3,6 +3,7 @@
 import { ChevronsUpDown, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { FactBreakdownChart } from "@/components/analytics/insights/fact-breakdown-chart";
+import { FactsBreakdownGridSkeleton } from "@/components/analytics/insights/insights-skeletons";
 import { NotableDifferences } from "@/components/analytics/insights/notable-differences";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -95,7 +96,7 @@ export function FactsBreakdownGrid() {
         </Popover>
       </div>
 
-      {state.status === "loading" && <div className="text-sm text-muted-foreground">Loading breakdowns…</div>}
+      {state.status === "loading" && <FactsBreakdownGridSkeleton count={factKeys.length} />}
       {state.status === "error" && <div className="text-sm text-destructive">{state.message}</div>}
       {state.status === "ready" && state.data.breakdowns.length === 0 && (
         <div className="text-sm text-muted-foreground">No facts selected. Click “Add fact”.</div>

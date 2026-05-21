@@ -2,6 +2,7 @@
 
 import { ChevronsUpDown, Plus } from "lucide-react";
 import { useState } from "react";
+import { PlanBreakdownGridSkeleton } from "@/components/analytics/insights/insights-skeletons";
 import { METADATA_KEY_LABELS, PlanBreakdownChart } from "@/components/analytics/insights/plan-breakdown-chart";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -72,7 +73,7 @@ export function PlanBreakdownGrid({ includeCustom, preGiki, statusFilter }: Prop
         </Popover>
       </div>
 
-      {state.status === "loading" && <div className="text-sm text-muted-foreground">Loading breakdowns…</div>}
+      {state.status === "loading" && <PlanBreakdownGridSkeleton count={metadataKeys.length} />}
       {state.status === "error" && <div className="text-sm text-destructive">{state.message}</div>}
       {state.status === "ready" && state.data.breakdowns.length === 0 && (
         <div className="text-sm text-muted-foreground">No fields selected. Click “Add field”.</div>

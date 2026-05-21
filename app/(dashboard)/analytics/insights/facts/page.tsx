@@ -4,6 +4,7 @@ import { CohortSummaryPill } from "@/components/analytics/insights/cohort-summar
 import { CsvDownloadButton } from "@/components/analytics/insights/csv-download-button";
 import { FactsBreakdownGrid } from "@/components/analytics/insights/facts-breakdown-grid";
 import { InsightsKpiStrip } from "@/components/analytics/insights/insights-kpi-strip";
+import { KpiStripSkeleton } from "@/components/analytics/insights/insights-skeletons";
 import { PageHeader } from "@/components/page-header";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import { useCohortSummary } from "@/lib/analytics/insights/use-cohort-summary";
@@ -32,7 +33,7 @@ export default function FactsInsightsPage() {
 
       <CohortSummaryPill cohortSize={cohortSize} totalOrgs={totalOrgs} />
 
-      {summary.status === "loading" && <div className="text-sm text-muted-foreground">Loading cohort summary…</div>}
+      {summary.status === "loading" && <KpiStripSkeleton />}
       {summary.status === "pending-backend" && (
         <div className="text-sm text-muted-foreground">Cohort summary endpoint isn't available yet.</div>
       )}

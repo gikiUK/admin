@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { CohortSummaryPill } from "@/components/analytics/insights/cohort-summary-pill";
 import { CsvDownloadButton } from "@/components/analytics/insights/csv-download-button";
+import { KpiStripSkeleton, PlanStatusChartSkeleton } from "@/components/analytics/insights/insights-skeletons";
 import { PlanBreakdownGrid } from "@/components/analytics/insights/plan-breakdown-grid";
 import { PlanFilters } from "@/components/analytics/insights/plan-filters";
 import { PlanKpiStrip } from "@/components/analytics/insights/plan-kpi-strip";
@@ -63,7 +64,12 @@ export default function PlanInsightsPage() {
         onStatusFilterChange={setStatusFilter}
       />
 
-      {overview.status === "loading" && <div className="text-sm text-muted-foreground">Loading plan summary…</div>}
+      {overview.status === "loading" && (
+        <>
+          <KpiStripSkeleton />
+          <PlanStatusChartSkeleton />
+        </>
+      )}
       {overview.status === "pending-backend" && (
         <div className="text-sm text-muted-foreground">Plan summary endpoint isn't available yet.</div>
       )}
