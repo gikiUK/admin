@@ -81,7 +81,7 @@ function filenameFromContentDisposition(header: string | null): string | null {
   return sanitizeFilename(match[1]);
 }
 
-function sanitizeFilename(raw: string): string | null {
+export function sanitizeFilename(raw: string): string | null {
   // biome-ignore lint/suspicious/noControlCharactersInRegex: stripping control chars is the point
   const stripped = raw.replace(/[\\/\x00-\x1f]/g, "").trim();
   if (!stripped) return null;

@@ -62,6 +62,9 @@ export function CohortProvider({ children }: { children: ReactNode }) {
     pendingEncodedRef.current = null;
     writeStoredEncoded(encoded);
     setStoredEncoded(encoded);
+    // Read window.location.search (not searchParams) so we merge against the
+    // browser's current URL — searchParams is captured at render time and may
+    // be stale by the time this debounced callback fires.
     const params = new URLSearchParams(window.location.search);
     params.set("cohort", encoded);
     router.replace(`?${params.toString()}`, { scroll: false });
