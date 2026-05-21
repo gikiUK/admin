@@ -2,15 +2,18 @@
 
 import { ChevronsUpDown, Plus } from "lucide-react";
 import { useState } from "react";
+import { PlanBreakdownGridSkeleton } from "@/components/analytics/insights/insights-skeletons";
 import { METADATA_KEY_LABELS, PlanBreakdownChart } from "@/components/analytics/insights/plan-breakdown-chart";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import type { PreGikiFilter } from "@/lib/analytics/insights/insights-api";
+import { usePersistentKeys } from "@/lib/analytics/insights/use-persistent-keys";
 import { usePlanBreakdown } from "@/lib/analytics/insights/use-plan-breakdown";
 
 const DEFAULT_METADATA_KEYS = ["impact_opportunity", "cost_saving_potential", "ghg_scope", "theme"];
+const METADATA_KEYS_STORAGE_KEY = "giki:insights:plan:metadata-keys";
 
 const ALL_KEYS = Object.keys(METADATA_KEY_LABELS);
 
@@ -22,7 +25,7 @@ type Props = {
 
 export function PlanBreakdownGrid({ includeCustom, preGiki, statusFilter }: Props) {
   const { spec } = useCohort();
-  const [metadataKeys, setMetadataKeys] = useState<string[]>(DEFAULT_METADATA_KEYS);
+  const [metadataKeys, setMetadataKeys] = usePersistentKeys(METADATA_KEYS_STORAGE_KEY, DEFAULT_METADATA_KEYS);
   const [pickerOpen, setPickerOpen] = useState(false);
   const state = usePlanBreakdown(spec, {
     metadata_keys: metadataKeys,
@@ -70,7 +73,7 @@ export function PlanBreakdownGrid({ includeCustom, preGiki, statusFilter }: Prop
         </Popover>
       </div>
 
-      {state.status === "loading" && <div className="text-sm text-muted-foreground">Loading breakdowns…</div>}
+      {state.status === "loading" && <PlanBreakdownGridSkeleton count={metadataKeys.length} />}
       {state.status === "error" && <div className="text-sm text-destructive">{state.message}</div>}
       {state.status === "ready" && state.data.breakdowns.length === 0 && (
         <div className="text-sm text-muted-foreground">No fields selected. Click “Add field”.</div>

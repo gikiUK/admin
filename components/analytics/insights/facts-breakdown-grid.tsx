@@ -3,6 +3,7 @@
 import { ChevronsUpDown, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { FactBreakdownChart } from "@/components/analytics/insights/fact-breakdown-chart";
+import { FactsBreakdownGridSkeleton } from "@/components/analytics/insights/insights-skeletons";
 import { NotableDifferences } from "@/components/analytics/insights/notable-differences";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -11,13 +12,15 @@ import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import { isEmptySpec } from "@/lib/analytics/insights/cohort-spec";
 import { useBaselineFactsBreakdown } from "@/lib/analytics/insights/use-baseline-facts-breakdown";
 import { useFactsBreakdown } from "@/lib/analytics/insights/use-facts-breakdown";
+import { usePersistentKeys } from "@/lib/analytics/insights/use-persistent-keys";
 import { useLiveDataset } from "@/lib/analytics/use-live-dataset";
 
 const DEFAULT_FACT_KEYS = ["size", "industries", "measures_emissions", "has_reduction_targets"];
+const FACT_KEYS_STORAGE_KEY = "giki:insights:facts:keys";
 
 export function FactsBreakdownGrid() {
   const { spec } = useCohort();
-  const [factKeys, setFactKeys] = useState<string[]>(DEFAULT_FACT_KEYS);
+  const [factKeys, setFactKeys] = usePersistentKeys(FACT_KEYS_STORAGE_KEY, DEFAULT_FACT_KEYS);
   const [pickerOpen, setPickerOpen] = useState(false);
   const { data: dataset } = useLiveDataset();
   const state = useFactsBreakdown(spec, factKeys);
@@ -93,7 +96,7 @@ export function FactsBreakdownGrid() {
         </Popover>
       </div>
 
-      {state.status === "loading" && <div className="text-sm text-muted-foreground">Loading breakdowns…</div>}
+      {state.status === "loading" && <FactsBreakdownGridSkeleton count={factKeys.length} />}
       {state.status === "error" && <div className="text-sm text-destructive">{state.message}</div>}
       {state.status === "ready" && state.data.breakdowns.length === 0 && (
         <div className="text-sm text-muted-foreground">No facts selected. Click “Add fact”.</div>

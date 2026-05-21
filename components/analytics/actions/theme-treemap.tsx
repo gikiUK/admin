@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Tooltip, Treemap } from "recharts";
+import { ResponsiveContainer, Tooltip, Treemap } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ActionLeaderboardRow } from "@/lib/analytics/actions-api";
 
@@ -77,58 +77,60 @@ export function ThemeTreemap({ rows }: Props) {
       </CardHeader>
       <CardContent>
         <div style={{ width: "100%", height: 360 }}>
-          <Treemap
-            width={720}
-            height={360}
-            data={tiles}
-            dataKey="size"
-            stroke="var(--background)"
-            content={<TreemapTile />}
-            isAnimationActive={false}
-          >
-            <Tooltip
-              content={({ active, payload }) => {
-                if (!active || !payload?.length) return null;
-                const tile = payload[0].payload as TileDatum;
-                return (
-                  <div className="rounded-md border bg-popover px-3 py-2 text-xs shadow-md">
-                    <div className="font-medium">{tile.name}</div>
-                    <div className="text-muted-foreground">{tile.theme}</div>
-                    <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-muted-foreground">
-                      <span>Adoption</span>
-                      <span className="text-right text-foreground">{tile.adoption_count}</span>
-                      <span>Completed</span>
-                      <span className="text-right text-foreground">{tile.completion_count}</span>
-                      <span>Completion</span>
-                      <span className="text-right text-foreground">{(tile.completion_rate * 100).toFixed(1)}%</span>
+          <ResponsiveContainer width="100%" height="100%">
+            <Treemap
+              data={tiles}
+              dataKey="size"
+              stroke="var(--background)"
+              content={<TreemapTile />}
+              isAnimationActive={false}
+            >
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload?.length) return null;
+                  const tile = payload[0].payload as TileDatum;
+                  return (
+                    <div className="rounded-md border bg-popover px-3 py-2 text-xs shadow-md">
+                      <div className="font-medium">{tile.name}</div>
+                      <div className="text-muted-foreground">{tile.theme}</div>
+                      <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-muted-foreground">
+                        <span>Adoption</span>
+                        <span className="text-right text-foreground">{tile.adoption_count}</span>
+                        <span>Completed</span>
+                        <span className="text-right text-foreground">{tile.completion_count}</span>
+                        <span>Completion</span>
+                        <span className="text-right text-foreground">{(tile.completion_rate * 100).toFixed(1)}%</span>
+                      </div>
                     </div>
-                  </div>
-                );
-              }}
-            />
-          </Treemap>
+                  );
+                }}
+              />
+            </Treemap>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-type TileProps = {
+// In Recharts 3, custom Treemap content receives a TreemapNode whose data fields
+// (size/completion_rate/adoption_count/etc.) are spread onto the node itself —
+// not nested under `payload` as in v2.
+type TileProps = Partial<TileDatum> & {
   x?: number;
   y?: number;
   width?: number;
   height?: number;
-  index?: number;
-  payload?: TileDatum;
-  name?: string;
+  depth?: number;
 };
 
 function TreemapTile(props: TileProps) {
-  const { x = 0, y = 0, width = 0, height = 0, payload, name } = props;
-  if (!payload || width <= 0 || height <= 0) return null;
+  const { x = 0, y = 0, width = 0, height = 0, depth, name, completion_rate, adoption_count } = props;
+  if (width <= 0 || height <= 0 || depth === 0) return null;
+  if (completion_rate === undefined || adoption_count === undefined) return null;
 
   const showLabel = width > 70 && height > 32;
-  const fill = completionColor(payload.completion_rate);
+  const fill = completionColor(completion_rate);
 
   return (
     <g>
@@ -139,7 +141,7 @@ function TreemapTile(props: TileProps) {
             {truncate(name ?? "", Math.floor(width / 7))}
           </text>
           <text x={x + 6} y={y + 28} fontSize={10} fill="white" fillOpacity={0.85}>
-            {payload.adoption_count} · {(payload.completion_rate * 100).toFixed(0)}%
+            {adoption_count} · {(completion_rate * 100).toFixed(0)}%
           </text>
         </>
       )}
