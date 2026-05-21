@@ -17,7 +17,7 @@ type Props = {
   onRemove: () => void;
 };
 
-type OptionPair = { value: string; label: string };
+type OptionPair = { value: string | number; label: string };
 
 export function FactFilterRow({ filter, dataset, onChange, onRemove }: Props) {
   const [keyOpen, setKeyOpen] = useState(false);
@@ -33,25 +33,28 @@ export function FactFilterRow({ filter, dataset, onChange, onRemove }: Props) {
     if (question.options?.length) {
       return question.options.map((o) => ({ value: o.value, label: o.label }));
     }
-    if (question.options_ref && dataset.data.constants[question.options_ref]) {
-      return dataset.data.constants[question.options_ref]
+    // Constant-backed facts store the numeric id in answers, so use id (not name) as the filter value.
+    const factKey = question.fact;
+    const fact = factKey ? dataset.data.facts[factKey] : undefined;
+    const valuesRef = fact?.values_ref ?? question.options_ref;
+    if (valuesRef && dataset.data.constants[valuesRef]) {
+      return dataset.data.constants[valuesRef]
         .filter((c) => c.enabled)
-        .map((c) => ({ value: c.name, label: c.label ?? c.name }));
+        .map((c) => ({ value: c.id, label: c.label ?? c.name }));
     }
     return [];
   }, [dataset, question]);
 
-  const selectedValues = filter.values.map(String);
+  const selectedKeys = filter.values.map(String);
 
   function setKey(key: string) {
     onChange({ key, values: [] });
     setKeyOpen(false);
   }
 
-  function toggleValue(value: string) {
-    const next = selectedValues.includes(value)
-      ? selectedValues.filter((v) => v !== value)
-      : [...selectedValues, value];
+  function toggleValue(value: string | number | boolean) {
+    const k = String(value);
+    const next = selectedKeys.includes(k) ? filter.values.filter((v) => String(v) !== k) : [...filter.values, value];
     onChange({ key: filter.key, values: next });
   }
 
@@ -95,10 +98,11 @@ export function FactFilterRow({ filter, dataset, onChange, onRemove }: Props) {
       <span className="text-xs text-muted-foreground">is any of</span>
 
       <div className="flex flex-wrap items-center gap-1">
-        {selectedValues.map((value) => {
-          const label = options.find((o) => o.value === value)?.label ?? value;
+        {filter.values.map((value) => {
+          const k = String(value);
+          const label = options.find((o) => String(o.value) === k)?.label ?? k;
           return (
-            <Badge key={value} variant="secondary" className="gap-1 pl-2 pr-1">
+            <Badge key={k} variant="secondary" className="gap-1 pl-2 pr-1">
               {label}
               <button
                 type="button"
@@ -129,9 +133,10 @@ export function FactFilterRow({ filter, dataset, onChange, onRemove }: Props) {
                   ) : (
                     <CommandGroup>
                       {options.map((opt) => {
-                        const isSelected = selectedValues.includes(opt.value);
+                        const optKey = String(opt.value);
+                        const isSelected = selectedKeys.includes(optKey);
                         return (
-                          <CommandItem key={opt.value} value={opt.label} onSelect={() => toggleValue(opt.value)}>
+                          <CommandItem key={optKey} value={opt.label} onSelect={() => toggleValue(opt.value)}>
                             <Check className={cn("size-4", isSelected ? "opacity-100" : "opacity-0")} />
                             <span>{opt.label}</span>
                           </CommandItem>

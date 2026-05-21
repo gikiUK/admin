@@ -7,6 +7,7 @@ import { CohortBuilder } from "@/components/analytics/insights/cohort-builder";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { makeFactFormatter } from "@/lib/analytics/fact-formatter";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import { isEmptySpec } from "@/lib/analytics/insights/cohort-spec";
 import { useLiveDataset } from "@/lib/analytics/use-live-dataset";
@@ -136,15 +137,12 @@ function buildChips(spec: ReturnType<typeof useCohort>["spec"], dataset: Dataset
     chips.push({ id: "tracked", label: "Tracked actions", value: "No" });
   }
 
+  const formatter = dataset ? makeFactFormatter(dataset.data) : null;
   for (const f of spec.fact_filters) {
     if (!f.key || f.values.length === 0) continue;
     const q = dataset?.data.questions.find((qq) => qq.key === f.key);
-    const optionPairs = q?.options?.length
-      ? q.options
-      : q?.options_ref
-        ? (dataset?.data.constants[q.options_ref] ?? []).map((c) => ({ value: c.name, label: c.label ?? c.name }))
-        : [];
-    const valueLabels = f.values.map((v) => optionPairs.find((o) => o.value === v)?.label ?? String(v));
+    const factKey = q?.fact ?? f.key;
+    const valueLabels = f.values.map((v) => (formatter ? formatter(factKey, v).valueLabel : String(v)));
     chips.push({
       id: `fact:${f.key}`,
       label: q?.label ?? f.key,

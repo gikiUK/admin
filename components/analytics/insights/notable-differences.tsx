@@ -3,6 +3,7 @@
 import { ArrowDown, ArrowUp, TrendingUp } from "lucide-react";
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { makeFactFormatter } from "@/lib/analytics/fact-formatter";
 import type { FactBreakdown } from "@/lib/analytics/insights/insights-api";
 import { useLiveDataset } from "@/lib/analytics/use-live-dataset";
 
@@ -31,6 +32,7 @@ export function NotableDifferences({ cohort, baseline, maxItems = 3 }: Props) {
   const highlights = useMemo(() => {
     if (baseline.length === 0) return [];
     const baselineByKey = new Map(baseline.map((b) => [b.key, b]));
+    const formatter = dataset ? makeFactFormatter(dataset.data) : null;
     const results: Highlight[] = [];
 
     for (const breakdown of cohort) {
@@ -38,15 +40,7 @@ export function NotableDifferences({ cohort, baseline, maxItems = 3 }: Props) {
       if (!baselineMatch) continue;
 
       const question = dataset?.data.questions.find((q) => q.key === breakdown.key);
-      const optionPairs = question?.options?.length
-        ? question.options
-        : question?.options_ref
-          ? (dataset?.data.constants[question.options_ref] ?? []).map((c) => ({
-              value: c.name,
-              label: c.label ?? c.name
-            }))
-          : [];
-      const labelLookup = new Map(optionPairs.map((o) => [String(o.value), o.label]));
+      const factKey = question?.fact ?? breakdown.key;
       const factLabel = question?.label ?? breakdown.key;
 
       const baselineShareByValue = new Map(baselineMatch.values.map((v) => [keyOf(v.value), v.share]));
@@ -60,7 +54,7 @@ export function NotableDifferences({ cohort, baseline, maxItems = 3 }: Props) {
         results.push({
           factKey: breakdown.key,
           factLabel,
-          valueLabel: labelLookup.get(String(v.value)) ?? String(v.value),
+          valueLabel: formatter ? formatter(factKey, v.value).valueLabel : String(v.value),
           cohortShare: v.share,
           baselineShare,
           delta
