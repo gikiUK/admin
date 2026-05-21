@@ -48,14 +48,14 @@ export function FactFilterRow({ filter, dataset, onChange, onRemove }: Props) {
   const selectedKeys = filter.values.map(String);
 
   function setKey(key: string) {
-    onChange({ key, values: [] });
+    onChange({ ...filter, key, values: [] });
     setKeyOpen(false);
   }
 
   function toggleValue(value: string | number | boolean) {
     const k = String(value);
     const next = selectedKeys.includes(k) ? filter.values.filter((v) => String(v) !== k) : [...filter.values, value];
-    onChange({ key: filter.key, values: next });
+    onChange({ ...filter, values: next });
   }
 
   return (

@@ -10,9 +10,16 @@ export type OrgFilters = {
 };
 
 export type FactFilter = {
+  /** Stable client-side identifier so React can key rows across reorders/removals. Regenerated on decode if missing. */
+  id: string;
   key: string;
   values: (string | number | boolean)[];
 };
+
+export function newFactFilterId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return `ff_${Math.random().toString(36).slice(2)}_${Date.now().toString(36)}`;
+}
 
 export type CohortSpec = {
   org_filters: OrgFilters;
@@ -43,7 +50,11 @@ export function decodeCohortSpec(encoded: string | null): CohortSpec {
     const parsed = JSON.parse(json) as Partial<CohortSpec>;
     return {
       org_filters: parsed.org_filters ?? {},
-      fact_filters: parsed.fact_filters ?? []
+      fact_filters: (parsed.fact_filters ?? []).map((f) => ({
+        id: f.id ?? newFactFilterId(),
+        key: f.key,
+        values: f.values
+      }))
     };
   } catch (err) {
     console.warn("Failed to decode cohort spec from URL, falling back to default", err);

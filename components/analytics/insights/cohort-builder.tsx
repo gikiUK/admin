@@ -10,7 +10,7 @@ import { WorkshopPicker } from "@/components/analytics/insights/workshop-picker"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
-import type { FactFilter, OrgFilters } from "@/lib/analytics/insights/cohort-spec";
+import { type FactFilter, newFactFilterId, type OrgFilters } from "@/lib/analytics/insights/cohort-spec";
 import { useLiveDataset } from "@/lib/analytics/use-live-dataset";
 
 type Props = {
@@ -47,7 +47,7 @@ export function CohortBuilder({ embedded = false }: Props = {}) {
   }
 
   function addFactFilter() {
-    updateFactFilters([...spec.fact_filters, { key: "", values: [] }]);
+    updateFactFilters([...spec.fact_filters, { id: newFactFilterId(), key: "", values: [] }]);
   }
 
   const body = (
@@ -99,18 +99,13 @@ export function CohortBuilder({ embedded = false }: Props = {}) {
           <p className="text-xs text-muted-foreground">No fact filters. Cohort defined by org filters only.</p>
         ) : (
           <div className="space-y-2">
-            {spec.fact_filters.map((filter, i) => (
+            {spec.fact_filters.map((filter) => (
               <FactFilterRow
-                // biome-ignore lint/suspicious/noArrayIndexKey: positional fact filters, no stable id
-                key={i}
+                key={filter.id}
                 filter={filter}
                 dataset={dataset}
-                onChange={(next) => {
-                  const copy = [...spec.fact_filters];
-                  copy[i] = next;
-                  updateFactFilters(copy);
-                }}
-                onRemove={() => updateFactFilters(spec.fact_filters.filter((_, idx) => idx !== i))}
+                onChange={(next) => updateFactFilters(spec.fact_filters.map((f) => (f.id === filter.id ? next : f)))}
+                onRemove={() => updateFactFilters(spec.fact_filters.filter((f) => f.id !== filter.id))}
               />
             ))}
           </div>

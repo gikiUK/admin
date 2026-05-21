@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { makeFactFormatter } from "@/lib/analytics/fact-formatter";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
+import { newFactFilterId } from "@/lib/analytics/insights/cohort-spec";
 import type { FactBreakdown, FactBreakdownValue } from "@/lib/analytics/insights/insights-api";
 import { useLiveDataset } from "@/lib/analytics/use-live-dataset";
 
@@ -60,7 +61,10 @@ export function FactBreakdownChart({ breakdown, baseline, onRemove }: Props) {
     const currentValues = existing?.values ?? [];
     const isSelected = currentValues.some((cv) => String(cv) === String(v));
     const nextValues = isSelected ? currentValues.filter((cv) => String(cv) !== String(v)) : [...currentValues, v];
-    const nextFilters = nextValues.length === 0 ? others : [...others, { key: breakdown.key, values: nextValues }];
+    const nextFilters =
+      nextValues.length === 0
+        ? others
+        : [...others, { id: existing?.id ?? newFactFilterId(), key: breakdown.key, values: nextValues }];
     setSpec({ ...spec, fact_filters: nextFilters });
   }
 

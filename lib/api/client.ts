@@ -77,7 +77,15 @@ export async function apiDownload(path: string, body: unknown, fallbackFilename:
 function filenameFromContentDisposition(header: string | null): string | null {
   if (!header) return null;
   const match = header.match(/filename="?([^";]+)"?/i);
-  return match ? match[1] : null;
+  if (!match) return null;
+  return sanitizeFilename(match[1]);
+}
+
+function sanitizeFilename(raw: string): string | null {
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: stripping control chars is the point
+  const stripped = raw.replace(/[\\/\x00-\x1f]/g, "").trim();
+  if (!stripped) return null;
+  return stripped.length > 255 ? stripped.slice(0, 255) : stripped;
 }
 
 export type Paginated<T> = {
