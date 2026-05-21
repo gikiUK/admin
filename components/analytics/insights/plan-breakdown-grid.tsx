@@ -8,9 +8,11 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import type { PreGikiFilter } from "@/lib/analytics/insights/insights-api";
+import { usePersistentKeys } from "@/lib/analytics/insights/use-persistent-keys";
 import { usePlanBreakdown } from "@/lib/analytics/insights/use-plan-breakdown";
 
 const DEFAULT_METADATA_KEYS = ["impact_opportunity", "cost_saving_potential", "ghg_scope", "theme"];
+const METADATA_KEYS_STORAGE_KEY = "giki:insights:plan:metadata-keys";
 
 const ALL_KEYS = Object.keys(METADATA_KEY_LABELS);
 
@@ -22,7 +24,7 @@ type Props = {
 
 export function PlanBreakdownGrid({ includeCustom, preGiki, statusFilter }: Props) {
   const { spec } = useCohort();
-  const [metadataKeys, setMetadataKeys] = useState<string[]>(DEFAULT_METADATA_KEYS);
+  const [metadataKeys, setMetadataKeys] = usePersistentKeys(METADATA_KEYS_STORAGE_KEY, DEFAULT_METADATA_KEYS);
   const [pickerOpen, setPickerOpen] = useState(false);
   const state = usePlanBreakdown(spec, {
     metadata_keys: metadataKeys,

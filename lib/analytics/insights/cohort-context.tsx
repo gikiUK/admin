@@ -74,12 +74,24 @@ export function CohortProvider({ children }: { children: ReactNode }) {
     }
   }, [localSpec, persistedSpec]);
 
-  useEffect(
-    () => () => {
+  // On unmount or page hide, flush any pending encoded spec to localStorage so a
+  // setSpec call followed quickly by navigation/close doesn't lose state. We
+  // only touch storage (not the router) since router.replace isn't safe during
+  // unmount and the URL is already stale at that point anyway.
+  useEffect(() => {
+    const flushToStorage = () => {
+      const encoded = pendingEncodedRef.current;
+      if (encoded === null) return;
+      pendingEncodedRef.current = null;
+      writeStoredEncoded(encoded);
+    };
+    window.addEventListener("beforeunload", flushToStorage);
+    return () => {
+      window.removeEventListener("beforeunload", flushToStorage);
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-    },
-    []
-  );
+      flushToStorage();
+    };
+  }, []);
 
   const setSpec = useCallback(
     (next: CohortSpec) => {

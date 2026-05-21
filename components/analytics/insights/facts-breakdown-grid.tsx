@@ -11,13 +11,15 @@ import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import { isEmptySpec } from "@/lib/analytics/insights/cohort-spec";
 import { useBaselineFactsBreakdown } from "@/lib/analytics/insights/use-baseline-facts-breakdown";
 import { useFactsBreakdown } from "@/lib/analytics/insights/use-facts-breakdown";
+import { usePersistentKeys } from "@/lib/analytics/insights/use-persistent-keys";
 import { useLiveDataset } from "@/lib/analytics/use-live-dataset";
 
 const DEFAULT_FACT_KEYS = ["size", "industries", "measures_emissions", "has_reduction_targets"];
+const FACT_KEYS_STORAGE_KEY = "giki:insights:facts:keys";
 
 export function FactsBreakdownGrid() {
   const { spec } = useCohort();
-  const [factKeys, setFactKeys] = useState<string[]>(DEFAULT_FACT_KEYS);
+  const [factKeys, setFactKeys] = usePersistentKeys(FACT_KEYS_STORAGE_KEY, DEFAULT_FACT_KEYS);
   const [pickerOpen, setPickerOpen] = useState(false);
   const { data: dataset } = useLiveDataset();
   const state = useFactsBreakdown(spec, factKeys);
