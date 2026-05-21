@@ -20,7 +20,7 @@ export type CohortSpec = {
 };
 
 export const DEFAULT_COHORT_SPEC: CohortSpec = {
-  org_filters: { tags_exclude: ["qa"] },
+  org_filters: {},
   fact_filters: []
 };
 

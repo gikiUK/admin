@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addOrgTag, type ManagedCompany, removeOrgTag } from "@/lib/manage/api";
+import { invalidateTagsCache } from "@/lib/manage/use-tags";
 
 type OrgTagsPanelProps = {
   company: ManagedCompany;
@@ -27,6 +28,7 @@ export function OrgTagsPanel({ company, onUpdate }: OrgTagsPanelProps) {
     try {
       const result = await addOrgTag(company.slug, tag);
       onUpdate(result.company);
+      invalidateTagsCache();
       setDraft("");
       toast.success("Tag added");
     } catch (err) {
@@ -41,6 +43,7 @@ export function OrgTagsPanel({ company, onUpdate }: OrgTagsPanelProps) {
     try {
       const result = await removeOrgTag(company.slug, tag);
       onUpdate(result.company);
+      invalidateTagsCache();
       toast.success("Tag removed");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to remove tag");

@@ -67,13 +67,17 @@ export function deleteCompany(slug: string): Promise<Record<string, never>> {
   });
 }
 
+export type TagWithCount = {
+  name: string;
+  count: number;
+};
+
 /**
- * Returns the universe of tags currently in use across all companies. Backed by
- * GET /admin/tags in the Rails API; the frontend tolerates a 404 in case the
- * endpoint isn't deployed yet and falls back to free-text entry.
+ * Returns every tag currently in use across companies, with the count of
+ * companies using each tag. Ordered by count desc, then name asc.
  */
-export function fetchTags(): Promise<{ tags: string[] }> {
-  return apiFetch<{ tags: string[] }>("/admin/tags");
+export function fetchTags(): Promise<{ tags: TagWithCount[] }> {
+  return apiFetch<{ tags: TagWithCount[] }>("/admin/analytics/tags");
 }
 
 export function addOrgTag(slug: string, tag: string): Promise<{ company: ManagedCompany }> {

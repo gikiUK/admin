@@ -14,7 +14,7 @@ type State =
 /**
  * Fetches the breakdown over the *baseline* cohort (all orgs, no fact filters) so the
  * Facts insights page can overlay "all orgs" as a comparison behind cohort bars.
- * Uses DEFAULT_COHORT_SPEC (which only excludes qa-tagged orgs) as the baseline.
+ * Uses DEFAULT_COHORT_SPEC (an empty cohort = every org) as the baseline.
  */
 export function useBaselineFactsBreakdown(factKeys: string[]): State {
   const [state, setState] = useState<State>({ status: "loading" });

@@ -17,6 +17,7 @@ const CHART_CONFIG = {
 
 const BAR_HEIGHT = 22;
 const Y_AXIS_WIDTH = 280;
+const Y_TICK_TEXT_WIDTH = Y_AXIS_WIDTH - 12;
 const MIN_RATE_FOR_FULL_GREEN = 0.5;
 
 function completionColor(rate: number): string {
@@ -27,6 +28,25 @@ function completionColor(rate: number): string {
 }
 
 type ChartRow = ActionLeaderboardRow & { label: string };
+
+type TickProps = {
+  x?: number;
+  y?: number;
+  payload?: { value: string };
+};
+
+function TruncatedYTick({ x = 0, y = 0, payload }: TickProps) {
+  const label = payload?.value ?? "";
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <foreignObject x={-Y_TICK_TEXT_WIDTH} y={-10} width={Y_TICK_TEXT_WIDTH} height={20}>
+        <div title={label} className="truncate text-right text-xs text-muted-foreground" style={{ lineHeight: "20px" }}>
+          {label}
+        </div>
+      </foreignObject>
+    </g>
+  );
+}
 
 function disambiguate(rows: ActionLeaderboardRow[]): ChartRow[] {
   const seen = new Map<string, number>();
@@ -74,7 +94,7 @@ export function LeaderboardChart({ rows, limit = 20 }: Props) {
               tickLine={false}
               axisLine={false}
               width={Y_AXIS_WIDTH}
-              tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+              tick={<TruncatedYTick />}
               interval={0}
             />
             <ChartTooltip

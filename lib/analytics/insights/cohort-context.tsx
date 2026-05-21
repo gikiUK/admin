@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { createContext, type ReactNode, useCallback, useContext, useMemo } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { type CohortSpec, decodeCohortSpec, encodeCohortSpec } from "@/lib/analytics/insights/cohort-spec";
 
 type CohortContextValue = {
@@ -12,27 +12,61 @@ type CohortContextValue = {
 
 const CohortContext = createContext<CohortContextValue | null>(null);
 
+const STORAGE_KEY = "giki:insights:cohort";
+
+function readStoredEncoded(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredEncoded(encoded: string | null): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (encoded === null) window.localStorage.removeItem(STORAGE_KEY);
+    else window.localStorage.setItem(STORAGE_KEY, encoded);
+  } catch {
+    // Quota / disabled storage — silently ignore; URL still works.
+  }
+}
+
 export function CohortProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const encoded = searchParams.get("cohort");
+  const urlEncoded = searchParams.get("cohort");
 
-  const spec = useMemo(() => decodeCohortSpec(encoded), [encoded]);
+  // localStorage is read once on mount so SSR and the first client render agree
+  // (both see `null`), then we hydrate from LS in an effect to avoid a mismatch.
+  const [storedEncoded, setStoredEncoded] = useState<string | null>(null);
+  useEffect(() => {
+    if (urlEncoded === null) setStoredEncoded(readStoredEncoded());
+  }, [urlEncoded]);
+
+  const spec = useMemo(() => decodeCohortSpec(urlEncoded ?? storedEncoded), [urlEncoded, storedEncoded]);
 
   const setSpec = useCallback(
     (next: CohortSpec) => {
+      const encoded = encodeCohortSpec(next);
+      writeStoredEncoded(encoded);
+      setStoredEncoded(encoded);
       const params = new URLSearchParams(searchParams.toString());
       // Always serialize the spec — even when "empty" — so that explicit user removals
-      // (e.g. clearing the default "qa" tags_exclude) survive a reload. Falling back to
-      // DEFAULT_COHORT_SPEC happens only when there's no ?cohort param at all.
-      params.set("cohort", encodeCohortSpec(next));
+      // survive a reload. Falling back to LS / DEFAULT_COHORT_SPEC happens only when
+      // there's no ?cohort param at all.
+      params.set("cohort", encoded);
       router.replace(`?${params.toString()}`, { scroll: false });
     },
     [router, searchParams]
   );
 
-  // Reset clears the URL param entirely so the next read falls back to DEFAULT_COHORT_SPEC.
+  // Reset clears both the URL param and the saved spec so the next read falls back
+  // to DEFAULT_COHORT_SPEC (an empty cohort).
   const reset = useCallback(() => {
+    writeStoredEncoded(null);
+    setStoredEncoded(null);
     const params = new URLSearchParams(searchParams.toString());
     params.delete("cohort");
     const query = params.toString();

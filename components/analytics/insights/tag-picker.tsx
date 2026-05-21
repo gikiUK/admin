@@ -16,22 +16,26 @@ type Props = {
   placeholder?: string;
 };
 
+type Entry = { name: string; count: number };
+
 export function TagPicker({ legend, value, onChange, placeholder = "Pick tags" }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const state = useTags();
 
-  const universe = useMemo(() => {
-    const all = state.status === "ready" ? state.tags : [];
-    // Make sure already-selected tags are always visible in the list even if
-    // the universe doesn't include them (e.g. just-typed tag or deleted server-side).
-    return Array.from(new Set([...all, ...value])).sort((a, b) => a.localeCompare(b));
+  const universe = useMemo<Entry[]>(() => {
+    const fromApi: Entry[] = state.status === "ready" ? state.tags : [];
+    const known = new Set(fromApi.map((t) => t.name));
+    // Surface already-selected tags that aren't in the API response (e.g. brand-new
+    // or just-removed elsewhere) so the user can still see/deselect them.
+    const orphans: Entry[] = value.filter((v) => !known.has(v)).map((name) => ({ name, count: 0 }));
+    return [...fromApi, ...orphans].sort((a, b) => a.name.localeCompare(b.name));
   }, [state, value]);
 
   const trimmedSearch = search.trim().toLowerCase();
   const canCreate =
     trimmedSearch.length > 0 &&
-    !universe.some((t) => t.toLowerCase() === trimmedSearch) &&
+    !universe.some((t) => t.name.toLowerCase() === trimmedSearch) &&
     !value.includes(trimmedSearch);
 
   function toggle(tag: string) {
@@ -75,26 +79,25 @@ export function TagPicker({ legend, value, onChange, placeholder = "Pick tags" }
               <CommandList>
                 {state.status === "loading" && <CommandEmpty>Loading tags…</CommandEmpty>}
                 {state.status === "error" && <CommandEmpty>{state.message}</CommandEmpty>}
-                {(state.status === "ready" || state.status === "unavailable") && (
+                {state.status === "ready" && (
                   <>
-                    {universe.length === 0 && !canCreate && (
-                      <CommandEmpty>
-                        {state.status === "unavailable" ? "Type a tag to add" : "No tags yet"}
-                      </CommandEmpty>
-                    )}
+                    {universe.length === 0 && !canCreate && <CommandEmpty>No tags yet</CommandEmpty>}
                     {universe.length > 0 && (
-                      <CommandGroup heading={state.status === "unavailable" ? "Selected" : "Tags"}>
-                        {universe.map((tag) => {
-                          const isSelected = value.includes(tag);
+                      <CommandGroup heading="Tags">
+                        {universe.map((entry) => {
+                          const isSelected = value.includes(entry.name);
                           return (
                             <CommandItem
-                              key={tag}
-                              value={tag}
-                              onSelect={() => toggle(tag)}
+                              key={entry.name}
+                              value={entry.name}
+                              onSelect={() => toggle(entry.name)}
                               className="flex items-center gap-2"
                             >
                               <Check className={cn("size-4", isSelected ? "opacity-100" : "opacity-0")} />
-                              <span className="truncate">{tag}</span>
+                              <span className="truncate flex-1">{entry.name}</span>
+                              {entry.count > 0 && (
+                                <span className="text-xs text-muted-foreground tabular-nums">{entry.count}</span>
+                              )}
                             </CommandItem>
                           );
                         })}
