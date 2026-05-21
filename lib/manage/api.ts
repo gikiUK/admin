@@ -67,6 +67,19 @@ export function deleteCompany(slug: string): Promise<Record<string, never>> {
   });
 }
 
+export type TagWithCount = {
+  name: string;
+  count: number;
+};
+
+/**
+ * Returns every tag currently in use across companies, with the count of
+ * companies using each tag. Ordered by count desc, then name asc.
+ */
+export function fetchTags(): Promise<{ tags: TagWithCount[] }> {
+  return apiFetch<{ tags: TagWithCount[] }>("/admin/analytics/tags");
+}
+
 export function addOrgTag(slug: string, tag: string): Promise<{ company: ManagedCompany }> {
   return apiFetch<{ company: ManagedCompany }>(`/admin/companies/${encodeURIComponent(slug)}/tags`, {
     method: "POST",
