@@ -73,6 +73,20 @@ Components are copied into `components/ui/` as source files you own and can edit
 - Max ~100 lines per file; extract components when growing
 - Path alias: `@/*` maps to project root
 
+## Refactoring Guidelines
+
+Apply these whenever splitting or reorganizing a folder of components:
+
+- **One component per file.** A file exports a single React component. Sub-components used only by that component live in their own files too.
+- **Hard cap ~100 LOC per file**, aim for less. If a component grows past it, extract sub-components, hooks, or helpers.
+- **Logic out of components.** Pure helpers go in `*-helpers.ts` (or `lib/<area>/`), stateful logic into `use<Name>.ts` hooks, types into `*-types.ts` when shared.
+- **DRY.** If two components share formatting, derived data, or rendering primitives, lift them into a shared helper, hook, or small presentational component.
+- **Folders by feature, not by kind.** Group by what the components are *about* (e.g. `funnel/`, `correlations/`), not by what they *are* (`charts/`, `cards/`). Humans navigate by feature.
+- **Co-locate.** A feature folder holds its components, hooks, helpers, and types together. Only promote to a higher-level `lib/` when more than one feature uses it.
+- **Single purpose.** Each component does one thing — render a card, render a tile, render a tooltip. Compose, don't conflate.
+- **Name files by what they render**, kebab-case: `funnel-section.tsx`, `funnel-step-row.tsx`, `use-funnel-data.ts`.
+- **Index files are optional, not mandatory.** Only add a barrel `index.ts` when a folder exposes a small, stable public surface — don't add one just to shorten imports.
+
 ## Design System
 
 shadcn/ui semantic color tokens defined in `app/globals.css`:
