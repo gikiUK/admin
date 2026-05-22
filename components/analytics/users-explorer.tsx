@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
 import { UserFilters } from "@/components/analytics/user-filters";
 import { UsersTable } from "@/components/analytics/users-table";
 import { Pager } from "@/components/ui/pager";
-import { type AnalyticsUser, fetchUsers, USER_STATUSES, type UserStatus, type UsersFilter } from "@/lib/analytics/api";
+import { USER_STATUSES, type UserStatus, type UsersFilter } from "@/lib/analytics/api";
+import { usersQuery } from "@/lib/analytics/queries";
 import { useUrlState } from "@/lib/use-url-state";
 
 const FILTER_KEYS = ["query", "company_id", "status", "order", "page"] as const;
@@ -25,26 +27,20 @@ function readFilter(searchParams: URLSearchParams): UsersFilter {
   };
 }
 
+const EMPTY_META = { current_page: 1, total_count: 0, total_pages: 1 };
+
 export function UsersExplorer() {
   const { searchParams, set } = useUrlState();
   const filter = useMemo(() => readFilter(searchParams), [searchParams]);
 
-  const [users, setUsers] = useState<AnalyticsUser[]>([]);
-  const [meta, setMeta] = useState({ current_page: 1, total_count: 0, total_pages: 1 });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    setLoading(true);
-    setError("");
-    fetchUsers(filter)
-      .then((response) => {
-        setUsers(response.results);
-        setMeta(response.meta);
-      })
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load users"))
-      .finally(() => setLoading(false));
-  }, [filter]);
+  const query = useQuery(usersQuery(filter));
+  const users = query.data?.results ?? [];
+  const meta = query.data?.meta ?? EMPTY_META;
+  const errorMessage = query.isError
+    ? query.error instanceof Error
+      ? query.error.message
+      : "Failed to load users"
+    : "";
 
   const handleFilterChange = useCallback(
     (patch: Partial<UsersFilter>) => {
@@ -67,8 +63,12 @@ export function UsersExplorer() {
   return (
     <div className="space-y-4">
       <UserFilters filter={filter} onChange={handleFilterChange} onReset={handleReset} />
-      {error && <div className="text-sm text-destructive">{error}</div>}
-      {loading ? <div className="text-sm text-muted-foreground">Loading users…</div> : <UsersTable users={users} />}
+      {errorMessage && <div className="text-sm text-destructive">{errorMessage}</div>}
+      {query.isPending ? (
+        <div className="text-sm text-muted-foreground">Loading users…</div>
+      ) : (
+        <UsersTable users={users} />
+      )}
       <Pager
         page={meta.current_page}
         totalPages={meta.total_pages}

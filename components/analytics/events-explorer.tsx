@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { EventDetailSheet } from "@/components/analytics/event-detail-sheet";
 import { EventFilters } from "@/components/analytics/event-filters";
 import { EventsTable } from "@/components/analytics/events-table";
 import { Pager } from "@/components/ui/pager";
-import { type AnalyticsEvent, type EventsFilter, fetchEvents } from "@/lib/analytics/api";
+import type { EventsFilter } from "@/lib/analytics/api";
+import { eventsQuery } from "@/lib/analytics/queries";
 import { useUrlState } from "@/lib/use-url-state";
 
 const FILTER_KEYS = [
@@ -37,27 +39,21 @@ function readFilter(searchParams: URLSearchParams): EventsFilter {
   };
 }
 
+const EMPTY_META = { current_page: 1, total_count: 0, total_pages: 1 };
+
 export function EventsExplorer() {
   const { searchParams, set } = useUrlState();
   const filter = readFilter(searchParams);
   const { action_type, company_id, user_id, from, to, order, page } = filter;
 
-  const [events, setEvents] = useState<AnalyticsEvent[]>([]);
-  const [meta, setMeta] = useState({ current_page: 1, total_count: 0, total_pages: 1 });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    setLoading(true);
-    setError("");
-    fetchEvents({ action_type, company_id, user_id, from, to, order, page })
-      .then((response) => {
-        setEvents(response.results);
-        setMeta(response.meta);
-      })
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load events"))
-      .finally(() => setLoading(false));
-  }, [action_type, company_id, user_id, from, to, order, page]);
+  const query = useQuery(eventsQuery({ action_type, company_id, user_id, from, to, order, page }));
+  const events = query.data?.results ?? [];
+  const meta = query.data?.meta ?? EMPTY_META;
+  const errorMessage = query.isError
+    ? query.error instanceof Error
+      ? query.error.message
+      : "Failed to load events"
+    : "";
 
   const handleFilterChange = useCallback(
     (patch: Partial<EventsFilter>) => {
@@ -101,8 +97,8 @@ export function EventsExplorer() {
   return (
     <div className="space-y-4">
       <EventFilters filter={filter} onChange={handleFilterChange} onReset={handleReset} />
-      {error && <div className="text-sm text-destructive">{error}</div>}
-      {loading ? (
+      {errorMessage && <div className="text-sm text-destructive">{errorMessage}</div>}
+      {query.isPending ? (
         <div className="text-sm text-muted-foreground">Loading events…</div>
       ) : (
         <EventsTable events={events} selectedEventId={selectedEventId} onSelect={handleSelect} />

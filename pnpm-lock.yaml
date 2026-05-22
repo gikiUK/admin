@@ -17,6 +17,9 @@ importers:
       '@sentry/nextjs':
         specifier: ^10
         version: 10.43.0(@opentelemetry/context-async-hooks@2.6.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.6.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.6.0(@opentelemetry/api@1.9.0))(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.105.4)
+      '@tanstack/react-query':
+        specifier: ^5.100.11
+        version: 5.100.11(react@19.2.3)
       '@tanstack/react-virtual':
         specifier: ^3.13.18
         version: 3.13.21(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -93,6 +96,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.2.1
+      '@tanstack/react-query-devtools':
+        specifier: ^5.100.11
+        version: 5.100.11(@tanstack/react-query@5.100.11(react@19.2.3))(react@19.2.3)
       '@testing-library/jest-dom':
         specifier: ^6
         version: 6.9.1
@@ -3135,6 +3141,23 @@ packages:
 
   '@tailwindcss/postcss@4.2.1':
     resolution: {integrity: sha512-OEwGIBnXnj7zJeonOh6ZG9woofIjGrd2BORfvE5p9USYKDCZoQmfqLcfNiRWoJlRWLdNPn2IgVZuWAOM4iTYMw==}
+
+  '@tanstack/query-core@5.100.11':
+    resolution: {integrity: sha512-lmE0994apShXPj8CUxgx4ch5yUJhE9k/+tVwihBvPOyerACWdBocfFg24t8+0RhtlTd7tEgchDkhlCxNssvDxw==}
+
+  '@tanstack/query-devtools@5.100.11':
+    resolution: {integrity: sha512-47rVBDuGMW/A4ekt3YQdz+q0JSIwktwGnWCYyQUvSs2/g/Oa+6Fi2/IQk4/Y4vf6u1uwI7hOogHslgMC8f3X/Q==}
+
+  '@tanstack/react-query-devtools@5.100.11':
+    resolution: {integrity: sha512-75RFlJEG53Ed/Cxe5WLmgIpOElPNpgLZq7h0fLFnM5XwTYxSTk1rX/gC6MqGVXsSdrbP7zn7hPSJx9MinwiUHA==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.100.11
+      react: ^18 || ^19
+
+  '@tanstack/react-query@5.100.11':
+    resolution: {integrity: sha512-J0f9s5x3LE1450nNNfYx+e/n0DMa0uOBdFJUy5r0RvmsXd4nB/n0rbHtHI1vYXhikNFan+wf51p6Tmp4c8ucrg==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@tanstack/react-virtual@3.13.21':
     resolution: {integrity: sha512-SYXFrmrbPgXBvf+HsOsKhFgqSe4M6B29VHOsX9Jih9TlNkNkDWx0hWMiMLUghMEzyUz772ndzdEeCEBx+3GIZw==}
@@ -10032,6 +10055,21 @@ snapshots:
       '@tailwindcss/oxide': 4.2.1
       postcss: 8.5.8
       tailwindcss: 4.2.1
+
+  '@tanstack/query-core@5.100.11': {}
+
+  '@tanstack/query-devtools@5.100.11': {}
+
+  '@tanstack/react-query-devtools@5.100.11(@tanstack/react-query@5.100.11(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      '@tanstack/query-devtools': 5.100.11
+      '@tanstack/react-query': 5.100.11(react@19.2.3)
+      react: 19.2.3
+
+  '@tanstack/react-query@5.100.11(react@19.2.3)':
+    dependencies:
+      '@tanstack/query-core': 5.100.11
+      react: 19.2.3
 
   '@tanstack/react-virtual@3.13.21(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:

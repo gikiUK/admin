@@ -5,6 +5,7 @@ import { PlanBreakdownGridHeader } from "@/components/analytics/insights/plan/pl
 import { PlanBreakdownGridSkeleton } from "@/components/analytics/insights/skeletons/plan-breakdown-grid-skeleton";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import type { PreGikiFilter } from "@/lib/analytics/insights/insights-api";
+import { useDebouncedValue } from "@/lib/analytics/insights/use-debounced-value";
 import { usePersistentKeys } from "@/lib/analytics/insights/use-persistent-keys";
 import { usePlanBreakdown } from "@/lib/analytics/insights/use-plan-breakdown";
 
@@ -19,8 +20,9 @@ type Props = {
 
 export function PlanBreakdownGrid({ includeCustom, preGiki, statusFilter }: Props) {
   const { spec } = useCohort();
+  const debouncedSpec = useDebouncedValue(spec, 200);
   const [metadataKeys, setMetadataKeys] = usePersistentKeys(METADATA_KEYS_STORAGE_KEY, DEFAULT_METADATA_KEYS);
-  const state = usePlanBreakdown(spec, {
+  const state = usePlanBreakdown(debouncedSpec, {
     metadata_keys: metadataKeys,
     include_custom: includeCustom,
     pre_giki_filter: preGiki,
