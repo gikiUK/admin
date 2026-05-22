@@ -6,6 +6,7 @@ import { CohortSummaryPill } from "@/components/analytics/insights/cohort/cohort
 import { PlanBreakdownGrid } from "@/components/analytics/insights/plan/plan-breakdown-grid";
 import { PlanFilters } from "@/components/analytics/insights/plan/plan-filters";
 import { PlanKpiStrip } from "@/components/analytics/insights/plan/plan-kpi-strip";
+import { PlanPopularActions } from "@/components/analytics/insights/plan/plan-popular-actions";
 import { PlanStatusChart } from "@/components/analytics/insights/plan/plan-status-chart";
 import { CsvDownloadButton } from "@/components/analytics/insights/shared/csv-download-button";
 import { KpiStripSkeleton } from "@/components/analytics/insights/skeletons/kpi-strip-skeleton";
@@ -84,6 +85,8 @@ export default function PlanInsightsPage() {
           </>
         )}
       </AsyncSection>
+
+      <PlanPopularActions includeCustom={includeCustom} preGiki={preGiki} statusFilter={statusFilter} />
 
       <PlanBreakdownGrid includeCustom={includeCustom} preGiki={preGiki} statusFilter={statusFilter} />
     </div>

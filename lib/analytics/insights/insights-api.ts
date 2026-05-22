@@ -1,3 +1,4 @@
+import type { ActionLeaderboardRow } from "@/lib/analytics/actions-api";
 import type { CohortSpec } from "@/lib/analytics/insights/cohort-spec";
 import { apiFetch } from "@/lib/api/client";
 
@@ -84,6 +85,33 @@ export type PlanBreakdownResponse = {
 
 export function fetchPlanBreakdown(spec: CohortSpec, opts: PlanBreakdownOptions): Promise<PlanBreakdownResponse> {
   return apiFetch<PlanBreakdownResponse>("/admin/analytics/insights/plan/breakdown", {
+    method: "POST",
+    body: JSON.stringify({ ...spec, ...opts })
+  });
+}
+
+export type PlanPopularActionsOptions = {
+  include_custom?: boolean;
+  pre_giki_filter?: PreGikiFilter;
+  status_filter?: string[];
+  limit?: number;
+};
+
+export type PlanPopularActionsResponse = {
+  cohort_size: number;
+  filters: {
+    include_custom: boolean;
+    pre_giki_filter: PreGikiFilter;
+    status_filter: string[] | null;
+  };
+  actions: ActionLeaderboardRow[];
+};
+
+export function fetchPlanPopularActions(
+  spec: CohortSpec,
+  opts: PlanPopularActionsOptions
+): Promise<PlanPopularActionsResponse> {
+  return apiFetch<PlanPopularActionsResponse>("/admin/analytics/insights/plan/popular_actions", {
     method: "POST",
     body: JSON.stringify({ ...spec, ...opts })
   });

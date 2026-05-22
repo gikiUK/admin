@@ -129,6 +129,28 @@ describe("CohortProvider", () => {
     expect(result.current.spec.fact_filters[0]?.values).toEqual(["JP"]);
   });
 
+  test("incomplete fact filter row survives the debounced persist", () => {
+    const { result, rerender } = renderHook(() => useCohort(), { wrapper });
+
+    const incomplete: CohortSpec = {
+      org_filters: {},
+      fact_filters: [{ id: "draft", key: "", values: [] }]
+    };
+    act(() => {
+      result.current.setSpec(incomplete);
+    });
+
+    expect(result.current.spec.fact_filters).toHaveLength(1);
+
+    act(() => {
+      jest.advanceTimersByTime(150);
+    });
+    rerender();
+
+    expect(result.current.spec.fact_filters).toHaveLength(1);
+    expect(result.current.spec.fact_filters[0]?.key).toBe("");
+  });
+
   test("local override clears once the persisted spec catches up via URL", () => {
     const { result, rerender } = renderHook(() => useCohort(), { wrapper });
 

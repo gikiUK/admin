@@ -86,8 +86,14 @@ export function CohortProvider({ children }: { children: ReactNode }) {
   }, [router]);
 
   // Clear the local override once the persisted spec matches what we wrote.
+  // encodeCohortSpec strips incomplete fact filters (empty key / no values), so
+  // a freshly-added empty row would appear "in sync" with an empty persistedSpec
+  // and get yanked out from under the user mid-edit. Keep the override alive
+  // while any incomplete row is present so the row survives the URL/LS write.
   useEffect(() => {
-    if (localSpec && encodeCohortSpec(localSpec) === encodeCohortSpec(persistedSpec)) {
+    if (!localSpec) return;
+    if (localSpec.fact_filters.some((f) => !f.key || f.values.length === 0)) return;
+    if (encodeCohortSpec(localSpec) === encodeCohortSpec(persistedSpec)) {
       setLocalSpec(null);
     }
   }, [localSpec, persistedSpec]);

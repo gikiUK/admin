@@ -5,15 +5,20 @@ import {
   fetchCohortSummary,
   fetchFactsBreakdown,
   fetchPlanBreakdown,
+  fetchPlanPopularActions,
   type PlanBreakdownOptions,
-  type PlanBreakdownResponse
+  type PlanBreakdownResponse,
+  type PlanPopularActionsOptions,
+  type PlanPopularActionsResponse
 } from "@/lib/analytics/insights/insights-api";
 
 export const insightsKeys = {
   all: ["insights"] as const,
   cohortSummary: (spec: CohortSpec) => ["insights", "cohort-summary", spec] as const,
   factsBreakdown: (spec: CohortSpec, factKeys: string[]) => ["insights", "facts-breakdown", spec, factKeys] as const,
-  planBreakdown: (spec: CohortSpec, opts: PlanBreakdownOptions) => ["insights", "plan-breakdown", spec, opts] as const
+  planBreakdown: (spec: CohortSpec, opts: PlanBreakdownOptions) => ["insights", "plan-breakdown", spec, opts] as const,
+  planPopularActions: (spec: CohortSpec, opts: PlanPopularActionsOptions) =>
+    ["insights", "plan-popular-actions", spec, opts] as const
 };
 
 export function cohortSummaryQuery(spec: CohortSpec) {
@@ -37,7 +42,14 @@ export function planBreakdownQuery(spec: CohortSpec, opts: PlanBreakdownOptions)
   };
 }
 
+export function planPopularActionsQuery(spec: CohortSpec, opts: PlanPopularActionsOptions) {
+  return {
+    queryKey: insightsKeys.planPopularActions(spec, opts),
+    queryFn: () => fetchPlanPopularActions(spec, opts)
+  };
+}
+
 export { type InsightsState, isPendingBackendError, toInsightsState } from "@/lib/query/insights-state";
 
 // Convenience accessors used to satisfy strict type narrowing in tests / consumers.
-export type { CohortSummary, FactsBreakdownResponse, PlanBreakdownResponse };
+export type { CohortSummary, FactsBreakdownResponse, PlanBreakdownResponse, PlanPopularActionsResponse };
