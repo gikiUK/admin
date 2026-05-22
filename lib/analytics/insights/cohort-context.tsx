@@ -39,12 +39,12 @@ export function CohortProvider({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams();
   const urlEncoded = searchParams.get("cohort");
 
-  // localStorage is read once on mount so SSR and the first client render agree
-  // (both see `null`), then we hydrate from LS in an effect to avoid a mismatch.
-  const [storedEncoded, setStoredEncoded] = useState<string | null>(null);
-  useEffect(() => {
-    if (urlEncoded === null) setStoredEncoded(readStoredEncoded());
-  }, [urlEncoded]);
+  // CohortProvider only renders on the client (parent layout is "use client"), so
+  // we can read localStorage synchronously on first render — no SSR hydration risk.
+  // Reading it in an effect instead caused a one-frame render with the empty default
+  // spec, which let React Query return a cached "ready" entry for that empty spec
+  // and produced a flash of stale data on first navigation into the page.
+  const [storedEncoded, setStoredEncoded] = useState<string | null>(() => readStoredEncoded());
 
   // Local override lets setSpec update the UI immediately while the URL/LS write
   // is debounced. Cleared whenever the URL catches up to the override.
