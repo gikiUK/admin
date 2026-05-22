@@ -5,12 +5,21 @@ import { useState } from "react";
 import { CohortBuilder } from "@/components/analytics/insights/cohort/cohort-builder";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useCohort } from "@/lib/analytics/insights/cohort-context";
 
 export function CohortEditSheet() {
   const [open, setOpen] = useState(false);
+  const { discard } = useCohort();
+
+  function handleOpenChange(next: boolean) {
+    // Drawer is the only scope for draft edits — wipe any uncommitted changes
+    // on close so reopening starts clean.
+    if (!next) discard();
+    setOpen(next);
+  }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button variant="outline" size="sm" className="h-7 text-xs">
           <Pencil className="size-3" />
