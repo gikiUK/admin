@@ -119,6 +119,16 @@ describe("CohortProvider", () => {
     expect(window.localStorage.getItem(STORAGE_KEY)).toBe(encodeCohortSpec(next));
   });
 
+  test("initial spec reflects localStorage value present before mount", () => {
+    const stored = specWithKey("country", "JP");
+    window.localStorage.setItem(STORAGE_KEY, encodeCohortSpec(stored));
+
+    const { result } = renderHook(() => useCohort(), { wrapper });
+
+    expect(result.current.spec.fact_filters[0]?.key).toBe("country");
+    expect(result.current.spec.fact_filters[0]?.values).toEqual(["JP"]);
+  });
+
   test("local override clears once the persisted spec catches up via URL", () => {
     const { result, rerender } = renderHook(() => useCohort(), { wrapper });
 
