@@ -9,10 +9,12 @@ import { KpiStripSkeleton } from "@/components/analytics/insights/skeletons/kpi-
 import { PageHeader } from "@/components/page-header";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import { useCohortSummary } from "@/lib/analytics/insights/use-cohort-summary";
+import { useDebouncedValue } from "@/lib/analytics/insights/use-debounced-value";
 
 export default function FactsInsightsPage() {
   const { spec } = useCohort();
-  const summary = useCohortSummary(spec);
+  const debouncedSpec = useDebouncedValue(spec, 200);
+  const summary = useCohortSummary(debouncedSpec);
 
   const cohortSize = summary.status === "ready" ? summary.data.cohort_size : undefined;
   const totalOrgs = summary.status === "ready" ? summary.data.total_orgs_in_db : undefined;

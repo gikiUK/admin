@@ -1,47 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { CohortSpec } from "@/lib/analytics/insights/cohort-spec";
-import { type FactsBreakdownResponse, fetchFactsBreakdown } from "@/lib/analytics/insights/insights-api";
-import { ApiError } from "@/lib/api/client";
+import type { FactsBreakdownResponse } from "@/lib/analytics/insights/insights-api";
+import { factsBreakdownQuery, type InsightsState, toInsightsState } from "@/lib/analytics/insights/queries";
 
-type State =
-  | { status: "loading" }
-  | { status: "ready"; data: FactsBreakdownResponse }
-  | { status: "pending-backend" }
-  | { status: "error"; message: string };
+const EMPTY: FactsBreakdownResponse = { cohort_size: 0, breakdowns: [] };
 
-export function useFactsBreakdown(spec: CohortSpec, factKeys: string[]): State {
-  const [state, setState] = useState<State>({ status: "loading" });
-  const key = JSON.stringify({ spec, factKeys });
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `key` is the JSON-stringified payload; re-running on `spec`/`factKeys` would re-fetch on every render
-  useEffect(() => {
-    let cancelled = false;
-    if (factKeys.length === 0) {
-      setState({ status: "ready", data: { cohort_size: 0, breakdowns: [] } });
-      return;
-    }
-    setState({ status: "loading" });
-    fetchFactsBreakdown(spec, factKeys)
-      .then((data) => {
-        if (!cancelled) setState({ status: "ready", data });
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        if (err instanceof ApiError && err.isNotFound()) {
-          setState({ status: "pending-backend" });
-        } else {
-          setState({
-            status: "error",
-            message: err instanceof Error ? err.message : "Failed to load fact breakdowns"
-          });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [key]);
-
-  return state;
+export function useFactsBreakdown(spec: CohortSpec, factKeys: string[]): InsightsState<FactsBreakdownResponse> {
+  const query = useQuery({
+    ...factsBreakdownQuery(spec, factKeys),
+    enabled: factKeys.length > 0,
+    placeholderData: keepPreviousData
+  });
+  return toInsightsState(query, EMPTY);
 }
