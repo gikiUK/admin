@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { CohortSummaryPill } from "@/components/analytics/insights/cohort-summary-pill";
-import { CsvDownloadButton } from "@/components/analytics/insights/csv-download-button";
-import { KpiStripSkeleton, PlanStatusChartSkeleton } from "@/components/analytics/insights/insights-skeletons";
-import { PlanBreakdownGrid } from "@/components/analytics/insights/plan-breakdown-grid";
-import { PlanFilters } from "@/components/analytics/insights/plan-filters";
-import { PlanKpiStrip } from "@/components/analytics/insights/plan-kpi-strip";
-import { PlanStatusChart } from "@/components/analytics/insights/plan-status-chart";
+import { useState } from "react";
+import { AsyncSection } from "@/components/analytics/async-section";
+import { CohortSummaryPill } from "@/components/analytics/insights/cohort/cohort-summary-pill";
+import { PlanBreakdownGrid } from "@/components/analytics/insights/plan/plan-breakdown-grid";
+import { PlanFilters } from "@/components/analytics/insights/plan/plan-filters";
+import { PlanKpiStrip } from "@/components/analytics/insights/plan/plan-kpi-strip";
+import { PlanStatusChart } from "@/components/analytics/insights/plan/plan-status-chart";
+import { CsvDownloadButton } from "@/components/analytics/insights/shared/csv-download-button";
+import { KpiStripSkeleton } from "@/components/analytics/insights/skeletons/kpi-strip-skeleton";
+import { PlanStatusChartSkeleton } from "@/components/analytics/insights/skeletons/plan-status-chart-skeleton";
 import { PageHeader } from "@/components/page-header";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import type { PreGikiFilter } from "@/lib/analytics/insights/insights-api";
@@ -26,17 +28,21 @@ export default function PlanInsightsPage() {
     status_filter: statusFilter.length > 0 ? statusFilter : undefined
   });
 
-  const csvBody = useMemo(
-    () => ({
-      ...spec,
-      include_custom: includeCustom,
-      pre_giki_filter: preGiki,
-      status_filter: statusFilter.length > 0 ? statusFilter : undefined
-    }),
-    [spec, includeCustom, preGiki, statusFilter]
-  );
+  const csvBody = {
+    ...spec,
+    include_custom: includeCustom,
+    pre_giki_filter: preGiki,
+    status_filter: statusFilter.length > 0 ? statusFilter : undefined
+  };
 
   const cohortSize = overview.status === "ready" ? overview.data.cohort_size : undefined;
+
+  const overviewLoadingFallback = (
+    <>
+      <KpiStripSkeleton />
+      <PlanStatusChartSkeleton />
+    </>
+  );
 
   return (
     <div className="space-y-6">
@@ -64,22 +70,18 @@ export default function PlanInsightsPage() {
         onStatusFilterChange={setStatusFilter}
       />
 
-      {overview.status === "loading" && (
-        <>
-          <KpiStripSkeleton />
-          <PlanStatusChartSkeleton />
-        </>
-      )}
-      {overview.status === "pending-backend" && (
-        <div className="text-sm text-muted-foreground">Plan summary endpoint isn't available yet.</div>
-      )}
-      {overview.status === "error" && <div className="text-sm text-destructive">{overview.message}</div>}
-      {overview.status === "ready" && (
-        <>
-          <PlanKpiStrip data={overview.data} />
-          <PlanStatusChart byStatus={overview.data.kpis.actions_by_status} />
-        </>
-      )}
+      <AsyncSection
+        state={overview}
+        endpoint="GET /admin/analytics/insights/plan/summary"
+        loadingFallback={overviewLoadingFallback}
+      >
+        {(data) => (
+          <>
+            <PlanKpiStrip data={data} />
+            <PlanStatusChart byStatus={data.kpis.actions_by_status} />
+          </>
+        )}
+      </AsyncSection>
 
       <PlanBreakdownGrid includeCustom={includeCustom} preGiki={preGiki} statusFilter={statusFilter} />
     </div>

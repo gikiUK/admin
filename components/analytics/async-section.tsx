@@ -12,14 +12,18 @@ type AsyncState<T> =
 type Props<T> = {
   state: AsyncState<T>;
   endpoint: string;
-  loadingLabel: string;
+  /** Text shown during `loading` when no `loadingFallback` is provided. */
+  loadingLabel?: string;
+  /** Custom skeleton/spinner shown during `loading`. Falls back to `loadingLabel` text. */
+  loadingFallback?: ReactNode;
   children: (data: T) => ReactNode;
 };
 
-export function AsyncSection<T>({ state, endpoint, loadingLabel, children }: Props<T>) {
+export function AsyncSection<T>({ state, endpoint, loadingLabel, loadingFallback, children }: Props<T>) {
   return (
     <section className="space-y-3">
-      {state.status === "loading" && <div className="text-sm text-muted-foreground">{loadingLabel}</div>}
+      {state.status === "loading" &&
+        (loadingFallback ?? <div className="text-sm text-muted-foreground">{loadingLabel ?? "Loading…"}</div>)}
       {state.status === "pending-backend" && <PendingBackend endpoint={endpoint} />}
       {state.status === "error" && <div className="text-sm text-destructive">{state.message}</div>}
       {state.status === "ready" && children(state.data)}

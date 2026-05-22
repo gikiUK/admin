@@ -87,6 +87,20 @@ Apply these whenever splitting or reorganizing a folder of components:
 - **Name files by what they render**, kebab-case: `funnel-section.tsx`, `funnel-step-row.tsx`, `use-funnel-data.ts`.
 - **Index files are optional, not mandatory.** Only add a barrel `index.ts` when a folder exposes a small, stable public surface — don't add one just to shorten imports.
 
+## React Compiler
+
+**This project uses the React Compiler** (`reactCompiler: true` in `next.config.ts`, `babel-plugin-react-compiler` installed). It auto-memoizes derived values and stable references inside components. Consequences:
+
+- **Do not write `useMemo`, `useCallback`, or `React.memo` by default.** The compiler caches the same expressions with the deps it infers from the code, so manual memoization is redundant noise and a stale-deps foot-gun. If you find one in existing code, removing it is usually correct.
+- **Exceptions** — keep manual memoization only when:
+  - The value flows into a `useEffect` / `useLayoutEffect` deps array (referential stability is the contract).
+  - The value is passed to a `React.memo`-wrapped child or used as a context value.
+  - It's consumed by an external library that compares by reference.
+  - The component contains a compiler bail-out pattern (prop/state mutation, conditional hooks, refs read during render) — rare; if you see one, fix the bail-out instead of papering over with `useMemo`.
+- **Do not opt out with `"use no memo"`** unless you have a concrete, documented reason.
+- **No `eslint-plugin-react-compiler` is installed** (repo uses Biome only). That means compiler bail-outs are silent. When in doubt about a removal, trace the consumer chain — does the result flow into effect deps, a memo'd child, or a context value? If no, the compiler handles it.
+- **Hook naming honesty.** If you remove the only React-hook call from a `use*` function, rename it (`useFooBar` → `buildFooBar` / `splitFooBar`) and drop the `use-` filename prefix. The `use-` convention is a contract that the function calls hooks.
+
 ## Design System
 
 shadcn/ui semantic color tokens defined in `app/globals.css`:
