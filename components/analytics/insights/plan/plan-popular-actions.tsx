@@ -4,7 +4,6 @@ import { LeaderboardChart } from "@/components/analytics/actions/leaderboard/lea
 import { AsyncSection } from "@/components/analytics/async-section";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import type { PreGikiFilter } from "@/lib/analytics/insights/insights-api";
-import { useDebouncedValue } from "@/lib/analytics/insights/use-debounced-value";
 import { usePlanPopularActions } from "@/lib/analytics/insights/use-plan-popular-actions";
 
 type Props = {
@@ -14,10 +13,9 @@ type Props = {
 };
 
 export function PlanPopularActions({ includeCustom, preGiki, statusFilter }: Props) {
-  const { spec } = useCohort();
-  const debouncedSpec = useDebouncedValue(spec, 200);
+  const { applied } = useCohort();
 
-  const state = usePlanPopularActions(debouncedSpec, {
+  const state = usePlanPopularActions(applied, {
     include_custom: includeCustom,
     pre_giki_filter: preGiki,
     status_filter: statusFilter.length > 0 ? statusFilter : undefined,

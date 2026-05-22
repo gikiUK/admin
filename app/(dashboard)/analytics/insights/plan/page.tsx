@@ -14,17 +14,15 @@ import { PlanStatusChartSkeleton } from "@/components/analytics/insights/skeleto
 import { PageHeader } from "@/components/page-header";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import type { PreGikiFilter } from "@/lib/analytics/insights/insights-api";
-import { useDebouncedValue } from "@/lib/analytics/insights/use-debounced-value";
 import { usePlanBreakdown } from "@/lib/analytics/insights/use-plan-breakdown";
 
 export default function PlanInsightsPage() {
-  const { spec } = useCohort();
-  const debouncedSpec = useDebouncedValue(spec, 200);
+  const { applied } = useCohort();
   const [includeCustom, setIncludeCustom] = useState(false);
   const [preGiki, setPreGiki] = useState<PreGikiFilter>("all");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
-  const overview = usePlanBreakdown(debouncedSpec, {
+  const overview = usePlanBreakdown(applied, {
     metadata_keys: [],
     include_custom: includeCustom,
     pre_giki_filter: preGiki,
@@ -32,7 +30,7 @@ export default function PlanInsightsPage() {
   });
 
   const csvBody = {
-    ...spec,
+    ...applied,
     include_custom: includeCustom,
     pre_giki_filter: preGiki,
     status_filter: statusFilter.length > 0 ? statusFilter : undefined

@@ -9,21 +9,21 @@ import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import type { OrgFilters } from "@/lib/analytics/insights/cohort-spec";
 
 export function CohortBuilderBody() {
-  const { spec, setSpec } = useCohort();
+  const { draft, setDraft } = useCohort();
 
   function updateOrg(patch: Partial<OrgFilters>) {
-    setSpec({ ...spec, org_filters: { ...spec.org_filters, ...patch } });
+    setDraft({ ...draft, org_filters: { ...draft.org_filters, ...patch } });
   }
 
   return (
     <>
-      <CohortTierStatusRow orgFilters={spec.org_filters} onChange={updateOrg} />
-      <CohortTagsRow orgFilters={spec.org_filters} onChange={updateOrg} />
+      <CohortTierStatusRow orgFilters={draft.org_filters} onChange={updateOrg} />
+      <CohortTagsRow orgFilters={draft.org_filters} onChange={updateOrg} />
       <WorkshopPicker
-        selectedUuids={spec.org_filters.workshop_uuids ?? []}
+        selectedUuids={draft.org_filters.workshop_uuids ?? []}
         onChange={(next) => updateOrg({ workshop_uuids: next })}
       />
-      <CohortOrgExtras orgFilters={spec.org_filters} onChange={updateOrg} />
+      <CohortOrgExtras orgFilters={draft.org_filters} onChange={updateOrg} />
       <CohortFactFilters />
     </>
   );

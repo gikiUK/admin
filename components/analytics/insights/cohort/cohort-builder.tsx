@@ -1,6 +1,6 @@
 "use client";
 
-import { RotateCcw } from "lucide-react";
+import { Check, RotateCcw, Undo2 } from "lucide-react";
 import { useState } from "react";
 import { CohortBuilderBody } from "@/components/analytics/insights/cohort/cohort-builder-body";
 import { Button } from "@/components/ui/button";
@@ -13,13 +13,28 @@ type Props = {
 };
 
 export function CohortBuilder({ embedded = false }: Props = {}) {
-  const { reset } = useCohort();
+  const { reset, apply, discard, hasUnsavedChanges } = useCohort();
   const [collapsed, setCollapsed] = useState(false);
+
+  const footer = hasUnsavedChanges ? (
+    <div className="sticky bottom-0 mt-4 flex items-center justify-end gap-2 border-t bg-card/95 py-3 backdrop-blur">
+      <span className="mr-auto text-xs text-muted-foreground">Unsaved changes</span>
+      <Button variant="ghost" size="sm" onClick={discard}>
+        <Undo2 className="size-3.5" />
+        Discard
+      </Button>
+      <Button size="sm" onClick={() => apply()}>
+        <Check className="size-3.5" />
+        Apply
+      </Button>
+    </div>
+  ) : null;
 
   if (embedded) {
     return (
       <div className="space-y-5 pt-2">
         <CohortBuilderBody />
+        {footer}
       </div>
     );
   }
@@ -47,6 +62,7 @@ export function CohortBuilder({ embedded = false }: Props = {}) {
       {!collapsed && (
         <CardContent className="space-y-5">
           <CohortBuilderBody />
+          {footer}
         </CardContent>
       )}
     </Card>
