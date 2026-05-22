@@ -39,11 +39,15 @@ export function CohortProvider({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams();
   const urlEncoded = searchParams.get("cohort");
 
-  // CohortProvider only renders on the client (parent layout is "use client"), so
-  // we can read localStorage synchronously on first render — no SSR hydration risk.
-  // Reading it in an effect instead caused a one-frame render with the empty default
-  // spec, which let React Query return a cached "ready" entry for that empty spec
-  // and produced a flash of stale data on first navigation into the page.
+  // Read localStorage synchronously on first render. CohortProvider only renders
+  // on the client (parent layout is "use client"), so there's no SSR mismatch risk.
+  // Reading it in a post-mount effect instead caused a one-frame render with the
+  // empty default spec, which let React Query return a cached "ready" entry for
+  // that spec and produced a flash of stale data on first navigation into the page.
+  //
+  // Cross-tab sync is not supported: if another tab updates localStorage, this tab
+  // continues using its mount-time value until something here calls setStoredEncoded.
+  // Add a `storage` event listener if that ever matters.
   const [storedEncoded, setStoredEncoded] = useState<string | null>(() => readStoredEncoded());
 
   // Local override lets setSpec update the UI immediately while the URL/LS write
