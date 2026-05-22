@@ -7,7 +7,6 @@ import { CorrelationsSection } from "@/components/analytics/actions/correlations
 import { EngagementScatter } from "@/components/analytics/actions/engagement-scatter";
 import { FunnelSection } from "@/components/analytics/actions/funnel-section";
 import { LeaderboardChart } from "@/components/analytics/actions/leaderboard-chart";
-import { ThemeTreemap } from "@/components/analytics/actions/theme-treemap";
 import { TrendsSection } from "@/components/analytics/actions/trends-section";
 import { DateRangePicker, isPreset, presetToRange } from "@/components/analytics/date-range-picker";
 import { PendingBackend } from "@/components/analytics/pending-backend";
@@ -65,7 +64,6 @@ export default function AnalyticsActionsPage() {
       />
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">Funnel</h2>
         {funnel.status === "loading" && <div className="text-sm text-muted-foreground">Loading funnel…</div>}
         {funnel.status === "pending-backend" && <PendingBackend endpoint="GET /admin/analytics/actions/funnel" />}
         {funnel.status === "error" && <div className="text-sm text-destructive">{funnel.message}</div>}
@@ -73,7 +71,6 @@ export default function AnalyticsActionsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">Correlations</h2>
         {correlations.status === "loading" && (
           <div className="text-sm text-muted-foreground">Loading correlations…</div>
         )}
@@ -85,7 +82,6 @@ export default function AnalyticsActionsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">Engagement quality</h2>
         {leaderboard.status === "loading" && <div className="text-sm text-muted-foreground">Loading actions…</div>}
         {leaderboard.status === "pending-backend" && <PendingBackend endpoint="GET /admin/analytics/actions" />}
         {leaderboard.status === "error" && <div className="text-sm text-destructive">{leaderboard.message}</div>}
@@ -93,20 +89,13 @@ export default function AnalyticsActionsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">Adoption</h2>
         {leaderboard.status === "loading" && <div className="text-sm text-muted-foreground">Loading leaderboard…</div>}
         {leaderboard.status === "pending-backend" && <PendingBackend endpoint="GET /admin/analytics/actions" />}
         {leaderboard.status === "error" && <div className="text-sm text-destructive">{leaderboard.message}</div>}
-        {leaderboard.status === "ready" && (
-          <div className="space-y-4">
-            <LeaderboardChart rows={leaderboard.data.actions} />
-            <ThemeTreemap rows={leaderboard.data.actions} />
-          </div>
-        )}
+        {leaderboard.status === "ready" && <LeaderboardChart rows={leaderboard.data.actions} />}
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">Catalog health</h2>
         {leaderboard.status === "loading" && <div className="text-sm text-muted-foreground">Loading catalog…</div>}
         {leaderboard.status === "pending-backend" && <PendingBackend endpoint="GET /admin/analytics/actions" />}
         {leaderboard.status === "error" && <div className="text-sm text-destructive">{leaderboard.message}</div>}
@@ -114,7 +103,6 @@ export default function AnalyticsActionsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">Trends</h2>
         {trends.status === "loading" && <div className="text-sm text-muted-foreground">Loading trends…</div>}
         {trends.status === "pending-backend" && <PendingBackend endpoint="GET /admin/analytics/actions/trends" />}
         {trends.status === "error" && <div className="text-sm text-destructive">{trends.message}</div>}
