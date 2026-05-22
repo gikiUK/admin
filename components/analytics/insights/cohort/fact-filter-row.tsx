@@ -23,24 +23,37 @@ export function FactFilterRow({ filter, dataset, onChange, onRemove }: Props) {
   const question = findFactFilterQuestion(dataset, filter.key);
   const options = buildFactFilterOptions(dataset, filter.key);
   const selectedKeys = filter.values.map(String);
+  const isBoolean = question?.type === "boolean_state";
 
   function setKey(key: string) {
     onChange({ ...filter, key, values: [] });
   }
 
   function toggleValue(value: string | number | boolean) {
+    // Booleans are single-select: picking Yes/No replaces, picking the same value clears.
+    if (isBoolean) {
+      const k = String(value);
+      const next = selectedKeys.includes(k) ? [] : [value];
+      onChange({ ...filter, values: next });
+      return;
+    }
     const k = String(value);
     const next = selectedKeys.includes(k) ? filter.values.filter((v) => String(v) !== k) : [...filter.values, value];
     onChange({ ...filter, values: next });
   }
 
+  // Single-value booleans read as "is Yes"; multi-value filters keep "is any of".
+  const connector = isBoolean ? "is" : "is any of";
+  // Once a boolean has its single value picked, hide the "Add value" trigger — replace via the badge.
+  const showValuePicker = filter.key && !(isBoolean && filter.values.length > 0);
+
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-md border bg-card px-3 py-2">
       <QuestionPicker dataset={dataset} selectedKey={filter.key} selectedLabel={question?.label} onSelect={setKey} />
-      <span className="text-xs text-muted-foreground">is any of</span>
+      <span className="text-xs text-muted-foreground">{connector}</span>
       <div className="flex flex-wrap items-center gap-1">
         <ValueBadges values={filter.values} options={options} onRemove={toggleValue} />
-        {filter.key && <ValuePicker options={options} selectedKeys={selectedKeys} onToggle={toggleValue} />}
+        {showValuePicker && <ValuePicker options={options} selectedKeys={selectedKeys} onToggle={toggleValue} />}
       </div>
       <Button variant="ghost" size="icon" onClick={onRemove} aria-label="Remove fact filter" className="ml-auto size-7">
         <Trash2 className="size-3.5" />

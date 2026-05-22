@@ -16,11 +16,11 @@ type Props = {
 };
 
 export function CohortSummaryPill({ cohortSize, totalOrgs }: Props) {
-  const { spec, reset } = useCohort();
+  const { applied, reset } = useCohort();
   const { data: dataset } = useLiveDataset();
 
-  const chips = buildCohortChips(spec, dataset);
-  const empty = isEmptySpec(spec);
+  const chips = buildCohortChips(applied, dataset);
+  const empty = isEmptySpec(applied);
 
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-md border bg-card px-3 py-2">

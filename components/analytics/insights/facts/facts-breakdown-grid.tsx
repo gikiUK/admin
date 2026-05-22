@@ -7,7 +7,6 @@ import { FactsBreakdownGridSkeleton } from "@/components/analytics/insights/skel
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import { isEmptySpec } from "@/lib/analytics/insights/cohort-spec";
 import { useBaselineFactsBreakdown } from "@/lib/analytics/insights/use-baseline-facts-breakdown";
-import { useDebouncedValue } from "@/lib/analytics/insights/use-debounced-value";
 import { useFactsBreakdown } from "@/lib/analytics/insights/use-facts-breakdown";
 import { usePersistentKeys } from "@/lib/analytics/insights/use-persistent-keys";
 
@@ -15,14 +14,13 @@ const DEFAULT_FACT_KEYS = ["size", "industries", "measures_emissions", "has_redu
 const FACT_KEYS_STORAGE_KEY = "giki:insights:facts:keys";
 
 export function FactsBreakdownGrid() {
-  const { spec } = useCohort();
-  const debouncedSpec = useDebouncedValue(spec, 200);
+  const { applied } = useCohort();
   const [factKeys, setFactKeys] = usePersistentKeys(FACT_KEYS_STORAGE_KEY, DEFAULT_FACT_KEYS);
-  const state = useFactsBreakdown(debouncedSpec, factKeys);
+  const state = useFactsBreakdown(applied, factKeys);
   const baselineState = useBaselineFactsBreakdown(factKeys);
 
   // Only show the baseline overlay when the cohort actually differs (otherwise the bars overlap).
-  const showBaseline = !isEmptySpec(debouncedSpec);
+  const showBaseline = !isEmptySpec(applied);
   const baselineByKey =
     baselineState.status === "ready" ? new Map(baselineState.data.breakdowns.map((b) => [b.key, b])) : new Map();
 

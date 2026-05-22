@@ -8,15 +8,15 @@ import { type FactFilter, newFactFilterId } from "@/lib/analytics/insights/cohor
 import { useLiveDataset } from "@/lib/analytics/use-live-dataset";
 
 export function CohortFactFilters() {
-  const { spec, setSpec } = useCohort();
+  const { draft, setDraft } = useCohort();
   const { data: dataset } = useLiveDataset();
 
   function updateFactFilters(next: FactFilter[]) {
-    setSpec({ ...spec, fact_filters: next });
+    setDraft({ ...draft, fact_filters: next });
   }
 
   function addFactFilter() {
-    updateFactFilters([...spec.fact_filters, { id: newFactFilterId(), key: "", values: [] }]);
+    updateFactFilters([...draft.fact_filters, { id: newFactFilterId(), key: "", values: [] }]);
   }
 
   return (
@@ -28,17 +28,17 @@ export function CohortFactFilters() {
           Add fact filter
         </Button>
       </div>
-      {spec.fact_filters.length === 0 ? (
+      {draft.fact_filters.length === 0 ? (
         <p className="text-xs text-muted-foreground">No fact filters. Cohort defined by org filters only.</p>
       ) : (
         <div className="space-y-2">
-          {spec.fact_filters.map((filter) => (
+          {draft.fact_filters.map((filter) => (
             <FactFilterRow
               key={filter.id}
               filter={filter}
               dataset={dataset}
-              onChange={(next) => updateFactFilters(spec.fact_filters.map((f) => (f.id === filter.id ? next : f)))}
-              onRemove={() => updateFactFilters(spec.fact_filters.filter((f) => f.id !== filter.id))}
+              onChange={(next) => updateFactFilters(draft.fact_filters.map((f) => (f.id === filter.id ? next : f)))}
+              onRemove={() => updateFactFilters(draft.fact_filters.filter((f) => f.id !== filter.id))}
             />
           ))}
         </div>

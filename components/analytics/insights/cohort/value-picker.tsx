@@ -11,10 +11,11 @@ import { cn } from "@/lib/utils";
 type Props = {
   options: OptionPair[];
   selectedKeys: string[];
-  onToggle: (value: string | number) => void;
+  onToggle: (value: string | number | boolean) => void;
+  triggerLabel?: string;
 };
 
-export function ValuePicker({ options, selectedKeys, onToggle }: Props) {
+export function ValuePicker({ options, selectedKeys, onToggle, triggerLabel = "Add value" }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -22,7 +23,7 @@ export function ValuePicker({ options, selectedKeys, onToggle }: Props) {
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="h-7 gap-1 text-xs">
           <ChevronsUpDown className="size-3" />
-          Add value
+          {triggerLabel}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[280px] p-0" align="start" portal={false}>
@@ -37,7 +38,14 @@ export function ValuePicker({ options, selectedKeys, onToggle }: Props) {
                   const optKey = String(opt.value);
                   const isSelected = selectedKeys.includes(optKey);
                   return (
-                    <CommandItem key={optKey} value={opt.label} onSelect={() => onToggle(opt.value)}>
+                    <CommandItem
+                      key={optKey}
+                      value={opt.label}
+                      onSelect={() => {
+                        onToggle(opt.value);
+                        setOpen(false);
+                      }}
+                    >
                       <Check className={cn("size-4", isSelected ? "opacity-100" : "opacity-0")} />
                       <span>{opt.label}</span>
                     </CommandItem>

@@ -30,154 +30,144 @@ function setUrlSearch(search: string) {
 }
 
 beforeEach(() => {
-  jest.useFakeTimers();
   window.localStorage.clear();
   routerReplace.mockClear();
   setUrlSearch("");
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
-
 describe("CohortProvider", () => {
-  test("rapid setSpec calls coalesce into a single router.replace", () => {
+  test("setDraft updates draft only; URL/localStorage stay on applied", () => {
     const { result } = renderHook(() => useCohort(), { wrapper });
 
     act(() => {
-      result.current.setSpec(specWithKey("country", "US"));
-      result.current.setSpec(specWithKey("country", "FR"));
-      result.current.setSpec(specWithKey("country", "DE"));
+      result.current.setDraft(specWithKey("country", "US"));
     });
 
-    // Override is visible immediately, but no router/LS write yet.
-    expect(result.current.spec.fact_filters[0]?.values).toEqual(["DE"]);
+    expect(result.current.draft.fact_filters[0]?.values).toEqual(["US"]);
+    expect(result.current.applied.fact_filters).toEqual([]);
+    expect(result.current.hasUnsavedChanges).toBe(true);
     expect(routerReplace).not.toHaveBeenCalled();
     expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
-
-    act(() => {
-      jest.advanceTimersByTime(150);
-    });
-
-    expect(routerReplace).toHaveBeenCalledTimes(1);
-    const finalEncoded = encodeCohortSpec(specWithKey("country", "DE"));
-    expect(routerReplace).toHaveBeenCalledWith(`?cohort=${encodeURIComponent(finalEncoded)}`, { scroll: false });
-    expect(window.localStorage.getItem(STORAGE_KEY)).toBe(finalEncoded);
   });
 
-  test("unmount mid-debounce flushes pending spec to localStorage but not the router", () => {
-    const { result, unmount } = renderHook(() => useCohort(), { wrapper });
+  test("apply() commits the current draft to URL + localStorage and clears hasUnsavedChanges", () => {
+    const { result } = renderHook(() => useCohort(), { wrapper });
 
     const next = specWithKey("country", "US");
     act(() => {
-      result.current.setSpec(next);
+      result.current.setDraft(next);
+    });
+    act(() => {
+      result.current.apply();
     });
 
-    expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
-
-    unmount();
-
-    expect(window.localStorage.getItem(STORAGE_KEY)).toBe(encodeCohortSpec(next));
-    // Router was not called — only LS is safe to touch during unmount.
-    expect(routerReplace).not.toHaveBeenCalled();
+    expect(routerReplace).toHaveBeenCalledTimes(1);
+    const encoded = encodeCohortSpec(next);
+    expect(routerReplace).toHaveBeenCalledWith(`?cohort=${encoded}`, { scroll: false });
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe(encoded);
+    expect(result.current.applied.fact_filters[0]?.values).toEqual(["US"]);
+    expect(result.current.hasUnsavedChanges).toBe(false);
   });
 
-  test("reset cancels a pending debounced flush", () => {
+  test("apply(override) commits the override spec, ignoring the current draft", () => {
     const { result } = renderHook(() => useCohort(), { wrapper });
 
     act(() => {
-      result.current.setSpec(specWithKey("country", "US"));
+      result.current.setDraft(specWithKey("country", "US"));
+    });
+    const override = specWithKey("country", "FR");
+    act(() => {
+      result.current.apply(override);
+    });
+
+    expect(result.current.applied.fact_filters[0]?.values).toEqual(["FR"]);
+    expect(result.current.draft.fact_filters[0]?.values).toEqual(["FR"]);
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe(encodeCohortSpec(override));
+  });
+
+  test("discard reverts the draft to applied without touching URL/localStorage", () => {
+    const { result } = renderHook(() => useCohort(), { wrapper });
+
+    act(() => {
+      result.current.setDraft(specWithKey("country", "US"));
+    });
+    act(() => {
+      result.current.discard();
+    });
+
+    expect(result.current.draft.fact_filters).toEqual([]);
+    expect(result.current.hasUnsavedChanges).toBe(false);
+    expect(routerReplace).not.toHaveBeenCalled();
+  });
+
+  test("reset clears both draft and applied + URL + localStorage", () => {
+    setUrlSearch(`cohort=${encodeCohortSpec(specWithKey("country", "US"))}`);
+    const { result, rerender } = renderHook(() => useCohort(), { wrapper });
+
+    act(() => {
+      result.current.setDraft(specWithKey("country", "FR"));
     });
     act(() => {
       result.current.reset();
+      // In real Next.js router.replace("?") drops the cohort param and useSearchParams updates.
+      // Mirror that here so applied recomputes from the empty URL + cleared localStorage.
+      setUrlSearch("");
     });
-    act(() => {
-      jest.advanceTimersByTime(500);
-    });
+    rerender();
 
-    // The setSpec write must not land after reset — only the reset's own
-    // router.replace should be visible.
-    expect(routerReplace).toHaveBeenCalledTimes(1);
-    expect(routerReplace).toHaveBeenCalledWith("?", { scroll: false });
+    expect(result.current.applied.fact_filters).toEqual([]);
+    expect(result.current.draft.fact_filters).toEqual([]);
+    expect(routerReplace).toHaveBeenLastCalledWith("?", { scroll: false });
     expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 
-  test("beforeunload writes pending encoded spec to localStorage", () => {
-    const { result } = renderHook(() => useCohort(), { wrapper });
-
-    const next = specWithKey("country", "US");
-    act(() => {
-      result.current.setSpec(next);
-    });
-
-    expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
-
-    act(() => {
-      window.dispatchEvent(new Event("beforeunload"));
-    });
-
-    expect(window.localStorage.getItem(STORAGE_KEY)).toBe(encodeCohortSpec(next));
-  });
-
-  test("initial spec reflects localStorage value present before mount", () => {
+  test("initial applied reflects localStorage value present before mount", () => {
     const stored = specWithKey("country", "JP");
     window.localStorage.setItem(STORAGE_KEY, encodeCohortSpec(stored));
 
     const { result } = renderHook(() => useCohort(), { wrapper });
 
-    expect(result.current.spec.fact_filters[0]?.key).toBe("country");
-    expect(result.current.spec.fact_filters[0]?.values).toEqual(["JP"]);
+    expect(result.current.applied.fact_filters[0]?.key).toBe("country");
+    expect(result.current.applied.fact_filters[0]?.values).toEqual(["JP"]);
+    // draft starts in sync with applied
+    expect(result.current.draft.fact_filters[0]?.values).toEqual(["JP"]);
+    expect(result.current.hasUnsavedChanges).toBe(false);
   });
 
-  test("incomplete fact filter row survives the debounced persist", () => {
-    const { result, rerender } = renderHook(() => useCohort(), { wrapper });
+  test("incomplete fact filter row stays in the draft until apply strips it", () => {
+    const { result } = renderHook(() => useCohort(), { wrapper });
 
     const incomplete: CohortSpec = {
       org_filters: {},
       fact_filters: [{ id: "draft", key: "", values: [] }]
     };
     act(() => {
-      result.current.setSpec(incomplete);
+      result.current.setDraft(incomplete);
     });
 
-    expect(result.current.spec.fact_filters).toHaveLength(1);
+    expect(result.current.draft.fact_filters).toHaveLength(1);
 
     act(() => {
-      jest.advanceTimersByTime(150);
+      result.current.apply();
     });
-    rerender();
 
-    expect(result.current.spec.fact_filters).toHaveLength(1);
-    expect(result.current.spec.fact_filters[0]?.key).toBe("");
+    // Apply persists the cleaned spec but also drops the incomplete row from draft
+    // so the UI stops showing "unsaved changes" for a row that wasn't sent.
+    expect(result.current.draft.fact_filters).toHaveLength(0);
+    expect(result.current.applied.fact_filters).toHaveLength(0);
   });
 
-  test("local override clears once the persisted spec catches up via URL", () => {
+  test("URL change from outside (back button) syncs applied AND pulls draft in sync if not edited", () => {
     const { result, rerender } = renderHook(() => useCohort(), { wrapper });
 
-    const next = specWithKey("country", "US");
-    act(() => {
-      result.current.setSpec(next);
-    });
+    expect(result.current.applied.fact_filters).toEqual([]);
+    expect(result.current.draft.fact_filters).toEqual([]);
 
-    // Override active: setSpec value is visible before the URL has changed.
-    expect(result.current.spec.fact_filters[0]?.values).toEqual(["US"]);
-
-    // Simulate Next router updating searchParams with what flushPersist wrote.
-    const encoded = encodeCohortSpec(next);
-    setUrlSearch(`cohort=${encodeURIComponent(encoded)}`);
-    act(() => {
-      jest.advanceTimersByTime(150);
-    });
-    rerender();
-
-    // Still resolves to the same spec — but now from persistedSpec, not localSpec.
-    expect(result.current.spec.fact_filters[0]?.values).toEqual(["US"]);
-
-    // Changing the URL out from under us (e.g. back button) should now win,
-    // because the override was cleared.
     const other = specWithKey("country", "FR");
-    setUrlSearch(`cohort=${encodeURIComponent(encodeCohortSpec(other))}`);
+    setUrlSearch(`cohort=${encodeCohortSpec(other)}`);
     rerender();
-    expect(result.current.spec.fact_filters[0]?.values).toEqual(["FR"]);
+
+    expect(result.current.applied.fact_filters[0]?.values).toEqual(["FR"]);
+    expect(result.current.draft.fact_filters[0]?.values).toEqual(["FR"]);
   });
 });

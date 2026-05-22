@@ -18,9 +18,9 @@ type Props = {
 
 export function FactBreakdownChart({ breakdown, baseline, onRemove }: Props) {
   const { data: dataset } = useLiveDataset();
-  const { spec, setSpec } = useCohort();
+  const { applied, apply } = useCohort();
 
-  const activeFilter = spec.fact_filters.find((f) => f.key === breakdown.key);
+  const activeFilter = applied.fact_filters.find((f) => f.key === breakdown.key);
   const activeValues = new Set((activeFilter?.values ?? []).map(String));
   const { title, labelFor, clickable } = buildFactBreakdownContext(dataset, breakdown.key);
   const rows = buildFactBreakdownRows({ breakdown, baseline, activeValues, labelFor });
@@ -31,8 +31,8 @@ export function FactBreakdownChart({ breakdown, baseline, onRemove }: Props) {
   function onValueClick(value: FactBreakdownValue["value"]) {
     if (!clickable || value === null) return;
     const v = value as string | number | boolean;
-    const others = spec.fact_filters.filter((f) => f.key !== breakdown.key);
-    const existing = spec.fact_filters.find((f) => f.key === breakdown.key);
+    const others = applied.fact_filters.filter((f) => f.key !== breakdown.key);
+    const existing = applied.fact_filters.find((f) => f.key === breakdown.key);
     const currentValues = existing?.values ?? [];
     const isSelected = currentValues.some((cv) => String(cv) === String(v));
     const nextValues = isSelected ? currentValues.filter((cv) => String(cv) !== String(v)) : [...currentValues, v];
@@ -40,7 +40,7 @@ export function FactBreakdownChart({ breakdown, baseline, onRemove }: Props) {
       nextValues.length === 0
         ? others
         : [...others, { id: existing?.id ?? newFactFilterId(), key: breakdown.key, values: nextValues }];
-    setSpec({ ...spec, fact_filters: nextFilters });
+    apply({ ...applied, fact_filters: nextFilters });
   }
 
   const description = (
