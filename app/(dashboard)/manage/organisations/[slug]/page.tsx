@@ -1,9 +1,9 @@
 "use client";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
 import { OrgAccessPanel } from "@/components/manage/org-access-panel";
 import { OrgDangerZone } from "@/components/manage/org-danger-zone";
 import { OrgMembersPanel } from "@/components/manage/org-members-panel";
@@ -14,40 +14,36 @@ import { OrgTagsPanel } from "@/components/manage/org-tags-panel";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api/client";
-import { fetchCompany, type ManagedCompany } from "@/lib/manage/api";
+import type { ManagedCompany } from "@/lib/manage/api";
+import { companyQuery, manageKeys } from "@/lib/manage/queries";
 
 export default function ManageOrganisationPage() {
   const { slug } = useParams<{ slug: string }>();
-  const [company, setCompany] = useState<ManagedCompany | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<{ message: string; notFound: boolean } | null>(null);
+  const queryClient = useQueryClient();
 
-  const load = useCallback(
-    (showLoading = true) => {
-      if (!slug) return;
-      if (showLoading) setLoading(true);
-      setError(null);
-      fetchCompany(slug)
-        .then((response) => setCompany(response.company))
-        .catch((err) => {
-          const notFound = err instanceof ApiError && err.isNotFound();
-          setError({
-            message: notFound ? "Organisation not found." : err instanceof Error ? err.message : "Failed to load",
-            notFound
-          });
-        })
-        .finally(() => {
-          if (showLoading) setLoading(false);
-        });
-    },
-    [slug]
-  );
+  const query = useQuery({
+    ...companyQuery(slug),
+    enabled: Boolean(slug),
+    select: (response) => response.company
+  });
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  const company = query.data;
+  const notFound = query.error instanceof ApiError && query.error.isNotFound();
+  const errorMessage = query.isError
+    ? notFound
+      ? "Organisation not found."
+      : query.error instanceof Error
+        ? query.error.message
+        : "Failed to load"
+    : "";
 
-  const refresh = useCallback(() => load(false), [load]);
+  function handleUpdate(next: ManagedCompany) {
+    queryClient.setQueryData(manageKeys.company(slug), { company: next });
+  }
+
+  function refresh() {
+    queryClient.invalidateQueries({ queryKey: manageKeys.company(slug) });
+  }
 
   return (
     <div className="space-y-6">
@@ -58,18 +54,18 @@ export default function ManageOrganisationPage() {
         </Link>
       </Button>
 
-      {loading && <div className="text-sm text-muted-foreground">Loading organisation…</div>}
-      {error && <div className="text-sm text-destructive">{error.message}</div>}
+      {query.isPending && <div className="text-sm text-muted-foreground">Loading organisation…</div>}
+      {errorMessage && <div className="text-sm text-destructive">{errorMessage}</div>}
 
       {company && (
         <>
           <PageHeader title={company.name} description={company.deleted_at ? "Deleted organisation" : undefined} />
           <OrgSummaryCard company={company} />
-          <OrgNamePanel company={company} onUpdate={setCompany} />
-          <OrgTagsPanel company={company} onUpdate={setCompany} />
-          <OrgAccessPanel company={company} onUpdate={setCompany} />
+          <OrgNamePanel company={company} onUpdate={handleUpdate} />
+          <OrgTagsPanel company={company} onUpdate={handleUpdate} />
+          <OrgAccessPanel company={company} onUpdate={handleUpdate} />
           <OrgMembersPanel slug={company.slug} onMembershipChange={refresh} />
-          <OrgOnboardingPanel company={company} onUpdate={setCompany} />
+          <OrgOnboardingPanel company={company} onUpdate={handleUpdate} />
           <OrgDangerZone company={company} />
         </>
       )}

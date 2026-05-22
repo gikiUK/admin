@@ -1,40 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SyncsTable } from "@/components/airtable/syncs-table";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { type AirtableSync, fetchSyncs, triggerSync } from "@/lib/airtable/api";
+import { triggerSync } from "@/lib/airtable/api";
+import { airtableKeys, syncsQuery } from "@/lib/airtable/queries";
 
 export default function AirtablePage() {
-  const [syncs, setSyncs] = useState<AirtableSync[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [syncing, setSyncing] = useState(false);
+  const queryClient = useQueryClient();
+  const syncs = useQuery(syncsQuery());
 
-  const loadSyncs = useCallback(() => {
-    fetchSyncs()
-      .then(setSyncs)
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load syncs"))
-      .finally(() => setLoading(false));
-  }, []);
+  const trigger = useMutation({
+    mutationFn: triggerSync,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: airtableKeys.syncs() })
+  });
 
-  useEffect(() => {
-    loadSyncs();
-  }, [loadSyncs]);
-
-  async function handleSync() {
-    setSyncing(true);
-    setError("");
-    try {
-      await triggerSync();
-      loadSyncs();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to trigger sync");
-    } finally {
-      setSyncing(false);
-    }
-  }
+  const errorMessage = (() => {
+    if (trigger.isError) return trigger.error instanceof Error ? trigger.error.message : "Failed to trigger sync";
+    if (syncs.isError) return syncs.error instanceof Error ? syncs.error.message : "Failed to load syncs";
+    return "";
+  })();
 
   return (
     <div className="space-y-6">
@@ -42,14 +28,14 @@ export default function AirtablePage() {
         title="Airtable"
         description="Sync data from Airtable"
         action={
-          <Button onClick={handleSync} disabled={syncing}>
-            {syncing ? "Syncing..." : "Sync Now"}
+          <Button onClick={() => trigger.mutate()} disabled={trigger.isPending}>
+            {trigger.isPending ? "Syncing..." : "Sync Now"}
           </Button>
         }
       />
-      {loading && <div className="text-muted-foreground">Loading...</div>}
-      {error && <div className="text-destructive">{error}</div>}
-      {!loading && !error && <SyncsTable syncs={syncs} />}
+      {syncs.isPending && <div className="text-muted-foreground">Loading...</div>}
+      {errorMessage && <div className="text-destructive">{errorMessage}</div>}
+      {!syncs.isPending && !syncs.isError && <SyncsTable syncs={syncs.data ?? []} />}
     </div>
   );
 }

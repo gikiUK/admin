@@ -1,18 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
 import { UsersTable } from "@/components/manage/users-table";
 import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Pager } from "@/components/ui/pager";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  type AnalyticsUser,
-  fetchUsers,
-  USER_STATUSES,
-  type UserStatus,
-  type UsersFilter,
-  type UsersOrder
-} from "@/lib/analytics/api";
+import { USER_STATUSES, type UserStatus, type UsersFilter, type UsersOrder } from "@/lib/analytics/api";
+import { usersQuery } from "@/lib/analytics/queries";
 import { useUrlState } from "@/lib/use-url-state";
 
 const ORDERS: Array<{ value: UsersOrder; label: string }> = [
@@ -21,6 +16,7 @@ const ORDERS: Array<{ value: UsersOrder; label: string }> = [
 ];
 
 const STATUS_ANY = "any";
+const EMPTY_META = { current_page: 1, total_count: 0, total_pages: 1 };
 
 function isUserStatus(value: string | null): value is UserStatus {
   return value !== null && (USER_STATUSES as readonly string[]).includes(value);
@@ -47,22 +43,14 @@ export function UsersExplorer() {
   const { searchParams, set } = useUrlState();
   const filter = useMemo(() => readFilter(searchParams), [searchParams]);
 
-  const [users, setUsers] = useState<AnalyticsUser[]>([]);
-  const [meta, setMeta] = useState({ current_page: 1, total_count: 0, total_pages: 1 });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    setLoading(true);
-    setError("");
-    fetchUsers(filter)
-      .then((response) => {
-        setUsers(response.results);
-        setMeta(response.meta);
-      })
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load users"))
-      .finally(() => setLoading(false));
-  }, [filter]);
+  const query = useQuery(usersQuery(filter));
+  const users = query.data?.results ?? [];
+  const meta = query.data?.meta ?? EMPTY_META;
+  const errorMessage = query.isError
+    ? query.error instanceof Error
+      ? query.error.message
+      : "Failed to load users"
+    : "";
 
   const handleQueryChange = useCallback(
     (value: string) => {
@@ -144,8 +132,12 @@ export function UsersExplorer() {
           </SelectContent>
         </Select>
       </div>
-      {error && <div className="text-sm text-destructive">{error}</div>}
-      {loading ? <div className="text-sm text-muted-foreground">Loading users…</div> : <UsersTable users={users} />}
+      {errorMessage && <div className="text-sm text-destructive">{errorMessage}</div>}
+      {query.isPending ? (
+        <div className="text-sm text-muted-foreground">Loading users…</div>
+      ) : (
+        <UsersTable users={users} />
+      )}
       <Pager
         page={meta.current_page}
         totalPages={meta.total_pages}

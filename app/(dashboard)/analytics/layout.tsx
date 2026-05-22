@@ -1,7 +1,6 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
 import { DEFAULT_PRESET, isPreset, presetToRange } from "@/components/analytics/date-range-picker";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { SummaryProvider } from "@/lib/analytics/summary-context";
@@ -10,7 +9,7 @@ export default function AnalyticsLayout({ children }: { children: React.ReactNod
   const searchParams = useSearchParams();
   const rawPreset = searchParams.get("range");
   const preset = isPreset(rawPreset) ? rawPreset : DEFAULT_PRESET;
-  const { from, to } = useMemo(() => presetToRange(preset), [preset]);
+  const { from, to } = presetToRange(preset);
 
   return (
     <SidebarInset>

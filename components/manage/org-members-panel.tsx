@@ -1,8 +1,9 @@
 "use client";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { AddMemberDialog } from "@/components/manage/add-member-dialog";
 import {
@@ -20,40 +21,43 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import type { Paginated } from "@/lib/api/client";
 import {
   deleteMembership,
-  fetchMemberships,
   MEMBERSHIP_ROLES,
   type Membership,
   type MembershipRole,
   updateMembershipRole
 } from "@/lib/manage/api";
+import { manageKeys, membershipsQuery } from "@/lib/manage/queries";
 
 type OrgMembersPanelProps = {
   slug: string;
   onMembershipChange?: () => void;
 };
 
+const MEMBERSHIPS_FILTER = { per: 100 } as const;
+
 export function OrgMembersPanel({ slug, onMembershipChange }: OrgMembersPanelProps) {
   const router = useRouter();
-  const [members, setMembers] = useState<Membership[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const queryClient = useQueryClient();
   const [pending, setPending] = useState<number | null>(null);
   const [addOpen, setAddOpen] = useState(false);
 
-  const reload = useCallback(() => {
-    setLoading(true);
-    setError("");
-    fetchMemberships(slug, { per: 100 })
-      .then((response) => setMembers(response.results))
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load members"))
-      .finally(() => setLoading(false));
-  }, [slug]);
+  const query = useQuery(membershipsQuery(slug, MEMBERSHIPS_FILTER));
+  const members = query.data?.results ?? null;
+  const errorMessage = query.isError
+    ? query.error instanceof Error
+      ? query.error.message
+      : "Failed to load members"
+    : "";
 
-  useEffect(() => {
-    reload();
-  }, [reload]);
+  function updateLocal(updater: (current: Membership[]) => Membership[]) {
+    queryClient.setQueryData<Paginated<Membership>>(manageKeys.memberships(slug, MEMBERSHIPS_FILTER), (current) => {
+      if (!current) return current;
+      return { ...current, results: updater(current.results) };
+    });
+  }
 
   async function handleRoleChange(member: Membership, role: MembershipRole) {
     if (role === member.role) return;
@@ -61,7 +65,7 @@ export function OrgMembersPanel({ slug, onMembershipChange }: OrgMembersPanelPro
     try {
       await updateMembershipRole(slug, member.id, role);
       toast.success(`${member.user.name || member.user.email} is now ${role}`);
-      setMembers((current) => (current ? current.map((m) => (m.id === member.id ? { ...m, role } : m)) : current));
+      updateLocal((current) => current.map((m) => (m.id === member.id ? { ...m, role } : m)));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to change role");
     } finally {
@@ -74,7 +78,7 @@ export function OrgMembersPanel({ slug, onMembershipChange }: OrgMembersPanelPro
     try {
       await deleteMembership(slug, member.id);
       toast.success(`${member.user.name || member.user.email} removed`);
-      setMembers((current) => (current ? current.filter((m) => m.id !== member.id) : current));
+      updateLocal((current) => current.filter((m) => m.id !== member.id));
       onMembershipChange?.();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to remove member");
@@ -94,8 +98,8 @@ export function OrgMembersPanel({ slug, onMembershipChange }: OrgMembersPanelPro
           </Button>
         </CardHeader>
         <CardContent>
-          {loading && <div className="text-sm text-muted-foreground">Loading members…</div>}
-          {error && <div className="text-sm text-destructive">{error}</div>}
+          {query.isPending && <div className="text-sm text-muted-foreground">Loading members…</div>}
+          {errorMessage && <div className="text-sm text-destructive">{errorMessage}</div>}
           {members && (
             <div className="rounded-md border">
               <Table>
@@ -184,7 +188,7 @@ export function OrgMembersPanel({ slug, onMembershipChange }: OrgMembersPanelPro
         open={addOpen}
         onOpenChange={setAddOpen}
         onAdded={() => {
-          reload();
+          queryClient.invalidateQueries({ queryKey: manageKeys.memberships(slug, MEMBERSHIPS_FILTER) });
           onMembershipChange?.();
         }}
       />

@@ -1,32 +1,31 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DownloadablesTable } from "@/components/downloads/downloadables-table";
 import { PageHeader } from "@/components/page-header";
-import { type Downloadable, fetchDownloadables } from "@/lib/downloads/api";
+import { downloadablesQuery, downloadsKeys } from "@/lib/downloads/queries";
 
 export default function DownloadsPage() {
-  const [downloadables, setDownloadables] = useState<Downloadable[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const queryClient = useQueryClient();
+  const query = useQuery(downloadablesQuery());
 
-  const load = useCallback(() => {
-    fetchDownloadables()
-      .then(setDownloadables)
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load downloadables"))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const errorMessage = query.isError
+    ? query.error instanceof Error
+      ? query.error.message
+      : "Failed to load downloadables"
+    : "";
 
   return (
     <div className="space-y-6">
       <PageHeader title="Downloads" description="Manage downloadable resources synced from Airtable" />
-      {loading && <div className="text-muted-foreground">Loading...</div>}
-      {error && <div className="text-destructive">{error}</div>}
-      {!loading && !error && <DownloadablesTable downloadables={downloadables} onChange={load} />}
+      {query.isPending && <div className="text-muted-foreground">Loading...</div>}
+      {errorMessage && <div className="text-destructive">{errorMessage}</div>}
+      {!query.isPending && !errorMessage && (
+        <DownloadablesTable
+          downloadables={query.data ?? []}
+          onChange={() => queryClient.invalidateQueries({ queryKey: downloadsKeys.list() })}
+        />
+      )}
     </div>
   );
 }

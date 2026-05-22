@@ -17,9 +17,14 @@ export function isPreset(value: string | null | undefined): value is DateRangePr
   return PRESETS.some((preset) => preset.value === value);
 }
 
+// Snap `to` down to a 5-minute bucket so the resulting strings stay stable across
+// renders within that window — otherwise every render produces a new millisecond-
+// precise timestamp and breaks query-cache hits. 5 minutes is the upper bound on
+// how stale "latest activity" can appear before a fresh visit re-keys the query.
 export function presetToRange(preset: DateRangePreset): { from: string; to: string } {
   const to = new Date();
-  const from = new Date();
+  to.setMinutes(Math.floor(to.getMinutes() / 5) * 5, 0, 0);
+  const from = new Date(to);
   switch (preset) {
     case "7d":
       from.setDate(to.getDate() - 7);

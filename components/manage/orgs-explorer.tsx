@@ -1,11 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
 import { OrgsTable } from "@/components/manage/orgs-table";
 import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Pager } from "@/components/ui/pager";
-import { type CompaniesFilter, fetchCompanies, type ManagedCompany } from "@/lib/manage/api";
+import type { CompaniesFilter } from "@/lib/manage/api";
+import { companiesQuery } from "@/lib/manage/queries";
 import { useUrlState } from "@/lib/use-url-state";
+
+const EMPTY_META = { current_page: 1, total_count: 0, total_pages: 1 };
 
 function readFilter(searchParams: URLSearchParams): CompaniesFilter {
   const page = Number(searchParams.get("page") ?? 1);
@@ -19,22 +23,14 @@ export function OrgsExplorer() {
   const { searchParams, set } = useUrlState();
   const filter = useMemo(() => readFilter(searchParams), [searchParams]);
 
-  const [companies, setCompanies] = useState<ManagedCompany[]>([]);
-  const [meta, setMeta] = useState({ current_page: 1, total_count: 0, total_pages: 1 });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    setLoading(true);
-    setError("");
-    fetchCompanies(filter)
-      .then((response) => {
-        setCompanies(response.results);
-        setMeta(response.meta);
-      })
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load organisations"))
-      .finally(() => setLoading(false));
-  }, [filter]);
+  const query = useQuery(companiesQuery(filter));
+  const companies = query.data?.results ?? [];
+  const meta = query.data?.meta ?? EMPTY_META;
+  const errorMessage = query.isError
+    ? query.error instanceof Error
+      ? query.error.message
+      : "Failed to load organisations"
+    : "";
 
   const handleNameChange = useCallback(
     (value: string) => {
@@ -60,8 +56,8 @@ export function OrgsExplorer() {
           aria-label="Search organisations"
         />
       </div>
-      {error && <div className="text-sm text-destructive">{error}</div>}
-      {loading ? (
+      {errorMessage && <div className="text-sm text-destructive">{errorMessage}</div>}
+      {query.isPending ? (
         <div className="text-sm text-muted-foreground">Loading organisations…</div>
       ) : (
         <OrgsTable companies={companies} />

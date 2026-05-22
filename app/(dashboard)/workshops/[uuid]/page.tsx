@@ -1,8 +1,8 @@
 "use client";
 
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { Link } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
 import { CompaniesPanel } from "@/components/workshops/companies-panel";
@@ -10,54 +10,52 @@ import { EmailSection } from "@/components/workshops/email-section";
 import { InviteesPanel } from "@/components/workshops/invitees-panel";
 import { WorkshopDetailsForm } from "@/components/workshops/workshop-details-form";
 import { getFrontendUrl } from "@/lib/api/config";
-import type { Workshop, WorkshopCompany, WorkshopFormData, WorkshopInvitee } from "@/lib/workshops/api";
+import type { Workshop, WorkshopFormData } from "@/lib/workshops/api";
+import { sendFollowupEmails, sendReminderEmails, sendWelcomeEmails, updateWorkshop } from "@/lib/workshops/api";
 import {
-  fetchCompanies,
-  fetchInvitees,
-  fetchWorkshop,
-  sendFollowupEmails,
-  sendReminderEmails,
-  sendWelcomeEmails,
-  updateWorkshop
-} from "@/lib/workshops/api";
+  workshopCompaniesQuery,
+  workshopDetailQuery,
+  workshopInviteesQuery,
+  workshopsKeys
+} from "@/lib/workshops/queries";
 
 export default function WorkshopPage() {
   const { uuid } = useParams<{ uuid: string }>();
-  const [workshop, setWorkshop] = useState<Workshop | null>(null);
-  const [invitees, setInvitees] = useState<WorkshopInvitee[]>([]);
-  const [companies, setCompanies] = useState<WorkshopCompany[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const queryClient = useQueryClient();
 
-  const loadWorkshop = useCallback(() => fetchWorkshop(uuid).then(setWorkshop), [uuid]);
-  const loadInvitees = useCallback(() => fetchInvitees(uuid).then(setInvitees), [uuid]);
-  const loadCompanies = useCallback(() => fetchCompanies(uuid).then(setCompanies), [uuid]);
+  const [workshopQuery, inviteesQuery, companiesQuery] = useQueries({
+    queries: [workshopDetailQuery(uuid), workshopInviteesQuery(uuid), workshopCompaniesQuery(uuid)]
+  });
 
-  const load = useCallback(() => {
-    setLoading(true);
-    Promise.all([loadWorkshop(), loadInvitees(), loadCompanies()])
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [loadWorkshop, loadInvitees, loadCompanies]);
+  const workshop = workshopQuery.data;
+  const invitees = inviteesQuery.data ?? [];
+  const companies = companiesQuery.data ?? [];
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  const loading = workshopQuery.isPending || inviteesQuery.isPending || companiesQuery.isPending;
+  const errorMessage = (() => {
+    const err = workshopQuery.error ?? inviteesQuery.error ?? companiesQuery.error;
+    if (!err) return "";
+    return err instanceof Error ? err.message : "Failed to load workshop";
+  })();
+
+  function refreshInvitees() {
+    queryClient.invalidateQueries({ queryKey: workshopsKeys.invitees(uuid) });
+  }
 
   async function handleSaveDetails(data: WorkshopFormData) {
     const updated = await updateWorkshop(uuid, data);
-    setWorkshop(updated);
+    queryClient.setQueryData<Workshop>(workshopsKeys.detail(uuid), updated);
   }
 
   function makeEmailSaver(field: "welcome_email_body" | "reminder_email_body" | "followup_email_body") {
     return async (body: string) => {
       const updated = await updateWorkshop(uuid, { [field]: body });
-      setWorkshop(updated);
+      queryClient.setQueryData<Workshop>(workshopsKeys.detail(uuid), updated);
     };
   }
 
   if (loading) return <p className="text-muted-foreground text-sm p-6">Loading…</p>;
-  if (error || !workshop) return <p className="text-destructive text-sm p-6">{error || "Not found"}</p>;
+  if (errorMessage || !workshop) return <p className="text-destructive text-sm p-6">{errorMessage || "Not found"}</p>;
 
   const inviteUrl = getFrontendUrl(`/auth/workshop/${workshop.invite_code}`);
 
@@ -92,7 +90,7 @@ export default function WorkshopPage() {
         </span>
       </button>
       <WorkshopDetailsForm initial={workshop} onSave={handleSaveDetails} />
-      <InviteesPanel workshopUuid={uuid} invitees={invitees} onChange={loadInvitees} />
+      <InviteesPanel workshopUuid={uuid} invitees={invitees} onChange={refreshInvitees} />
       <CompaniesPanel companies={companies} />
       <EmailSection
         title="Welcome Email"
