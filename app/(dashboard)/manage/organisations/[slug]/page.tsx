@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback } from "react";
 import { OrgAccessPanel } from "@/components/manage/org-access-panel";
 import { OrgDangerZone } from "@/components/manage/org-danger-zone";
 import { OrgMembersPanel } from "@/components/manage/org-members-panel";
@@ -38,16 +37,13 @@ export default function ManageOrganisationPage() {
         : "Failed to load"
     : "";
 
-  const handleUpdate = useCallback(
-    (next: ManagedCompany) => {
-      queryClient.setQueryData(manageKeys.company(slug), { company: next });
-    },
-    [queryClient, slug]
-  );
+  function handleUpdate(next: ManagedCompany) {
+    queryClient.setQueryData(manageKeys.company(slug), { company: next });
+  }
 
-  const refresh = useCallback(() => {
+  function refresh() {
     queryClient.invalidateQueries({ queryKey: manageKeys.company(slug) });
-  }, [queryClient, slug]);
+  }
 
   return (
     <div className="space-y-6">

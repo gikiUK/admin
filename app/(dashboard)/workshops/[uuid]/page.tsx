@@ -3,7 +3,6 @@
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { Link } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useCallback } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
 import { CompaniesPanel } from "@/components/workshops/companies-panel";
@@ -39,10 +38,9 @@ export default function WorkshopPage() {
     return err instanceof Error ? err.message : "Failed to load workshop";
   })();
 
-  const refreshInvitees = useCallback(
-    () => queryClient.invalidateQueries({ queryKey: workshopsKeys.invitees(uuid) }),
-    [queryClient, uuid]
-  );
+  function refreshInvitees() {
+    queryClient.invalidateQueries({ queryKey: workshopsKeys.invitees(uuid) });
+  }
 
   async function handleSaveDetails(data: WorkshopFormData) {
     const updated = await updateWorkshop(uuid, data);

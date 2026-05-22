@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback } from "react";
 import { UserAccountActionsPanel } from "@/components/manage/user-account-actions-panel";
 import { UserDangerZone } from "@/components/manage/user-danger-zone";
 import { UserEmailPanel } from "@/components/manage/user-email-panel";
@@ -41,16 +40,13 @@ export default function ManageUserPage() {
           : "Failed to load"
       : "";
 
-  const handleUpdate = useCallback(
-    (next: ManagedUser) => {
-      queryClient.setQueryData(manageKeys.user(userId), { user: next });
-    },
-    [queryClient, userId]
-  );
+  function handleUpdate(next: ManagedUser) {
+    queryClient.setQueryData(manageKeys.user(userId), { user: next });
+  }
 
-  const refresh = useCallback(() => {
+  function refresh() {
     queryClient.invalidateQueries({ queryKey: manageKeys.user(userId) });
-  }, [queryClient, userId]);
+  }
 
   return (
     <div className="space-y-6">

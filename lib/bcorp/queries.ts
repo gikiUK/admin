@@ -1,4 +1,4 @@
-import { fetchBcorpData, fetchOrganizations, fetchPlan } from "@/lib/bcorp/api";
+import { fetchOrganizations, fetchPlan } from "@/lib/bcorp/api";
 
 export const bcorpKeys = {
   all: ["bcorp"] as const,
@@ -13,8 +13,4 @@ export function bcorpOrganizationsQuery() {
 
 export function bcorpPlanQuery(orgId: string) {
   return { queryKey: bcorpKeys.plan(orgId), queryFn: () => fetchPlan(orgId) };
-}
-
-export function bcorpDataQuery(orgId: string) {
-  return { queryKey: bcorpKeys.data(orgId), queryFn: () => fetchBcorpData(orgId) };
 }
