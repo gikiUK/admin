@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { ActivityChart, type ChartClickPayload, type ChartMode } from "@/components/analytics/activity-chart";
 import {
   DateRangePicker,
@@ -31,8 +31,8 @@ export function OrgActivitySection({ slug, companyId, companyName }: Props) {
 
   const rawPreset = searchParams.get("activity_range");
   const preset: DateRangePreset = isPreset(rawPreset) ? rawPreset : DEFAULT_PRESET;
-  const { from, to } = useMemo(() => presetToRange(preset), [preset]);
-  const prior = useMemo(() => previousRange(from, to), [from, to]);
+  const { from, to } = presetToRange(preset);
+  const prior = previousRange(from, to);
 
   const selected = parseSelection(searchParams.get("series"));
   const rawMode = searchParams.get("chart");

@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -14,8 +15,9 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { type AnalyticsUser, fetchUsers } from "@/lib/analytics/api";
+import type { AnalyticsUser } from "@/lib/analytics/api";
 import { createMembership, MEMBERSHIP_ROLES, type MembershipRole } from "@/lib/manage/api";
+import { userSearchQuery } from "@/lib/manage/queries";
 
 type AddMemberDialogProps = {
   slug: string;
@@ -26,46 +28,28 @@ type AddMemberDialogProps = {
 
 export function AddMemberDialog({ slug, open, onOpenChange, onAdded }: AddMemberDialogProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<AnalyticsUser[]>([]);
-  const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<AnalyticsUser | null>(null);
   const [role, setRole] = useState<MembershipRole>("standard");
   const [submitting, setSubmitting] = useState(false);
 
+  const trimmed = query.trim();
+  const searchEnabled = open && trimmed.length >= 2;
+
+  const search = useQuery({
+    ...userSearchQuery(trimmed),
+    enabled: searchEnabled
+  });
+
+  const results = searchEnabled ? (search.data?.results ?? []) : [];
+  const searching = searchEnabled && search.isFetching;
+
   useEffect(() => {
     if (!open) {
       setQuery("");
-      setResults([]);
       setSelected(null);
       setRole("standard");
     }
   }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const trimmed = query.trim();
-    if (trimmed.length < 2) {
-      setResults([]);
-      return;
-    }
-    setSearching(true);
-    let cancelled = false;
-    fetchUsers({ query: trimmed, per: 10 })
-      .then((response) => {
-        if (cancelled) return;
-        setResults(response.results);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setResults([]);
-      })
-      .finally(() => {
-        if (!cancelled) setSearching(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [open, query]);
 
   async function handleSubmit() {
     if (!selected) return;
@@ -120,7 +104,7 @@ export function AddMemberDialog({ slug, open, onOpenChange, onAdded }: AddMember
                 <div className="p-3 text-sm text-muted-foreground">Searching…</div>
               ) : results.length === 0 ? (
                 <div className="p-3 text-sm text-muted-foreground">
-                  {query.trim().length < 2 ? "Type at least 2 characters." : "No users found."}
+                  {trimmed.length < 2 ? "Type at least 2 characters." : "No users found."}
                 </div>
               ) : (
                 <ul className="divide-y">

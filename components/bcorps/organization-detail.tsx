@@ -1,19 +1,34 @@
 "use client";
 
+import { useQueries } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { BcorpDataForm } from "@/components/bcorps/bcorp-data-form";
 import { PillTab } from "@/components/bcorps/bcorp-header";
 import { PlanJsonExplorer } from "@/components/bcorps/plan-json-explorer";
 import { PlanView } from "@/components/bcorps/plan-view";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { fetchBcorpData, fetchPlan } from "@/lib/bcorp/api";
+import { fetchBcorpData } from "@/lib/bcorp/api";
 import { useBcorpHeader } from "@/lib/bcorp/bcorp-header-context";
 import { deriveFromPlan } from "@/lib/bcorp/plan-rules";
-import type { BcorpData, Plan } from "@/lib/bcorp/types";
+import { bcorpKeys, bcorpPlanQuery } from "@/lib/bcorp/queries";
+import type { BcorpData } from "@/lib/bcorp/types";
 
 type OrganizationDetailProps = {
   orgId: string;
 };
+
+// 404 from /bcorp_data means "no data yet" — return an empty form payload so the
+// rule-derived data still drives the UI. Other errors propagate.
+async function fetchBcorpDataOrEmpty(orgId: string): Promise<BcorpData> {
+  try {
+    return await fetchBcorpData(orgId);
+  } catch (err) {
+    if (err instanceof Error && "status" in err && (err as { status: number }).status === 404) {
+      return {} as BcorpData;
+    }
+    throw err;
+  }
+}
 
 export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
   const {
@@ -64,42 +79,32 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
     }
   }, [activeTab]);
 
-  const [plan, setPlanLocal] = useState<Plan | null>(null);
-  const [alreadyDoingActions, setAlreadyDoingActions] = useState<Plan | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
+  const [planQuery, bcorpDataQuery] = useQueries({
+    queries: [bcorpPlanQuery(orgId), { queryKey: bcorpKeys.data(orgId), queryFn: () => fetchBcorpDataOrEmpty(orgId) }]
+  });
 
+  const planData = planQuery.data?.plan;
+  const alreadyDoing = planQuery.data?.alreadyDoingActions ?? null;
+  const bcorpData = bcorpDataQuery.data;
+
+  // Push the loaded data into the bcorp header context. This effect runs once the
+  // two queries resolve and re-runs only when their data identities change.
   useEffect(() => {
-    async function load() {
-      try {
-        const [{ plan: planData, alreadyDoingActions: alreadyDoing }, data] = await Promise.all([
-          fetchPlan(orgId),
-          fetchBcorpData(orgId).catch((err) => {
-            if (err instanceof Error && "status" in err && (err as { status: number }).status === 404) return {};
-            throw err;
-          })
-        ]);
-        const { data: ruleData, reasoning: ruleReasoning } = deriveFromPlan(planData);
-        const merged = { ...ruleData, ...(data as BcorpData) };
-        setPlanLocal(planData);
-        setAlreadyDoingActions(alreadyDoing);
-        setPlan(planData);
-        setOrgId(orgId);
-        setOrgName(merged.name);
-        setPlanCount(planData.length);
-        setAlreadyDoingCount(alreadyDoing?.length ?? 0);
-        setBcorpFormData({ ...ruleData, ...(data as BcorpData) });
-        setBcorpFormReasoning(ruleReasoning);
-      } catch (err) {
-        setLoadError(err instanceof Error ? err.message : "Failed to load organization");
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-    return () => setOrgId("");
+    if (!planData || !bcorpData) return;
+    const { data: ruleData, reasoning: ruleReasoning } = deriveFromPlan(planData);
+    const merged = { ...ruleData, ...bcorpData };
+    setPlan(planData);
+    setOrgId(orgId);
+    setOrgName(merged.name);
+    setPlanCount(planData.length);
+    setAlreadyDoingCount(alreadyDoing?.length ?? 0);
+    setBcorpFormData(merged);
+    setBcorpFormReasoning(ruleReasoning);
   }, [
     orgId,
+    planData,
+    alreadyDoing,
+    bcorpData,
     setPlan,
     setOrgId,
     setOrgName,
@@ -109,8 +114,21 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
     setBcorpFormReasoning
   ]);
 
+  useEffect(() => {
+    return () => setOrgId("");
+  }, [setOrgId]);
+
+  const loading = planQuery.isPending || bcorpDataQuery.isPending;
+  const loadError = (() => {
+    const err = planQuery.error ?? bcorpDataQuery.error;
+    if (!err) return "";
+    return err instanceof Error ? err.message : "Failed to load organization";
+  })();
+
   if (loading) return <div className="text-muted-foreground">Loading...</div>;
   if (loadError) return <div className="text-destructive">{loadError}</div>;
+
+  const plan = planData ?? [];
 
   return (
     <>
@@ -152,7 +170,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
           </PillTab>
           <div className="flex items-center rounded-full bg-muted/60 overflow-hidden">
             <PillTab value="plan" active={activeTab} onClick={setActiveTab}>
-              Plan ({plan?.length ?? 0})
+              Plan ({plan.length})
             </PillTab>
             <div className="w-px h-3.5 bg-border/70 shrink-0" />
             <PillTab value="json" active={activeTab} onClick={setActiveTab}>
@@ -161,7 +179,7 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
           </div>
           <div className="flex items-center rounded-full bg-muted/60 overflow-hidden">
             <PillTab value="already-doing" active={activeTab} onClick={setActiveTab}>
-              Already Doing ({alreadyDoingActions?.length ?? 0})
+              Already Doing ({alreadyDoing?.length ?? 0})
             </PillTab>
             <div className="w-px h-3.5 bg-border/70 shrink-0" />
             <PillTab value="already-doing-json" active={activeTab} onClick={setActiveTab}>
@@ -179,16 +197,16 @@ export function OrganizationDetail({ orgId }: OrganizationDetailProps) {
           {bcorpFormData !== null && <BcorpDataForm orgId={orgId} initialData={bcorpFormData} />}
         </TabsContent>
         <TabsContent value="plan" className="mt-3 max-w-[760px]">
-          <PlanView plan={plan ?? []} />
+          <PlanView plan={plan} />
         </TabsContent>
         <TabsContent value="json" className="mt-3">
-          <PlanJsonExplorer plan={plan ?? []} />
+          <PlanJsonExplorer plan={plan} />
         </TabsContent>
         <TabsContent value="already-doing" className="mt-3 max-w-[760px]">
-          <PlanView plan={alreadyDoingActions ?? []} showFilters={false} />
+          <PlanView plan={alreadyDoing ?? []} showFilters={false} />
         </TabsContent>
         <TabsContent value="already-doing-json" className="mt-3">
-          <PlanJsonExplorer plan={alreadyDoingActions ?? []} />
+          <PlanJsonExplorer plan={alreadyDoing ?? []} />
         </TabsContent>
         <TabsContent value="preview" className="mt-3">
           <iframe

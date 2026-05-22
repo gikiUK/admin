@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { ActivityChart, type ChartClickPayload, type ChartMode } from "@/components/analytics/activity-chart";
 import { AtRiskOrgs } from "@/components/analytics/at-risk-orgs";
 import { DEFAULT_PRESET, isPreset, presetToRange, previousRange } from "@/components/analytics/date-range-picker";
@@ -34,8 +34,8 @@ export function ActivityTab({ data }: ActivityTabProps) {
 
   const rawPreset = searchParams.get("range");
   const preset = isPreset(rawPreset) ? rawPreset : DEFAULT_PRESET;
-  const { from, to } = useMemo(() => presetToRange(preset), [preset]);
-  const prior = useMemo(() => previousRange(from, to), [from, to]);
+  const { from, to } = presetToRange(preset);
+  const prior = previousRange(from, to);
 
   const previous = usePreviousSeries(prior.from, prior.to, compare);
   const previousData = previous.status === "ready" ? previous.data : null;
