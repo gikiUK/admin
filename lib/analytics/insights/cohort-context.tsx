@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { type CohortSpec, decodeCohortSpec, encodeCohortSpec } from "@/lib/analytics/insights/cohort-spec";
 
 type CohortContextValue = {
@@ -39,12 +40,26 @@ export function CohortProvider({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams();
   const urlEncoded = searchParams.get("cohort");
 
-  // localStorage is read once on mount so SSR and the first client render agree
-  // (both see `null`), then we hydrate from LS in an effect to avoid a mismatch.
+  // We can't read localStorage during render: "use client" components still
+  // server-render for the initial HTML, so a sync read causes a hydration
+  // mismatch whenever storage has data. We also can't read it in a post-mount
+  // effect: that gives children one frame with the empty default spec, which
+  // lets React Query return a cached "ready" entry for that spec and produces
+  // a flash of stale data on first navigation in.
+  //
+  // Compromise: gate rendering until we've read storage. Server and first
+  // client render both return null (no mismatch), and children mount once with
+  // the real stored spec already in place (no flash).
+  //
+  // Cross-tab sync is not supported: if another tab updates localStorage, this
+  // tab continues using its mount-time value. Add a `storage` listener if that
+  // ever matters.
   const [storedEncoded, setStoredEncoded] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
-    if (urlEncoded === null) setStoredEncoded(readStoredEncoded());
-  }, [urlEncoded]);
+    setStoredEncoded(readStoredEncoded());
+    setHydrated(true);
+  }, []);
 
   // Local override lets setSpec update the UI immediately while the URL/LS write
   // is debounced. Cleared whenever the URL catches up to the override.
@@ -123,7 +138,22 @@ export function CohortProvider({ children }: { children: ReactNode }) {
     router.replace(query ? `?${query}` : "?", { scroll: false });
   }, [router]);
 
+  if (!hydrated) return <InsightsHydrationSkeleton />;
+
   return <CohortContext.Provider value={{ spec, setSpec, reset }}>{children}</CohortContext.Provider>;
+}
+
+// Shown only during the SSR pass and the first client render — replaced by real
+// content on the next tick once the hydration effect runs. Generic on purpose
+// since the provider doesn't know which insights page is mounting.
+function InsightsHydrationSkeleton() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-10 w-64" />
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-64 w-full" />
+    </div>
+  );
 }
 
 export function useCohort(): CohortContextValue {
