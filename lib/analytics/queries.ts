@@ -5,7 +5,17 @@ import {
   fetchActionLeaderboard,
   fetchActionTrends
 } from "@/lib/analytics/actions-api";
-import { fetchOrganizationActivity, fetchSummary } from "@/lib/analytics/api";
+import {
+  type EventsFilter,
+  fetchEvents,
+  fetchOrganization,
+  fetchOrganizationActivity,
+  fetchOrganizations,
+  fetchSummary,
+  fetchUsers,
+  type OrgsFilter,
+  type UsersFilter
+} from "@/lib/analytics/api";
 
 export const analyticsKeys = {
   all: ["analytics"] as const,
@@ -17,7 +27,11 @@ export const analyticsKeys = {
     ["analytics", "action-leaderboard", from, to, kind] as const,
   actionTrends: (weeks: number, kind: ActionKind) => ["analytics", "action-trends", weeks, kind] as const,
   organizationActivity: (slug: string, from: string, to: string) =>
-    ["analytics", "organization-activity", slug, from, to] as const
+    ["analytics", "organization-activity", slug, from, to] as const,
+  events: (filter: EventsFilter) => ["analytics", "events", filter] as const,
+  organizations: (filter: OrgsFilter) => ["analytics", "organizations", filter] as const,
+  users: (filter: UsersFilter) => ["analytics", "users", filter] as const,
+  organization: (slug: string) => ["analytics", "organization", slug] as const
 };
 
 export function summaryQuery(from: string, to: string) {
@@ -57,4 +71,20 @@ export function organizationActivityQuery(slug: string, from: string, to: string
     queryKey: analyticsKeys.organizationActivity(slug, from, to),
     queryFn: () => fetchOrganizationActivity(slug, from, to)
   };
+}
+
+export function eventsQuery(filter: EventsFilter) {
+  return { queryKey: analyticsKeys.events(filter), queryFn: () => fetchEvents(filter) };
+}
+
+export function organizationsQuery(filter: OrgsFilter) {
+  return { queryKey: analyticsKeys.organizations(filter), queryFn: () => fetchOrganizations(filter) };
+}
+
+export function usersQuery(filter: UsersFilter) {
+  return { queryKey: analyticsKeys.users(filter), queryFn: () => fetchUsers(filter) };
+}
+
+export function organizationQuery(slug: string) {
+  return { queryKey: analyticsKeys.organization(slug), queryFn: () => fetchOrganization(slug) };
 }

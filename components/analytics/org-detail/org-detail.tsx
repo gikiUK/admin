@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { OrgActivitySection } from "@/components/analytics/org-activity-section";
-import { type AnalyticsOrganizationDetail, fetchOrganization } from "@/lib/analytics/api";
+import { organizationQuery } from "@/lib/analytics/queries";
 import { useUrlState } from "@/lib/use-url-state";
 import { FactsSection } from "./facts-section";
 import { isSectionId, KpiStrip, type SectionId } from "./kpi-strip";
@@ -16,26 +16,25 @@ type OrgDetailProps = {
 };
 
 export function OrgDetail({ slug }: OrgDetailProps) {
-  const [data, setData] = useState<AnalyticsOrganizationDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const query = useQuery({
+    ...organizationQuery(slug),
+    select: (response) => response.organization
+  });
+  const data = query.data;
+  const errorMessage = query.isError
+    ? query.error instanceof Error
+      ? query.error.message
+      : "Failed to load organisation"
+    : "";
+
   const { searchParams, set } = useUrlState();
   const rawSection = searchParams.get("section");
   const activeSection: SectionId = isSectionId(rawSection) ? rawSection : "activity";
 
-  useEffect(() => {
-    setLoading(true);
-    setError("");
-    fetchOrganization(slug)
-      .then((response) => setData(response.organization))
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load organisation"))
-      .finally(() => setLoading(false));
-  }, [slug]);
-
   return (
     <div className="space-y-6">
-      {loading && <div className="text-sm text-muted-foreground">Loading organisation…</div>}
-      {error && <div className="text-sm text-destructive">{error}</div>}
+      {query.isPending && <div className="text-sm text-muted-foreground">Loading organisation…</div>}
+      {errorMessage && <div className="text-sm text-destructive">{errorMessage}</div>}
 
       {data && (
         <>
