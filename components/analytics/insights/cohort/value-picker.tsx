@@ -25,7 +25,7 @@ export function ValuePicker({ options, selectedKeys, onToggle }: Props) {
           Add value
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-0" align="start">
+      <PopoverContent className="w-[280px] p-0" align="start" portal={false}>
         <Command>
           <CommandInput placeholder="Search values…" />
           <CommandList>

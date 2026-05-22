@@ -40,7 +40,7 @@ export function TagPickerPopover({ state, universe, value, triggerLabel, onToggl
           {triggerLabel}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-0" align="start">
+      <PopoverContent className="w-[280px] p-0" align="start" portal={false}>
         <Command>
           <CommandInput placeholder="Search tags…" value={search} onValueChange={setSearch} />
           <CommandList>

@@ -25,7 +25,7 @@ export function QuestionPicker({ dataset, selectedKey, selectedLabel, onSelect }
           {selectedLabel ?? selectedKey ?? "Pick question"}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[340px] p-0" align="start">
+      <PopoverContent className="w-[340px] p-0" align="start" portal={false}>
         <Command>
           <CommandInput placeholder="Search questions…" />
           <CommandList>
@@ -46,7 +46,7 @@ export function QuestionPicker({ dataset, selectedKey, selectedLabel, onSelect }
                       className="flex flex-col items-start gap-0.5 py-2"
                     >
                       <span className="text-sm">{q.label}</span>
-                      <span className="text-[10px] text-muted-foreground">{q.key}</span>
+                      <span className="text-xs text-muted-foreground">{q.key}</span>
                     </CommandItem>
                   ))}
               </CommandGroup>

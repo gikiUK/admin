@@ -28,7 +28,7 @@ export function WorkshopPickerPopover({ workshops, totalCount, selectedUuids, tr
           {triggerLabel}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[320px] p-0" align="start">
+      <PopoverContent className="w-[320px] p-0" align="start" portal={false}>
         <Command>
           <CommandInput placeholder="Search workshops…" />
           <CommandList>
