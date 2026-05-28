@@ -4,6 +4,7 @@ export type Workshop = {
   uuid: string;
   title: string;
   scheduled_at: string;
+  expires_at: string;
   streaming_url: string | null;
   invite_code: string;
   welcome_email_body: string | null;
@@ -34,6 +35,7 @@ export type WorkshopCompany = {
 export type WorkshopFormData = {
   title?: string;
   scheduled_at?: string;
+  expires_at?: string;
   streaming_url?: string;
   welcome_email_body?: string;
   reminder_email_body?: string;

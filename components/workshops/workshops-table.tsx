@@ -25,6 +25,7 @@ export function WorkshopsTable({ workshops, page, totalPages, onPageChange }: Pr
             <TableRow>
               <TableHead>Title</TableHead>
               <TableHead>Scheduled</TableHead>
+              <TableHead>Expires</TableHead>
               <TableHead>Invite Code</TableHead>
               <TableHead className="text-right">Invitees</TableHead>
               <TableHead className="text-right">Attendees</TableHead>
@@ -33,24 +34,31 @@ export function WorkshopsTable({ workshops, page, totalPages, onPageChange }: Pr
           <TableBody>
             {workshops.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                <TableCell colSpan={6} className="text-center text-muted-foreground">
                   No workshops found.
                 </TableCell>
               </TableRow>
             ) : (
-              workshops.map((w) => (
-                <TableRow
-                  key={w.uuid}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => router.push(`/workshops/${w.uuid}`)}
-                >
-                  <TableCell className="font-medium">{w.title}</TableCell>
-                  <TableCell>{formatDate(w.scheduled_at)}</TableCell>
-                  <TableCell className="font-mono text-xs">{w.invite_code}</TableCell>
-                  <TableCell className="text-right">{w.invitees_count}</TableCell>
-                  <TableCell className="text-right">{w.attendees_count}</TableCell>
-                </TableRow>
-              ))
+              workshops.map((w) => {
+                const expired = new Date(w.expires_at).getTime() < Date.now();
+                return (
+                  <TableRow
+                    key={w.uuid}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => router.push(`/workshops/${w.uuid}`)}
+                  >
+                    <TableCell className="font-medium">{w.title}</TableCell>
+                    <TableCell>{formatDate(w.scheduled_at)}</TableCell>
+                    <TableCell className={expired ? "text-destructive" : undefined}>
+                      {formatDate(w.expires_at)}
+                      {expired && <span className="ml-1 text-xs">(expired)</span>}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">{w.invite_code}</TableCell>
+                    <TableCell className="text-right">{w.invitees_count}</TableCell>
+                    <TableCell className="text-right">{w.attendees_count}</TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
