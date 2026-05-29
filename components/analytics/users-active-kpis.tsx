@@ -16,19 +16,19 @@ export function UsersActiveKpis({ data, isLoading }: UsersActiveKpisProps) {
         label="DAU"
         icon={Activity}
         value={data ? data.active_users.dau : isLoading ? "…" : null}
-        hint="Distinct users with any event in the last 24h"
+        hint="Distinct users who performed an action in the last 24h"
       />
       <KpiCard
         label="WAU"
         icon={Activity}
         value={data ? data.active_users.wau : isLoading ? "…" : null}
-        hint="Distinct users with any event in the last 7 days"
+        hint="Distinct users who performed an action in the last 7 days"
       />
       <KpiCard
         label="MAU"
         icon={Activity}
         value={data ? data.active_users.mau : isLoading ? "…" : null}
-        hint="Distinct users with any event in the last 30 days"
+        hint="Distinct users who performed an action in the last 30 days"
       />
       <KpiCard
         label="New signups"

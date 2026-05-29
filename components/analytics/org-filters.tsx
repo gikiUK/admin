@@ -1,10 +1,12 @@
 "use client";
 
 import { X } from "lucide-react";
+import { StatusSelectItem } from "@/components/analytics/status-select-item";
 import { Button } from "@/components/ui/button";
 import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import {
   ORG_STATUSES,
   ORG_TIERS,
@@ -21,6 +23,14 @@ const ORDER_OPTIONS: Array<{ value: OrgsOrder; label: string }> = [
   { value: "oldest_signup", label: "Oldest signup" },
   { value: "most_members", label: "Most members" }
 ];
+
+const STATUS_DESCRIPTIONS: Record<OrgStatus, string> = {
+  trial: "Currently in an active trial (trial end date is in the future).",
+  onboarding: "Signed up less than 7 days ago and has no recorded events yet.",
+  active: "Has a recorded event in the last 6 months.",
+  dormant: "Last event was 6 to 12 months ago.",
+  churned: "No event in the last 12 months, or no events ever and signed up over 7 days ago."
+};
 
 const ALL_STATUSES = "__all__";
 const ALL_TIERS = "__all__";
@@ -69,12 +79,17 @@ export function OrgFilters({ filter, onChange, onReset }: OrgFiltersProps) {
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL_STATUSES}>All statuses</SelectItem>
-            {ORG_STATUSES.map((status) => (
-              <SelectItem key={status} value={status}>
-                {status}
-              </SelectItem>
-            ))}
+            <TooltipProvider delayDuration={200} disableHoverableContent>
+              <SelectItem value={ALL_STATUSES}>All statuses</SelectItem>
+              {ORG_STATUSES.map((status) => (
+                <StatusSelectItem
+                  key={status}
+                  value={status}
+                  label={status}
+                  description={STATUS_DESCRIPTIONS[status]}
+                />
+              ))}
+            </TooltipProvider>
           </SelectContent>
         </Select>
       </FilterField>
