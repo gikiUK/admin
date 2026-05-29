@@ -19,9 +19,12 @@ function readFilter(searchParams: URLSearchParams): OrgsFilter {
   const validOrder =
     order === "most_active" ||
     order === "least_active" ||
+    order === "most_events" ||
     order === "newest_signup" ||
     order === "oldest_signup" ||
-    order === "most_members";
+    order === "most_members" ||
+    order === "fewest_members" ||
+    order === "oldest_active";
   const validStatus = status !== null && (ORG_STATUSES as readonly string[]).includes(status);
   const validTier = tier !== null && (ORG_TIERS as readonly string[]).includes(tier);
   return {
@@ -77,7 +80,12 @@ export function OrgsExplorer({ onSelect }: OrgsExplorerProps = {}) {
       {query.isPending ? (
         <div className="text-sm text-muted-foreground">Loading organisations…</div>
       ) : (
-        <OrgsTable organizations={organizations} onSelect={onSelect ? (org) => onSelect(org.slug) : undefined} />
+        <OrgsTable
+          organizations={organizations}
+          onSelect={onSelect ? (org) => onSelect(org.slug) : undefined}
+          order={filter.order}
+          onOrderChange={(order) => handleFilterChange({ order })}
+        />
       )}
       <Pager
         page={meta.current_page}

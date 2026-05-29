@@ -1,18 +1,28 @@
 "use client";
 
 import { X } from "lucide-react";
+import { StatusSelectItem } from "@/components/analytics/status-select-item";
 import { Button } from "@/components/ui/button";
 import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { USER_STATUSES, type UserStatus, type UsersFilter, type UsersOrder } from "@/lib/analytics/api";
 
 const ORDER_OPTIONS: Array<{ value: UsersOrder; label: string }> = [
   { value: "most_active", label: "Most recently active" },
-  { value: "least_active", label: "Least active" },
+  { value: "least_active", label: "Fewest events" },
   { value: "newest_signup", label: "Newest signup" },
   { value: "oldest_signup", label: "Oldest signup" }
 ];
+
+const STATUS_DESCRIPTIONS: Record<UserStatus, string> = {
+  active: "Performed an action in the last 6 months.",
+  dormant: "Last action was 6 to 12 months ago.",
+  churned: "No action in the last 12 months, or no actions ever recorded.",
+  unconfirmed: "Has not confirmed their email address yet.",
+  bounced: "Their email address hard-bounced and can no longer be reached."
+};
 
 const ALL_STATUSES = "__all__";
 
@@ -49,12 +59,17 @@ export function UserFilters({ filter, onChange, onReset }: UserFiltersProps) {
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL_STATUSES}>All statuses</SelectItem>
-            {USER_STATUSES.map((status) => (
-              <SelectItem key={status} value={status}>
-                {status}
-              </SelectItem>
-            ))}
+            <TooltipProvider delayDuration={200} disableHoverableContent>
+              <SelectItem value={ALL_STATUSES}>All statuses</SelectItem>
+              {USER_STATUSES.map((status) => (
+                <StatusSelectItem
+                  key={status}
+                  value={status}
+                  label={status}
+                  description={STATUS_DESCRIPTIONS[status]}
+                />
+              ))}
+            </TooltipProvider>
           </SelectContent>
         </Select>
       </FilterField>
