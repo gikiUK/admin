@@ -11,7 +11,7 @@ import { USER_STATUSES, type UserStatus, type UsersFilter, type UsersOrder } fro
 
 const ORDER_OPTIONS: Array<{ value: UsersOrder; label: string }> = [
   { value: "most_active", label: "Most recently active" },
-  { value: "least_active", label: "Least active" },
+  { value: "least_active", label: "Fewest events" },
   { value: "newest_signup", label: "Newest signup" },
   { value: "oldest_signup", label: "Oldest signup" }
 ];
