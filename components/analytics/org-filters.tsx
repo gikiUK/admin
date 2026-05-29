@@ -18,10 +18,13 @@ import {
 
 const ORDER_OPTIONS: Array<{ value: OrgsOrder; label: string }> = [
   { value: "most_active", label: "Most recently active" },
-  { value: "least_active", label: "Least active" },
+  { value: "oldest_active", label: "Least recently active" },
+  { value: "most_events", label: "Most events" },
+  { value: "least_active", label: "Fewest events" },
   { value: "newest_signup", label: "Newest signup" },
   { value: "oldest_signup", label: "Oldest signup" },
-  { value: "most_members", label: "Most members" }
+  { value: "most_members", label: "Most members" },
+  { value: "fewest_members", label: "Fewest members" }
 ];
 
 const STATUS_DESCRIPTIONS: Record<OrgStatus, string> = {

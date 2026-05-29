@@ -1,13 +1,16 @@
 "use client";
 
+import { SortableHeader } from "@/components/analytics/sortable-header";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { AnalyticsOrganization, OrgStatus } from "@/lib/analytics/api";
+import type { AnalyticsOrganization, OrgStatus, OrgsOrder } from "@/lib/analytics/api";
 import { cn } from "@/lib/utils";
 
 type OrgsTableProps = {
   organizations: AnalyticsOrganization[];
   onSelect?: (org: AnalyticsOrganization) => void;
+  order?: OrgsOrder;
+  onOrderChange?: (order: OrgsOrder | undefined) => void;
 };
 
 const STATUS_STYLES: Record<OrgStatus, string> = {
@@ -37,7 +40,9 @@ function formatPercent(value: number): string {
   return `${Math.round(value * 100)}%`;
 }
 
-export function OrgsTable({ organizations, onSelect }: OrgsTableProps) {
+export function OrgsTable({ organizations, onSelect, order, onOrderChange }: OrgsTableProps) {
+  const handleSort = onOrderChange ?? (() => {});
+  const sortable = Boolean(onOrderChange);
   return (
     <div className="rounded-md border">
       <Table>
@@ -46,11 +51,60 @@ export function OrgsTable({ organizations, onSelect }: OrgsTableProps) {
             <TableHead>Organisation</TableHead>
             <TableHead className="w-[120px]">Status</TableHead>
             <TableHead className="w-[120px]">Tier</TableHead>
-            <TableHead className="w-[90px] text-right">Members</TableHead>
-            <TableHead className="w-[90px] text-right">Events</TableHead>
+            {sortable ? (
+              <SortableHeader
+                label="Members"
+                descSort="most_members"
+                ascSort="fewest_members"
+                currentSort={order}
+                onSort={(next) => handleSort(next as OrgsOrder | undefined)}
+                align="right"
+                className="w-[90px]"
+              />
+            ) : (
+              <TableHead className="w-[90px] text-right">Members</TableHead>
+            )}
+            {sortable ? (
+              <SortableHeader
+                label="Events"
+                descSort="most_events"
+                ascSort="least_active"
+                currentSort={order}
+                onSort={(next) => handleSort(next as OrgsOrder | undefined)}
+                align="right"
+                className="w-[90px]"
+                tooltip="Total events recorded about this organisation, all time."
+              />
+            ) : (
+              <TableHead className="w-[90px] text-right">Events</TableHead>
+            )}
             <TableHead className="w-[140px]">Actions</TableHead>
-            <TableHead className="w-[160px]">Last active</TableHead>
-            <TableHead className="w-[140px]">Signed up</TableHead>
+            {sortable ? (
+              <SortableHeader
+                label="Last active"
+                descSort="most_active"
+                ascSort="oldest_active"
+                currentSort={order}
+                onSort={(next) => handleSort(next as OrgsOrder | undefined)}
+                className="w-[160px]"
+                tooltip="Most recent event recorded about this organisation."
+              />
+            ) : (
+              <TableHead className="w-[160px]">Last active</TableHead>
+            )}
+            {sortable ? (
+              <SortableHeader
+                label="Signed up"
+                descSort="newest_signup"
+                ascSort="oldest_signup"
+                currentSort={order}
+                onSort={(next) => handleSort(next as OrgsOrder | undefined)}
+                className="w-[140px]"
+                tooltip="The date the organisation was created — not the date of its first activity."
+              />
+            ) : (
+              <TableHead className="w-[140px]">Signed up</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>

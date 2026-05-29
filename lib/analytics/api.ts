@@ -198,7 +198,15 @@ export type AnalyticsOrganization = {
   status: OrgStatus;
 };
 
-export type OrgsOrder = "most_active" | "least_active" | "newest_signup" | "oldest_signup" | "most_members";
+export type OrgsOrder =
+  | "most_active"
+  | "least_active"
+  | "most_events"
+  | "newest_signup"
+  | "oldest_signup"
+  | "most_members"
+  | "fewest_members"
+  | "oldest_active";
 
 export type OrgsFilter = {
   query?: string;

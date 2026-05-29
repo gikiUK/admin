@@ -22,7 +22,12 @@ export function OrgKpis({ data, isLoading }: OrgKpisProps) {
         value={data ? data.active_orgs : isLoading ? "…" : null}
         hint="Distinct companies with any event in range"
       />
-      <KpiCard label="New companies" icon={Users} value={data ? data.new_companies : isLoading ? "…" : null} />
+      <KpiCard
+        label="New companies"
+        icon={Users}
+        value={data ? data.new_companies : isLoading ? "…" : null}
+        hint="Companies created in range — different from 'Active orgs' (any org with activity in range)"
+      />
       <KpiCard
         label="Trial orgs"
         icon={Clock}
