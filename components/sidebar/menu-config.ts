@@ -8,6 +8,7 @@ import {
   GitBranch,
   Layers,
   Lightbulb,
+  LinkIcon,
   ListOrdered,
   type LucideIcon,
   Settings,
@@ -15,7 +16,6 @@ import {
   Table2,
   Telescope,
   Users,
-  Video,
   Zap
 } from "lucide-react";
 
@@ -46,10 +46,10 @@ export const SIDEBAR_MENU: MenuSection[] = [
     items: [
       {
         kind: "link",
-        href: "/workshops",
-        label: "Workshops",
-        icon: Video,
-        matchPaths: ["/workshops"]
+        href: "/signup-links",
+        label: "Signup Links",
+        icon: LinkIcon,
+        matchPaths: ["/signup-links"]
       },
       {
         kind: "group",

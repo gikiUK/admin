@@ -4,7 +4,7 @@ import { CohortFactFilters } from "@/components/analytics/insights/cohort/cohort
 import { CohortOrgExtras } from "@/components/analytics/insights/cohort/cohort-org-extras";
 import { CohortTagsRow } from "@/components/analytics/insights/cohort/cohort-tags-row";
 import { CohortTierStatusRow } from "@/components/analytics/insights/cohort/cohort-tier-status-row";
-import { WorkshopPicker } from "@/components/analytics/insights/cohort/workshop-picker";
+import { SignupLinkPicker } from "@/components/analytics/insights/cohort/signup-link-picker";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import type { OrgFilters } from "@/lib/analytics/insights/cohort-spec";
 
@@ -19,9 +19,9 @@ export function CohortBuilderBody() {
     <>
       <CohortTierStatusRow orgFilters={draft.org_filters} onChange={updateOrg} />
       <CohortTagsRow orgFilters={draft.org_filters} onChange={updateOrg} />
-      <WorkshopPicker
-        selectedUuids={draft.org_filters.workshop_uuids ?? []}
-        onChange={(next) => updateOrg({ workshop_uuids: next })}
+      <SignupLinkPicker
+        selectedUuids={draft.org_filters.signup_link_uuids ?? []}
+        onChange={(next) => updateOrg({ signup_link_uuids: next })}
       />
       <CohortOrgExtras orgFilters={draft.org_filters} onChange={updateOrg} />
       <CohortFactFilters />

@@ -39,8 +39,8 @@ export function buildCohortChips(spec: CohortSpec, dataset: Dataset | null): Coh
   if (o.tags_exclude?.length) {
     chips.push({ id: "tags_ex", label: "Tags excl.", value: o.tags_exclude.join(", ") });
   }
-  if (o.workshop_uuids?.length) {
-    chips.push({ id: "workshops", label: "Workshops", value: `${o.workshop_uuids.length} selected` });
+  if (o.signup_link_uuids?.length) {
+    chips.push({ id: "signup_links", label: "Signup links", value: `${o.signup_link_uuids.length} selected` });
   }
   if (o.signed_up_from || o.signed_up_to) {
     const from = o.signed_up_from?.slice(0, 10) ?? "…";

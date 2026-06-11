@@ -1,0 +1,136 @@
+import { formStateToPayload, initialFormState } from "@/components/signup-links/form/use-signup-link-form";
+import type { SignupLink } from "@/lib/signup-links/types";
+
+function makeLink(overrides: Partial<SignupLink> = {}): SignupLink {
+  return {
+    uuid: "u-1",
+    code: "abc",
+    title: "Test",
+    enabled: true,
+    expires_on: null,
+    max_uses: null,
+    uses_count: 0,
+    consumed_count: 0,
+    premium_until: null,
+    feature_flags: [],
+    analytics_tags: [],
+    analytics_cohorts: [],
+    skip_email_confirmation: false,
+    skip_welcome_email: false,
+    welcome_page_title: null,
+    welcome_page_body: null,
+    referrer: null,
+    expired: false,
+    exhausted: false,
+    usable: true,
+    ...overrides
+  };
+}
+
+describe("initialFormState", () => {
+  test("returns sensible defaults when no link given", () => {
+    const state = initialFormState(null);
+    expect(state.title).toBe("");
+    expect(state.code).toBe("");
+    expect(state.enabled).toBe(true);
+    expect(state.welcome_page_enabled).toBe(false);
+    expect(state.referrer_id).toBe("");
+  });
+
+  test("hydrates from an existing link", () => {
+    const link = makeLink({
+      title: "Beta",
+      code: "beta123",
+      enabled: false,
+      expires_on: "2026-12-31",
+      max_uses: 50,
+      analytics_tags: ["alpha"],
+      referrer: { id: 42, name: "Partner" }
+    });
+    const state = initialFormState(link);
+    expect(state.title).toBe("Beta");
+    expect(state.code).toBe("beta123");
+    expect(state.enabled).toBe(false);
+    expect(state.expires_on).toBe("2026-12-31");
+    expect(state.max_uses).toBe("50");
+    expect(state.analytics_tags).toEqual(["alpha"]);
+    expect(state.referrer_id).toBe("42");
+  });
+
+  test("welcome_page_enabled is true only when both title and body are set", () => {
+    expect(
+      initialFormState(makeLink({ welcome_page_title: "Hi", welcome_page_body: "Body" })).welcome_page_enabled
+    ).toBe(true);
+    expect(initialFormState(makeLink({ welcome_page_title: "Hi", welcome_page_body: null })).welcome_page_enabled).toBe(
+      false
+    );
+    expect(
+      initialFormState(makeLink({ welcome_page_title: null, welcome_page_body: "Body" })).welcome_page_enabled
+    ).toBe(false);
+  });
+});
+
+describe("formStateToPayload", () => {
+  test("includes code only when includeCode is true", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.code = "  custom  ";
+    const withCode = formStateToPayload(state, true);
+    expect(withCode.code).toBe("custom");
+    const withoutCode = formStateToPayload(state, false);
+    expect(withoutCode.code).toBeUndefined();
+  });
+
+  test("blank code on create is omitted (server auto-generates)", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.code = "";
+    const payload = formStateToPayload(state, true);
+    expect(payload.code).toBeUndefined();
+  });
+
+  test("empty max_uses becomes null", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    const payload = formStateToPayload(state, true);
+    expect(payload.max_uses).toBeNull();
+  });
+
+  test("welcome_page fields are nulled when disabled, even if title/body have values", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.welcome_page_title = "leftover";
+    state.welcome_page_body = "leftover";
+    state.welcome_page_enabled = false;
+    const payload = formStateToPayload(state, true);
+    expect(payload.welcome_page_title).toBeNull();
+    expect(payload.welcome_page_body).toBeNull();
+  });
+
+  test("welcome_page fields are sent when enabled and non-empty", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.welcome_page_enabled = true;
+    state.welcome_page_title = "Welcome";
+    state.welcome_page_body = "Body markdown";
+    const payload = formStateToPayload(state, true);
+    expect(payload.welcome_page_title).toBe("Welcome");
+    expect(payload.welcome_page_body).toBe("Body markdown");
+  });
+
+  test("empty referrer_id becomes null", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.referrer_id = "";
+    const payload = formStateToPayload(state, true);
+    expect(payload.referrer_id).toBeNull();
+  });
+
+  test("non-empty referrer_id is coerced to a number", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.referrer_id = "42";
+    const payload = formStateToPayload(state, true);
+    expect(payload.referrer_id).toBe(42);
+  });
+});
