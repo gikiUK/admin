@@ -6,7 +6,7 @@ import type { TagEntry } from "@/components/analytics/insights/cohort/tag-picker
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import type { useTags } from "@/lib/manage/use-tags";
+import type { useTags } from "@/lib/tags/use-tags";
 import { cn } from "@/lib/utils";
 
 type Props = {

@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-  fetchCompanyCohorts,
-  fetchCompanyTags,
-  fetchFeatureFlagCatalogue,
-  fetchReferrers,
-  type TagWithCount
-} from "@/lib/signup-links/related-api";
+import { fetchCompanyCohorts, fetchFeatureFlagCatalogue, fetchReferrers } from "@/lib/signup-links/related-api";
 import type { SignupLinkReferrer } from "@/lib/signup-links/types";
+import { fetchCompanyTags, type TagWithCount } from "@/lib/tags/api";
 
 type State<T> = { status: "loading" } | { status: "ready"; value: T } | { status: "error"; message: string };
 

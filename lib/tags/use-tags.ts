@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchTags, type TagWithCount } from "@/lib/manage/api";
+import { fetchCompanyTags, type TagWithCount } from "@/lib/tags/api";
 
-type State = { status: "loading" } | { status: "ready"; tags: TagWithCount[] } | { status: "error"; message: string };
+export type TagsState =
+  | { status: "loading" }
+  | { status: "ready"; tags: TagWithCount[] }
+  | { status: "error"; message: string };
 
-// Module-level cache so multiple TagPickers on the same page share one request.
-// Tags rarely change mid-session; call invalidateTagsCache() from any code that
-// creates/renames/deletes tags server-side to force a refresh on the next mount.
 let cached: TagWithCount[] | null = null;
 let inflight: Promise<TagWithCount[]> | null = null;
 const subscribers = new Set<() => void>();
@@ -15,10 +15,10 @@ const subscribers = new Set<() => void>();
 function loadTags(): Promise<TagWithCount[]> {
   if (cached) return Promise.resolve(cached);
   if (!inflight) {
-    inflight = fetchTags()
+    inflight = fetchCompanyTags()
       .then((res) => {
-        cached = res.tags;
-        return res.tags;
+        cached = res.company_tags;
+        return res.company_tags;
       })
       .finally(() => {
         inflight = null;
@@ -33,13 +33,10 @@ export function invalidateTagsCache(): void {
   for (const fn of subscribers) fn();
 }
 
-/**
- * Fetches the universe of tags currently in use, with company counts. Caches at
- * module scope (tags rarely change while a session is open). Call
- * invalidateTagsCache() after add/remove tag mutations so the next read refetches.
- */
-export function useTags(): State {
-  const [state, setState] = useState<State>(() => (cached ? { status: "ready", tags: cached } : { status: "loading" }));
+export function useTags(): TagsState {
+  const [state, setState] = useState<TagsState>(() =>
+    cached ? { status: "ready", tags: cached } : { status: "loading" }
+  );
 
   useEffect(() => {
     let cancelled = false;

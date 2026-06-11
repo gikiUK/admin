@@ -22,6 +22,7 @@ export function PerksSection({ premiumUntil, featureFlags, onPremiumUntilChange,
           type="datetime-local"
           value={premiumUntil}
           onChange={(e) => onPremiumUntilChange(e.target.value)}
+          className="w-fit"
         />
         <p className="text-xs text-muted-foreground">Companies that sign up get premium access until this time.</p>
       </div>

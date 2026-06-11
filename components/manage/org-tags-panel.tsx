@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addOrgTag, type ManagedCompany, removeOrgTag } from "@/lib/manage/api";
-import { invalidateTagsCache } from "@/lib/manage/use-tags";
+import { invalidateTagsCache } from "@/lib/tags/use-tags";
 
 type OrgTagsPanelProps = {
   company: ManagedCompany;
@@ -20,6 +20,7 @@ export function OrgTagsPanel({ company, onUpdate }: OrgTagsPanelProps) {
   const [draft, setDraft] = useState("");
   const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
+  const tags = company.analytics_tags ?? [];
 
   async function handleAdd() {
     const tag = draft.trim();
@@ -85,11 +86,11 @@ export function OrgTagsPanel({ company, onUpdate }: OrgTagsPanelProps) {
           </p>
         </div>
 
-        {company.tags.length === 0 ? (
+        {tags.length === 0 ? (
           <p className="text-sm text-muted-foreground">No tags yet.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
-            {company.tags.map((tag) => (
+            {tags.map((tag) => (
               <Badge key={tag} variant="secondary" className="gap-1 pr-1 font-mono text-xs">
                 {tag}
                 <button

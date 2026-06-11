@@ -1,8 +1,7 @@
 "use client";
 
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MarkdownPreview } from "../markdown-preview";
 
 type Props = {
   title: string;
@@ -16,10 +15,8 @@ export function WelcomePagePreview({ title, body }: Props) {
         <CardTitle className="text-base">Welcome page</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-sm dark:prose-invert max-w-none">
-          <h2>{title}</h2>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
-        </div>
+        <h2 className="mb-3 text-2xl font-semibold tracking-tight">{title}</h2>
+        <MarkdownPreview body={body} />
       </CardContent>
     </Card>
   );

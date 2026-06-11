@@ -1,12 +1,11 @@
 "use client";
 
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { MarkdownPreview } from "../markdown-preview";
 
 type Props = {
   enabled: boolean;
@@ -57,11 +56,11 @@ export function WelcomePageSection({ enabled, title, body, onEnabledChange, onTi
                 />
               </TabsContent>
               <TabsContent value="preview">
-                <div className="prose prose-sm dark:prose-invert min-h-40 max-w-none rounded-md border bg-muted/40 p-4">
+                <div className="min-h-40 rounded-md border bg-muted/40 p-4">
                   {body.trim() ? (
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
+                    <MarkdownPreview body={body} />
                   ) : (
-                    <p className="text-muted-foreground">Nothing to preview yet.</p>
+                    <p className="text-sm text-muted-foreground">Nothing to preview yet.</p>
                   )}
                 </div>
               </TabsContent>
