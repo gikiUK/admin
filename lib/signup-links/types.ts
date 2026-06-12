@@ -1,8 +1,3 @@
-export type SignupLinkReferrer = {
-  id: number;
-  name: string;
-};
-
 export type SignupLink = {
   uuid: string;
   code: string;
@@ -15,12 +10,10 @@ export type SignupLink = {
   premium_until: string | null;
   feature_flags: string[];
   analytics_tags: string[];
-  analytics_cohorts: string[];
   skip_email_confirmation: boolean;
   skip_welcome_email: boolean;
   welcome_page_title: string | null;
   welcome_page_body: string | null;
-  referrer: SignupLinkReferrer | null;
   expired: boolean;
   exhausted: boolean;
   usable: boolean;
@@ -38,10 +31,8 @@ export type SignupLinkPayload = {
   skip_welcome_email?: boolean;
   welcome_page_title?: string | null;
   welcome_page_body?: string | null;
-  referrer_id?: number | null;
   feature_flags?: string[];
   analytics_tags?: string[];
-  analytics_cohorts?: string[];
 };
 
 export type SignupLinkCompany = {
@@ -58,7 +49,6 @@ export type SignupLinkCompany = {
   gifted_premium_until: string | null;
   access_status: "standard" | "premium" | "premium_trial";
   analytics_tags: string[];
-  analytics_cohorts: string[];
   feature_flags: string[];
   created_at: string;
   deleted_at: string | null;

@@ -81,11 +81,7 @@ export function SignupLinkForm({ initial, submitLabel, onSubmit }: Props) {
           />
           <AnalyticsSection
             analyticsTags={state.analytics_tags}
-            analyticsCohorts={state.analytics_cohorts}
-            referrerId={state.referrer_id}
             onAnalyticsTagsChange={(v) => update("analytics_tags", v)}
-            onAnalyticsCohortsChange={(v) => update("analytics_cohorts", v)}
-            onReferrerIdChange={(v) => update("referrer_id", v)}
           />
           <WelcomePageSection
             enabled={state.welcome_page_enabled}

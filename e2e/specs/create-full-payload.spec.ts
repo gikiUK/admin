@@ -9,9 +9,7 @@ import { expect, test } from "@/e2e/mock-api/test-fixtures";
  */
 test.describe("Signup link — full-payload create round-trip", () => {
   test.beforeEach(({ mockApi }) => {
-    mockApi.store.referrers = [{ id: 42, name: "Partner A" }];
     mockApi.store.featureFlags = ["energy_shock", "carbon_lite"];
-    mockApi.store.cohorts = [{ name: "spring-2026", count: 3 }];
     mockApi.store.companyTags = [{ name: "vip", count: 5 }];
   });
 
@@ -44,15 +42,6 @@ test.describe("Signup link — full-payload create round-trip", () => {
     await page.getByRole("option", { name: /Create.*partner-x/i }).click();
     await page.keyboard.press("Escape");
 
-    // Cohort from universe
-    await page.getByRole("button", { name: /add cohort/i }).click();
-    await page.getByRole("option", { name: /^spring-2026/ }).click();
-    await page.keyboard.press("Escape");
-
-    // Referrer — the Radix Select trigger that follows the "Referrer" label.
-    await page.locator("label", { hasText: "Referrer" }).locator("..").getByRole("combobox").click();
-    await page.getByRole("option", { name: "Partner A" }).click();
-
     // Welcome page on, fill both
     await page.getByRole("switch", { name: /enable welcome page/i }).click();
     await page.locator("input#welcome_page_title").fill("Welcome!");
@@ -73,8 +62,6 @@ test.describe("Signup link — full-payload create round-trip", () => {
         skip_welcome_email: false,
         feature_flags: ["energy_shock"],
         analytics_tags: ["partner-x"],
-        analytics_cohorts: ["spring-2026"],
-        referrer_id: 42,
         welcome_page_title: "Welcome!",
         welcome_page_body: "## Body"
       }
@@ -88,10 +75,8 @@ test.describe("Signup link — full-payload create round-trip", () => {
     // The UI should now render every value we sent.
     await expect(page.getByRole("heading", { name: "Partner X" })).toBeVisible();
     await expect(page.getByText(/Code: PARTNERX/)).toBeVisible();
-    await expect(page.getByText("Partner A", { exact: true })).toBeVisible();
     await expect(page.getByText("energy_shock", { exact: true })).toBeVisible();
     await expect(page.getByText("partner-x", { exact: true })).toBeVisible();
-    await expect(page.getByText("spring-2026", { exact: true })).toBeVisible();
     await expect(page.getByText("Yes", { exact: true })).toBeVisible(); // skip email confirmation
     await expect(page.getByRole("heading", { name: "Welcome!" })).toBeVisible(); // welcome preview
   });

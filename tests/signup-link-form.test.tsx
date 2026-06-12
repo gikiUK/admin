@@ -12,9 +12,7 @@ jest.mock("remark-gfm", () => ({
 
 jest.mock("@/components/signup-links/form/use-form-data", () => ({
   useFeatureFlagCatalogue: () => ({ status: "ready", value: ["energy_shock"] }),
-  useReferrers: () => ({ status: "ready", value: [{ id: 1, name: "Partner A" }] }),
-  useCompanyTagUniverse: () => ({ status: "ready", value: [] }),
-  useCompanyCohortUniverse: () => ({ status: "ready", value: [] })
+  useCompanyTagUniverse: () => ({ status: "ready", value: [] })
 }));
 
 import { SignupLinkForm } from "@/components/signup-links/form/signup-link-form";
@@ -33,12 +31,10 @@ function makeLink(overrides: Partial<SignupLink> = {}): SignupLink {
     premium_until: null,
     feature_flags: [],
     analytics_tags: [],
-    analytics_cohorts: [],
     skip_email_confirmation: false,
     skip_welcome_email: false,
     welcome_page_title: null,
     welcome_page_body: null,
-    referrer: null,
     expired: false,
     exhausted: false,
     usable: true,

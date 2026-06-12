@@ -25,7 +25,7 @@ If the test passes, copy the `expected = {...}` hash from the test source into
 truth — if it ever drifts from what the serializer actually emits, the Rails
 test will catch it first.
 
-For variant fixtures (expired, exhausted, referrer-set, etc.) we currently
+For variant fixtures (expired, exhausted, etc.) we currently
 build them in TypeScript via `e2e/mock-api/builders.ts`, layering overrides on
 top of `canonical.json`. If a variant's shape gets non-trivial, capture it as
 its own JSON file the same way.

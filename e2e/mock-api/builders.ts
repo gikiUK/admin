@@ -31,7 +31,6 @@ export function buildCompany(overrides: Partial<SignupLinkCompany> = {}): Signup
     gifted_premium_until: null,
     access_status: "standard",
     analytics_tags: [],
-    analytics_cohorts: [],
     feature_flags: [],
     created_at: "2026-06-01T12:00:00Z",
     deleted_at: null,

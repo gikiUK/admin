@@ -5,7 +5,7 @@
  *   import { test, expect } from "@/e2e/mock-api/test-fixtures";
  *
  *   test("…", async ({ page, mockApi }) => {
- *     mockApi.store.referrers = [{ id: 1, name: "Partner" }];
+ *     mockApi.store.featureFlags = ["energy_shock"];
  *     await page.goto("/signup-links");
  *     …
  *   });

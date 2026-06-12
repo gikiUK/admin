@@ -124,14 +124,8 @@ export async function installMockApi(page: Page, store: MockStore): Promise<Mock
       }
 
       // ── Reference catalogues ─────────────────────────────────
-      if (method === "GET" && url.pathname === "/admin/referrers") {
-        return ok(route, { referrers: store.referrers });
-      }
       if (method === "GET" && url.pathname === "/admin/feature_flags") {
         return ok(route, { feature_flags: store.featureFlags });
-      }
-      if (method === "GET" && url.pathname === "/admin/analytics/cohorts") {
-        return ok(route, { cohorts: store.cohorts });
       }
       if (method === "GET" && url.pathname === "/admin/analytics/company_tags") {
         return ok(route, { company_tags: store.companyTags });

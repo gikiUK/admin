@@ -44,10 +44,8 @@ test.describe("Signup links — list & minimal create", () => {
         premium_until: null,
         welcome_page_title: null,
         welcome_page_body: null,
-        referrer_id: null,
         feature_flags: [],
-        analytics_tags: [],
-        analytics_cohorts: []
+        analytics_tags: []
       }
     });
     // Crucially: blank code is omitted, not sent as "" — Rails auto-generates.

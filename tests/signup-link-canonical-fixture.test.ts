@@ -21,7 +21,6 @@ describe("canonical signup-link fixture", () => {
     expect(typeof link.enabled).toBe("boolean");
     expect(Array.isArray(link.feature_flags)).toBe(true);
     expect(Array.isArray(link.analytics_tags)).toBe(true);
-    expect(Array.isArray(link.analytics_cohorts)).toBe(true);
     expect(typeof link.skip_email_confirmation).toBe("boolean");
     expect(typeof link.skip_welcome_email).toBe("boolean");
     expect(typeof link.expired).toBe("boolean");
@@ -47,12 +46,10 @@ describe("canonical signup-link fixture", () => {
       "premium_until",
       "feature_flags",
       "analytics_tags",
-      "analytics_cohorts",
       "skip_email_confirmation",
       "skip_welcome_email",
       "welcome_page_title",
       "welcome_page_body",
-      "referrer",
       "expired",
       "exhausted",
       "usable",

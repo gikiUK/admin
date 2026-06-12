@@ -10,13 +10,11 @@ export type SignupLinkFormState = {
   premium_until: string;
   feature_flags: string[];
   analytics_tags: string[];
-  analytics_cohorts: string[];
   skip_email_confirmation: boolean;
   skip_welcome_email: boolean;
   welcome_page_enabled: boolean;
   welcome_page_title: string;
   welcome_page_body: string;
-  referrer_id: string;
 };
 
 function isoToDate(value: string | null): string {
@@ -43,13 +41,11 @@ export function initialFormState(link: SignupLink | null): SignupLinkFormState {
       premium_until: "",
       feature_flags: [],
       analytics_tags: [],
-      analytics_cohorts: [],
       skip_email_confirmation: false,
       skip_welcome_email: false,
       welcome_page_enabled: false,
       welcome_page_title: "",
-      welcome_page_body: "",
-      referrer_id: ""
+      welcome_page_body: ""
     };
   }
   return {
@@ -61,13 +57,11 @@ export function initialFormState(link: SignupLink | null): SignupLinkFormState {
     premium_until: isoToDateTimeLocal(link.premium_until),
     feature_flags: link.feature_flags ?? [],
     analytics_tags: link.analytics_tags ?? [],
-    analytics_cohorts: link.analytics_cohorts ?? [],
     skip_email_confirmation: link.skip_email_confirmation,
     skip_welcome_email: link.skip_welcome_email,
     welcome_page_enabled: !!(link.welcome_page_title && link.welcome_page_body),
     welcome_page_title: link.welcome_page_title ?? "",
-    welcome_page_body: link.welcome_page_body ?? "",
-    referrer_id: link.referrer ? String(link.referrer.id) : ""
+    welcome_page_body: link.welcome_page_body ?? ""
   };
 }
 
@@ -80,12 +74,10 @@ export function formStateToPayload(state: SignupLinkFormState, includeCode: bool
     premium_until: state.premium_until ? new Date(state.premium_until).toISOString() : null,
     feature_flags: state.feature_flags,
     analytics_tags: state.analytics_tags,
-    analytics_cohorts: state.analytics_cohorts,
     skip_email_confirmation: state.skip_email_confirmation,
     skip_welcome_email: state.skip_welcome_email,
     welcome_page_title: state.welcome_page_enabled ? state.welcome_page_title.trim() || null : null,
-    welcome_page_body: state.welcome_page_enabled ? state.welcome_page_body.trim() || null : null,
-    referrer_id: state.referrer_id === "" ? null : Number(state.referrer_id)
+    welcome_page_body: state.welcome_page_enabled ? state.welcome_page_body.trim() || null : null
   };
   if (includeCode && state.code.trim()) {
     payload.code = state.code.trim();

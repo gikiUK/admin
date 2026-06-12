@@ -22,7 +22,6 @@ export function DetailsPanel({ link }: Props) {
         <DetailRow label="Uses">{formatUses(link.uses_count, link.max_uses)}</DetailRow>
         <DetailRow label="Expires on">{formatShortDate(link.expires_on)}</DetailRow>
         <DetailRow label="Premium until">{formatShortDateTime(link.premium_until)}</DetailRow>
-        <DetailRow label="Referrer">{link.referrer?.name ?? "—"}</DetailRow>
         <DetailRow label="Skip email confirmation">{link.skip_email_confirmation ? "Yes" : "No"}</DetailRow>
         <DetailRow label="Skip welcome email">{link.skip_welcome_email ? "Yes" : "No"}</DetailRow>
         <DetailRow label="Welcome page">
@@ -33,9 +32,6 @@ export function DetailsPanel({ link }: Props) {
         </DetailRow>
         <DetailRow label="Analytics tags">
           {link.analytics_tags.length === 0 ? "—" : link.analytics_tags.join(", ")}
-        </DetailRow>
-        <DetailRow label="Analytics cohorts">
-          {link.analytics_cohorts.length === 0 ? "—" : link.analytics_cohorts.join(", ")}
         </DetailRow>
       </CardContent>
     </Card>

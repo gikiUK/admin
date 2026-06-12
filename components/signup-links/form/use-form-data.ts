@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchCompanyCohorts, fetchFeatureFlagCatalogue, fetchReferrers } from "@/lib/signup-links/related-api";
-import type { SignupLinkReferrer } from "@/lib/signup-links/types";
+import { fetchFeatureFlagCatalogue } from "@/lib/signup-links/related-api";
 import { fetchCompanyTags, type TagWithCount } from "@/lib/tags/api";
 
 type State<T> = { status: "loading" } | { status: "ready"; value: T } | { status: "error"; message: string };
@@ -67,8 +66,4 @@ export const useFeatureFlagCatalogue = buildLoader<string[]>(() =>
   fetchFeatureFlagCatalogue().then((r) => r.feature_flags)
 );
 
-export const useReferrers = buildLoader<SignupLinkReferrer[]>(() => fetchReferrers().then((r) => r.referrers));
-
 export const useCompanyTagUniverse = buildLoader<TagWithCount[]>(() => fetchCompanyTags().then((r) => r.company_tags));
-
-export const useCompanyCohortUniverse = buildLoader<TagWithCount[]>(() => fetchCompanyCohorts().then((r) => r.cohorts));

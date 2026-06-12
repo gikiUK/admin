@@ -2,12 +2,12 @@
  * In-memory backing store for the hermetic mock API. One instance per test.
  *
  * The store models the slice of Rails state the admin UI reaches for during a
- * signup-link round-trip: the link itself, the linked companies, plus the three
- * reference catalogues the form pulls (referrers, feature flags, cohorts).
+ * signup-link round-trip: the link itself, the linked companies, plus the
+ * reference catalogues the form pulls (feature flags).
  *
  * Write operations mirror Rails' `Admin::SignupLinksController` semantics
  * just enough that the UI behaves the same: assign a uuid on create, merge on
- * update, validate referrer existence, etc.
+ * update, etc.
  */
 import canonicalJson from "@/e2e/fixtures/signup-link/canonical.json";
 import type { TagWithCount } from "@/lib/tags/api";
@@ -15,23 +15,17 @@ import type { SignupLink, SignupLinkCompany, SignupLinkPayload } from "./types";
 
 const CANONICAL: SignupLink = canonicalJson as SignupLink;
 
-export type Referrer = { id: number; name: string };
-
 export type StoreSeed = {
   links?: SignupLink[];
   companiesByLink?: Record<string, SignupLinkCompany[]>;
-  referrers?: Referrer[];
   featureFlags?: string[];
-  cohorts?: TagWithCount[];
   companyTags?: TagWithCount[];
 };
 
 export class MockStore {
   links: SignupLink[] = [];
   companies = new Map<string, SignupLinkCompany[]>();
-  referrers: Referrer[] = [];
   featureFlags: string[] = [];
-  cohorts: TagWithCount[] = [];
   companyTags: TagWithCount[] = [];
 
   private uuidCounter = 0;
@@ -43,9 +37,7 @@ export class MockStore {
         this.companies.set(uuid, [...companies]);
       }
     }
-    this.referrers = seed.referrers ?? [];
     this.featureFlags = seed.featureFlags ?? [];
-    this.cohorts = seed.cohorts ?? [];
     this.companyTags = seed.companyTags ?? [];
   }
 
@@ -59,7 +51,6 @@ export class MockStore {
   }
 
   create(payload: SignupLinkPayload): SignupLink {
-    const referrer = payload.referrer_id ? (this.referrers.find((r) => r.id === payload.referrer_id) ?? null) : null;
     const link: SignupLink = {
       ...CANONICAL,
       uuid: this.nextUuid(),
@@ -73,12 +64,10 @@ export class MockStore {
       premium_until: payload.premium_until ?? null,
       feature_flags: payload.feature_flags ?? [],
       analytics_tags: payload.analytics_tags ?? [],
-      analytics_cohorts: payload.analytics_cohorts ?? [],
       skip_email_confirmation: payload.skip_email_confirmation ?? false,
       skip_welcome_email: payload.skip_welcome_email ?? false,
       welcome_page_title: payload.welcome_page_title ?? null,
       welcome_page_body: payload.welcome_page_body ?? null,
-      referrer: referrer ? { id: referrer.id, name: referrer.name } : null,
       expired: false,
       exhausted: false,
       usable: true
@@ -91,12 +80,6 @@ export class MockStore {
     const idx = this.links.findIndex((l) => l.uuid === uuid);
     if (idx === -1) return undefined;
     const existing = this.links[idx];
-    const referrer =
-      "referrer_id" in payload
-        ? payload.referrer_id
-          ? (this.referrers.find((r) => r.id === payload.referrer_id) ?? null)
-          : null
-        : existing.referrer;
     const merged: SignupLink = {
       ...existing,
       ...("title" in payload ? { title: payload.title ?? "" } : {}),
@@ -107,14 +90,12 @@ export class MockStore {
       ...("premium_until" in payload ? { premium_until: payload.premium_until ?? null } : {}),
       ...("feature_flags" in payload ? { feature_flags: payload.feature_flags ?? [] } : {}),
       ...("analytics_tags" in payload ? { analytics_tags: payload.analytics_tags ?? [] } : {}),
-      ...("analytics_cohorts" in payload ? { analytics_cohorts: payload.analytics_cohorts ?? [] } : {}),
       ...("skip_email_confirmation" in payload
         ? { skip_email_confirmation: payload.skip_email_confirmation ?? false }
         : {}),
       ...("skip_welcome_email" in payload ? { skip_welcome_email: payload.skip_welcome_email ?? false } : {}),
       ...("welcome_page_title" in payload ? { welcome_page_title: payload.welcome_page_title ?? null } : {}),
-      ...("welcome_page_body" in payload ? { welcome_page_body: payload.welcome_page_body ?? null } : {}),
-      referrer: referrer ? { id: referrer.id, name: referrer.name } : null
+      ...("welcome_page_body" in payload ? { welcome_page_body: payload.welcome_page_body ?? null } : {})
     };
     this.links[idx] = merged;
     return merged;

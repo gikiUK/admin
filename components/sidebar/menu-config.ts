@@ -12,7 +12,6 @@ import {
   ListOrdered,
   type LucideIcon,
   Settings,
-  Share2,
   Sparkles,
   Table2,
   Telescope,
@@ -51,13 +50,6 @@ export const SIDEBAR_MENU: MenuSection[] = [
         label: "Signup Links",
         icon: LinkIcon,
         matchPaths: ["/signup-links"]
-      },
-      {
-        kind: "link",
-        href: "/referrers",
-        label: "Referrers",
-        icon: Share2,
-        matchPaths: ["/referrers"]
       },
       {
         kind: "group",

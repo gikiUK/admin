@@ -14,12 +14,10 @@ function makeLink(overrides: Partial<SignupLink> = {}): SignupLink {
     premium_until: null,
     feature_flags: [],
     analytics_tags: [],
-    analytics_cohorts: [],
     skip_email_confirmation: false,
     skip_welcome_email: false,
     welcome_page_title: null,
     welcome_page_body: null,
-    referrer: null,
     expired: false,
     exhausted: false,
     usable: true,
@@ -34,7 +32,6 @@ describe("initialFormState", () => {
     expect(state.code).toBe("");
     expect(state.enabled).toBe(true);
     expect(state.welcome_page_enabled).toBe(false);
-    expect(state.referrer_id).toBe("");
   });
 
   test("hydrates from an existing link", () => {
@@ -44,8 +41,7 @@ describe("initialFormState", () => {
       enabled: false,
       expires_on: "2026-12-31",
       max_uses: 50,
-      analytics_tags: ["alpha"],
-      referrer: { id: 42, name: "Partner" }
+      analytics_tags: ["alpha"]
     });
     const state = initialFormState(link);
     expect(state.title).toBe("Beta");
@@ -54,7 +50,6 @@ describe("initialFormState", () => {
     expect(state.expires_on).toBe("2026-12-31");
     expect(state.max_uses).toBe("50");
     expect(state.analytics_tags).toEqual(["alpha"]);
-    expect(state.referrer_id).toBe("42");
   });
 
   test("welcome_page_enabled is true only when both title and body are set", () => {
@@ -118,32 +113,14 @@ describe("formStateToPayload", () => {
     expect(payload.welcome_page_body).toBe("Body markdown");
   });
 
-  test("empty referrer_id becomes null", () => {
-    const state = initialFormState(null);
-    state.title = "T";
-    state.referrer_id = "";
-    const payload = formStateToPayload(state, true);
-    expect(payload.referrer_id).toBeNull();
-  });
-
-  test("non-empty referrer_id is coerced to a number", () => {
-    const state = initialFormState(null);
-    state.title = "T";
-    state.referrer_id = "42";
-    const payload = formStateToPayload(state, true);
-    expect(payload.referrer_id).toBe(42);
-  });
-
-  test("feature_flags, analytics_tags, analytics_cohorts pass through unchanged", () => {
+  test("feature_flags and analytics_tags pass through unchanged", () => {
     const state = initialFormState(null);
     state.title = "T";
     state.feature_flags = ["a", "b"];
     state.analytics_tags = ["x"];
-    state.analytics_cohorts = ["c1", "c2"];
     const payload = formStateToPayload(state, true);
     expect(payload.feature_flags).toEqual(["a", "b"]);
     expect(payload.analytics_tags).toEqual(["x"]);
-    expect(payload.analytics_cohorts).toEqual(["c1", "c2"]);
   });
 
   test("empty expires_on becomes null", () => {
