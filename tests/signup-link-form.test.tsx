@@ -167,3 +167,92 @@ describe("SignupLinkForm — edit", () => {
     expect(onSubmit.mock.calls[0][0].enabled).toBe(false);
   });
 });
+
+describe("SignupLinkForm — welcome page validation", () => {
+  function enableWelcomePage() {
+    fireEvent.click(screen.getByRole("switch", { name: /enable welcome page/i }));
+  }
+
+  test("enabling welcome page with empty title and body blocks submit and shows warnings", () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined);
+    render(<SignupLinkForm initial={makeLink({ title: "Has title" })} submitLabel="Save" onSubmit={onSubmit} />);
+
+    enableWelcomePage();
+
+    expect(screen.getByText(/title is required when the welcome page is on/i)).not.toBeNull();
+    expect(screen.getByText(/body is required when the welcome page is on/i)).not.toBeNull();
+    expect(screen.getByText(/welcome page is enabled but title or body is missing/i)).not.toBeNull();
+
+    const saveButton = screen.getByRole("button", { name: /^save$/i }) as HTMLButtonElement;
+    expect(saveButton.disabled).toBe(true);
+  });
+
+  test("filling only the title still blocks submit and keeps the body warning", () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined);
+    render(<SignupLinkForm initial={makeLink({ title: "Has title" })} submitLabel="Save" onSubmit={onSubmit} />);
+
+    enableWelcomePage();
+    fireEvent.change(document.getElementById("welcome_page_title") as HTMLInputElement, {
+      target: { value: "Welcome!" }
+    });
+
+    expect(screen.queryByText(/title is required when the welcome page is on/i)).toBeNull();
+    expect(screen.getByText(/body is required when the welcome page is on/i)).not.toBeNull();
+    expect((screen.getByRole("button", { name: /^save$/i }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  test("whitespace-only title and body do not satisfy the requirement", () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined);
+    render(<SignupLinkForm initial={makeLink({ title: "Has title" })} submitLabel="Save" onSubmit={onSubmit} />);
+
+    enableWelcomePage();
+    fireEvent.change(document.getElementById("welcome_page_title") as HTMLInputElement, {
+      target: { value: "   " }
+    });
+    fireEvent.change(document.getElementById("welcome_page_body") as HTMLTextAreaElement, {
+      target: { value: "  \n  " }
+    });
+
+    expect(screen.getByText(/title is required when the welcome page is on/i)).not.toBeNull();
+    expect(screen.getByText(/body is required when the welcome page is on/i)).not.toBeNull();
+    expect((screen.getByRole("button", { name: /^save$/i }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  test("filling both title and body unblocks submit and sends them in the payload", async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined);
+    render(<SignupLinkForm initial={makeLink({ title: "Has title" })} submitLabel="Save" onSubmit={onSubmit} />);
+
+    enableWelcomePage();
+    fireEvent.change(document.getElementById("welcome_page_title") as HTMLInputElement, {
+      target: { value: "Welcome!" }
+    });
+    fireEvent.change(document.getElementById("welcome_page_body") as HTMLTextAreaElement, {
+      target: { value: "Body markdown" }
+    });
+
+    expect(screen.queryByText(/welcome page is enabled but title or body is missing/i)).toBeNull();
+
+    const saveButton = screen.getByRole("button", { name: /^save$/i }) as HTMLButtonElement;
+    expect(saveButton.disabled).toBe(false);
+
+    fireEvent.click(saveButton);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit.mock.calls[0][0].welcome_page_title).toBe("Welcome!");
+    expect(onSubmit.mock.calls[0][0].welcome_page_body).toBe("Body markdown");
+  });
+
+  test("toggling welcome page back off clears the block even with empty fields", () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined);
+    render(<SignupLinkForm initial={makeLink({ title: "Has title" })} submitLabel="Save" onSubmit={onSubmit} />);
+
+    enableWelcomePage();
+    expect((screen.getByRole("button", { name: /^save$/i }) as HTMLButtonElement).disabled).toBe(true);
+
+    enableWelcomePage();
+    expect(screen.queryByText(/welcome page is enabled but title or body is missing/i)).toBeNull();
+    expect((screen.getByRole("button", { name: /^save$/i }) as HTMLButtonElement).disabled).toBe(false);
+  });
+});

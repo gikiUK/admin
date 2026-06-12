@@ -26,6 +26,8 @@ export function SignupLinkForm({ initial, submitLabel, onSubmit }: Props) {
 
   const isEdit = initial !== null;
   const codeChanged = isEdit && state.code.trim() !== initial.code;
+  const welcomePageIncomplete =
+    state.welcome_page_enabled && (!state.welcome_page_title.trim() || !state.welcome_page_body.trim());
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -97,7 +99,12 @@ export function SignupLinkForm({ initial, submitLabel, onSubmit }: Props) {
       </Collapsible>
 
       {error && <p className="text-destructive text-sm">{error}</p>}
-      <Button type="submit" disabled={submitting || !state.title.trim()}>
+      {welcomePageIncomplete && (
+        <p className="text-destructive text-sm">
+          Welcome page is enabled but title or body is missing. Fill both fields or turn the welcome page off.
+        </p>
+      )}
+      <Button type="submit" disabled={submitting || !state.title.trim() || welcomePageIncomplete}>
         {submitting ? "Saving…" : submitLabel}
       </Button>
     </form>

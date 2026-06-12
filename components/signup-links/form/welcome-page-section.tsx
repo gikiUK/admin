@@ -17,6 +17,8 @@ type Props = {
 };
 
 export function WelcomePageSection({ enabled, title, body, onEnabledChange, onTitleChange, onBodyChange }: Props) {
+  const titleMissing = enabled && !title.trim();
+  const bodyMissing = enabled && !body.trim();
   return (
     <section className="space-y-4 rounded-md border p-4">
       <div className="flex items-center justify-between">
@@ -31,16 +33,18 @@ export function WelcomePageSection({ enabled, title, body, onEnabledChange, onTi
       {enabled && (
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label htmlFor="welcome_page_title">Title</Label>
+            <Label htmlFor="welcome_page_title">Title *</Label>
             <Input
               id="welcome_page_title"
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
               placeholder="Welcome to Giki!"
+              aria-invalid={titleMissing}
             />
+            {titleMissing && <p className="text-destructive text-xs">Title is required when the welcome page is on.</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="welcome_page_body">Body (markdown)</Label>
+            <Label htmlFor="welcome_page_body">Body (markdown) *</Label>
             <Tabs defaultValue="write">
               <TabsList>
                 <TabsTrigger value="write">Write</TabsTrigger>
@@ -53,7 +57,11 @@ export function WelcomePageSection({ enabled, title, body, onEnabledChange, onTi
                   onChange={(e) => onBodyChange(e.target.value)}
                   rows={10}
                   placeholder="Markdown is supported. Use tables, lists, links, etc."
+                  aria-invalid={bodyMissing}
                 />
+                {bodyMissing && (
+                  <p className="text-destructive text-xs">Body is required when the welcome page is on.</p>
+                )}
               </TabsContent>
               <TabsContent value="preview">
                 <div className="min-h-40 rounded-md border bg-muted/40 p-4">

@@ -133,4 +133,56 @@ describe("formStateToPayload", () => {
     const payload = formStateToPayload(state, true);
     expect(payload.referrer_id).toBe(42);
   });
+
+  test("feature_flags, analytics_tags, analytics_cohorts pass through unchanged", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.feature_flags = ["a", "b"];
+    state.analytics_tags = ["x"];
+    state.analytics_cohorts = ["c1", "c2"];
+    const payload = formStateToPayload(state, true);
+    expect(payload.feature_flags).toEqual(["a", "b"]);
+    expect(payload.analytics_tags).toEqual(["x"]);
+    expect(payload.analytics_cohorts).toEqual(["c1", "c2"]);
+  });
+
+  test("empty expires_on becomes null", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.expires_on = "";
+    expect(formStateToPayload(state, true).expires_on).toBeNull();
+  });
+
+  test("expires_on passes the date string through verbatim", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.expires_on = "2027-06-15";
+    expect(formStateToPayload(state, true).expires_on).toBe("2027-06-15");
+  });
+
+  test("empty premium_until becomes null", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.premium_until = "";
+    expect(formStateToPayload(state, true).premium_until).toBeNull();
+  });
+
+  test("non-empty premium_until is converted to an ISO timestamp", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.premium_until = "2027-01-01T00:00";
+    const payload = formStateToPayload(state, true);
+    expect(typeof payload.premium_until).toBe("string");
+    expect(payload.premium_until).toMatch(/T\d{2}:\d{2}:\d{2}/);
+  });
+
+  test("skip_email_confirmation and skip_welcome_email are passed through", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.skip_email_confirmation = true;
+    state.skip_welcome_email = true;
+    const payload = formStateToPayload(state, true);
+    expect(payload.skip_email_confirmation).toBe(true);
+    expect(payload.skip_welcome_email).toBe(true);
+  });
 });

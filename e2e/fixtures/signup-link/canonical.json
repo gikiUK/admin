@@ -1,0 +1,22 @@
+{
+  "uuid": "11111111-1111-1111-1111-111111111111",
+  "code": "PARTNERX",
+  "title": "Partner X",
+  "enabled": true,
+  "expires_on": "2027-01-01",
+  "max_uses": 5,
+  "uses_count": 2,
+  "consumed_count": 0,
+  "premium_until": "2027-01-01T00:00:00Z",
+  "feature_flags": ["energy_shock"],
+  "analytics_tags": ["partner-x"],
+  "analytics_cohorts": ["spring-2026"],
+  "skip_email_confirmation": true,
+  "skip_welcome_email": false,
+  "welcome_page_title": "Welcome!",
+  "welcome_page_body": "## Body",
+  "referrer": null,
+  "expired": false,
+  "exhausted": false,
+  "usable": true
+}

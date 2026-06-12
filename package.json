@@ -13,6 +13,9 @@
     "check": "pnpm exec biome check .",
     "check:fix": "pnpm exec biome check --write .",
     "test": "jest --passWithNoTests",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report",
     "prepare": "husky"
   },
   "dependencies": {
@@ -47,6 +50,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.15",
     "@opennextjs/cloudflare": "^1.17.1",
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-query-devtools": "^5.100.11",
     "@testing-library/jest-dom": "^6",
