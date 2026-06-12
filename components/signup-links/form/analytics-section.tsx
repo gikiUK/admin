@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ReferrerSelect } from "@/components/signup-links/form/referrer-select";
 import { TagAutocompleteInput } from "@/components/signup-links/form/tag-autocomplete-input";
 import { useCompanyCohortUniverse, useCompanyTagUniverse } from "@/components/signup-links/form/use-form-data";
@@ -50,6 +51,14 @@ export function AnalyticsSection({
       <div className="space-y-1.5">
         <Label htmlFor="referrer_id">Referrer</Label>
         <ReferrerSelect value={referrerId} onChange={onReferrerIdChange} />
+        <Link
+          href="/referrers"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block text-xs text-primary hover:underline"
+        >
+          Add referrer
+        </Link>
       </div>
     </section>
   );

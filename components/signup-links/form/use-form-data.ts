@@ -25,6 +25,12 @@ function buildLoader<T>(fetcher: () => Promise<T>) {
     return inflight;
   }
 
+  function invalidate() {
+    cached = null;
+    inflight = null;
+    for (const sub of subscribers) sub();
+  }
+
   function useLoader(): State<T> {
     const [state, setState] = useState<State<T>>(() =>
       cached !== null ? { status: "ready", value: cached } : { status: "loading" }
@@ -54,7 +60,7 @@ function buildLoader<T>(fetcher: () => Promise<T>) {
     return state;
   }
 
-  return useLoader;
+  return Object.assign(useLoader, { invalidate });
 }
 
 export const useFeatureFlagCatalogue = buildLoader<string[]>(() =>

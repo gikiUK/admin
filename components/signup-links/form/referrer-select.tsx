@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useReferrers } from "@/components/signup-links/form/use-form-data";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -13,6 +14,14 @@ type Props = {
 export function ReferrerSelect({ value, onChange }: Props) {
   const state = useReferrers();
   const referrers = state.status === "ready" ? state.value : [];
+
+  useEffect(() => {
+    function refetch() {
+      useReferrers.invalidate();
+    }
+    window.addEventListener("focus", refetch);
+    return () => window.removeEventListener("focus", refetch);
+  }, []);
 
   return (
     <Select value={value === "" ? NONE : value} onValueChange={(v) => onChange(v === NONE ? "" : v)}>
