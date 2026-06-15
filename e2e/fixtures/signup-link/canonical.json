@@ -8,7 +8,7 @@
   "uses_count": 2,
   "consumed_count": 0,
   "premium_until": "2027-01-01T00:00:00Z",
-  "feature_flags": ["energy_shock"],
+  "feature_flags": ["energy_price_shock"],
   "analytics_tags": ["partner-x"],
   "skip_email_confirmation": true,
   "skip_welcome_email": false,

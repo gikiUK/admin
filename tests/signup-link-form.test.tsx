@@ -11,7 +11,7 @@ jest.mock("remark-gfm", () => ({
 }));
 
 jest.mock("@/components/signup-links/form/use-form-data", () => ({
-  useFeatureFlagCatalogue: () => ({ status: "ready", value: ["energy_shock"] }),
+  useFeatureFlagCatalogue: () => ({ status: "ready", value: ["energy_price_shock"] }),
   useCompanyTagUniverse: () => ({ status: "ready", value: [] })
 }));
 

@@ -5,7 +5,7 @@
  *   import { test, expect } from "@/e2e/mock-api/test-fixtures";
  *
  *   test("…", async ({ page, mockApi }) => {
- *     mockApi.store.featureFlags = ["energy_shock"];
+ *     mockApi.store.featureFlags = ["energy_price_shock"];
  *     await page.goto("/signup-links");
  *     …
  *   });

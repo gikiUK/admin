@@ -9,7 +9,7 @@ import { expect, test } from "@/e2e/mock-api/test-fixtures";
  */
 test.describe("Signup link — full-payload create round-trip", () => {
   test.beforeEach(({ mockApi }) => {
-    mockApi.store.featureFlags = ["energy_shock", "carbon_lite"];
+    mockApi.store.featureFlags = ["energy_price_shock", "carbon_lite"];
     mockApi.store.companyTags = [{ name: "vip", count: 5 }];
   });
 
@@ -31,7 +31,7 @@ test.describe("Signup link — full-payload create round-trip", () => {
 
     // Feature flag pick
     await page.getByRole("button", { name: /pick flags/i }).click();
-    await page.getByRole("option", { name: "energy_shock" }).click();
+    await page.getByRole("option", { name: "energy_price_shock" }).click();
     await page.keyboard.press("Escape");
 
     // Analytics tag (free-create)
@@ -58,7 +58,7 @@ test.describe("Signup link — full-payload create round-trip", () => {
         max_uses: 5,
         skip_email_confirmation: true,
         skip_welcome_email: false,
-        feature_flags: ["energy_shock"],
+        feature_flags: ["energy_price_shock"],
         analytics_tags: ["partner-x"],
         welcome_page_title: "Welcome!",
         welcome_page_body: "## Body"
@@ -73,7 +73,7 @@ test.describe("Signup link — full-payload create round-trip", () => {
     // The UI should now render every value we sent.
     await expect(page.getByRole("heading", { name: "Partner X" })).toBeVisible();
     await expect(page.getByText(/Code: PARTNERX/)).toBeVisible();
-    await expect(page.getByText("energy_shock", { exact: true })).toBeVisible();
+    await expect(page.getByText("energy_price_shock", { exact: true })).toBeVisible();
     await expect(page.getByText("partner-x", { exact: true })).toBeVisible();
     await expect(page.getByText("Yes", { exact: true })).toBeVisible(); // skip email confirmation
     await expect(page.getByRole("heading", { name: "Welcome!" })).toBeVisible(); // welcome preview
