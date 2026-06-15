@@ -31,7 +31,7 @@ export function CohortEditSheet() {
           <SheetTitle>Edit cohort</SheetTitle>
         </SheetHeader>
         <div className="px-4 pb-6">
-          <CohortBuilder embedded />
+          <CohortBuilder embedded onApplied={() => setOpen(false)} />
         </div>
       </SheetContent>
     </Sheet>

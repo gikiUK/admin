@@ -26,10 +26,17 @@ export function TagPickerPopover({ state, universe, value, triggerLabel, onToggl
   const canCreate =
     trimmed.length > 0 && !universe.some((t) => t.name.toLowerCase() === trimmed) && !value.includes(trimmed);
 
+  function handleToggle(tag: string) {
+    onToggle(tag);
+    setOpen(false);
+    setSearch("");
+  }
+
   function handleCreate() {
     if (!canCreate) return;
     onCreate(trimmed);
     setSearch("");
+    setOpen(false);
   }
 
   return (
@@ -57,7 +64,7 @@ export function TagPickerPopover({ state, universe, value, triggerLabel, onToggl
                         <CommandItem
                           key={entry.name}
                           value={entry.name}
-                          onSelect={() => onToggle(entry.name)}
+                          onSelect={() => handleToggle(entry.name)}
                           className="flex items-center gap-2"
                         >
                           <Check className={cn("size-4", isSelected ? "opacity-100" : "opacity-0")} />

@@ -10,11 +10,18 @@ import { useCohort } from "@/lib/analytics/insights/cohort-context";
 type Props = {
   /** When embedded inside a Sheet/Dialog, skip the outer Card chrome and the collapse toggle. */
   embedded?: boolean;
+  /** Called after a successful Apply — host can use this to close a containing drawer/dialog. */
+  onApplied?: () => void;
 };
 
-export function CohortBuilder({ embedded = false }: Props = {}) {
+export function CohortBuilder({ embedded = false, onApplied }: Props = {}) {
   const { reset, apply, discard, hasUnsavedChanges } = useCohort();
   const [collapsed, setCollapsed] = useState(false);
+
+  function handleApply() {
+    apply();
+    onApplied?.();
+  }
 
   const footer = hasUnsavedChanges ? (
     <div className="sticky bottom-0 mt-4 flex items-center justify-end gap-2 border-t bg-card/95 py-3 backdrop-blur">
@@ -23,7 +30,7 @@ export function CohortBuilder({ embedded = false }: Props = {}) {
         <Undo2 className="size-3.5" />
         Discard
       </Button>
-      <Button size="sm" onClick={() => apply()}>
+      <Button size="sm" onClick={handleApply}>
         <Check className="size-3.5" />
         Apply
       </Button>
