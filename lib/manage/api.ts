@@ -17,7 +17,7 @@ export type ManagedCompany = {
   in_trial: boolean;
   gifted_premium_until: string | null;
   access_status: OrgAccessStatus;
-  tags: string[];
+  analytics_tags?: string[];
   created_at: string;
   deleted_at: string | null;
 };
@@ -65,19 +65,6 @@ export function deleteCompany(slug: string): Promise<Record<string, never>> {
   return apiFetch<Record<string, never>>(`/admin/companies/${encodeURIComponent(slug)}`, {
     method: "DELETE"
   });
-}
-
-export type TagWithCount = {
-  name: string;
-  count: number;
-};
-
-/**
- * Returns every tag currently in use across companies, with the count of
- * companies using each tag. Ordered by count desc, then name asc.
- */
-export function fetchTags(): Promise<{ tags: TagWithCount[] }> {
-  return apiFetch<{ tags: TagWithCount[] }>("/admin/analytics/tags");
 }
 
 export function addOrgTag(slug: string, tag: string): Promise<{ company: ManagedCompany }> {

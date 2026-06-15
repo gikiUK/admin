@@ -3,7 +3,7 @@ export type OrgFilters = {
   subscription_status?: string[];
   tags_include?: string[];
   tags_exclude?: string[];
-  workshop_uuids?: string[];
+  signup_link_uuids?: string[];
   signed_up_from?: string;
   signed_up_to?: string;
   has_tracked_actions?: boolean;
@@ -68,7 +68,7 @@ function trimOrgFilters(filters: OrgFilters): OrgFilters {
   if (filters.subscription_status?.length) result.subscription_status = filters.subscription_status;
   if (filters.tags_include?.length) result.tags_include = filters.tags_include;
   if (filters.tags_exclude?.length) result.tags_exclude = filters.tags_exclude;
-  if (filters.workshop_uuids?.length) result.workshop_uuids = filters.workshop_uuids;
+  if (filters.signup_link_uuids?.length) result.signup_link_uuids = filters.signup_link_uuids;
   if (filters.signed_up_from) result.signed_up_from = filters.signed_up_from;
   if (filters.signed_up_to) result.signed_up_to = filters.signed_up_to;
   if (filters.has_tracked_actions !== undefined) result.has_tracked_actions = filters.has_tracked_actions;

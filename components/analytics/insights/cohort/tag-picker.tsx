@@ -3,7 +3,7 @@
 import { TagBadgeList } from "@/components/analytics/insights/cohort/tag-badge-list";
 import { TagPickerPopover } from "@/components/analytics/insights/cohort/tag-picker-popover";
 import { buildTagUniverse } from "@/components/analytics/insights/cohort/tag-picker-universe";
-import { useTags } from "@/lib/manage/use-tags";
+import { useTags } from "@/lib/tags/use-tags";
 
 type Props = {
   legend: string;

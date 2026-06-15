@@ -1,4 +1,4 @@
-import type { useTags } from "@/lib/manage/use-tags";
+import type { useTags } from "@/lib/tags/use-tags";
 
 export type TagEntry = { name: string; count: number };
 
