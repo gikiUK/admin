@@ -1,4 +1,4 @@
-import { fillCode, fillTitle, openAdvanced } from "@/e2e/helpers/selectors";
+import { fillCode, fillTitle } from "@/e2e/helpers/selectors";
 import { expect, test } from "@/e2e/mock-api/test-fixtures";
 
 /**
@@ -21,8 +21,6 @@ test.describe("Signup link — full-payload create round-trip", () => {
     // enabled defaults to true; flip off then back on to exercise the switch.
     await page.getByRole("switch", { name: /^enabled$/i }).click();
     await page.getByRole("switch", { name: /^enabled$/i }).click();
-
-    await openAdvanced(page);
 
     await page.locator("input#expires_on").fill("2027-01-01");
     await page.locator("input#max_uses").fill("5");

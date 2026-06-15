@@ -1,4 +1,4 @@
-import { fillTitle, openAdvanced } from "@/e2e/helpers/selectors";
+import { fillTitle } from "@/e2e/helpers/selectors";
 import { buildSignupLink } from "@/e2e/mock-api/builders";
 import { expect, test } from "@/e2e/mock-api/test-fixtures";
 
@@ -13,7 +13,6 @@ test.describe("Signup link — welcome page on/off", () => {
   test("create with welcome page filled persists both fields", async ({ page, mockApi }) => {
     await page.goto("/signup-links/new");
     await fillTitle(page, "WithWelcome");
-    await openAdvanced(page);
 
     await page.getByRole("switch", { name: /enable welcome page/i }).click();
     await page.locator("input#welcome_page_title").fill("Hi there");

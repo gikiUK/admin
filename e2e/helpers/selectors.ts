@@ -15,12 +15,6 @@ export const sel = {
   welcomePageBodyInput: () => "textarea#welcome_page_body"
 };
 
-export async function openAdvanced(page: Page) {
-  const trigger = page.getByRole("button", { name: /advanced options/i });
-  const ariaExpanded = await trigger.getAttribute("aria-expanded");
-  if (ariaExpanded === "false") await trigger.click();
-}
-
 export async function fillTitle(page: Page, title: string) {
   await page.locator(sel.titleInput()).fill(title);
 }
