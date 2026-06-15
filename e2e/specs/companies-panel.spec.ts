@@ -23,7 +23,7 @@ test.describe("Signup link show — companies panel", () => {
     await page.goto("/signup-links/u-y");
     await expect(page.getByRole("link", { name: "Acme Co" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Globex" })).toBeVisible();
-    await expect(page.getByRole("cell", { name: "4" })).toBeVisible();
-    await expect(page.getByRole("cell", { name: "12" })).toBeVisible();
+    await expect(page.getByRole("cell", { name: "4", exact: true })).toBeVisible();
+    await expect(page.getByRole("cell", { name: "12", exact: true })).toBeVisible();
   });
 });
