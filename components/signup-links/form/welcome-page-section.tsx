@@ -56,7 +56,7 @@ export function WelcomePageSection({ enabled, title, body, onEnabledChange, onTi
                   value={body}
                   onChange={(e) => onBodyChange(e.target.value)}
                   rows={10}
-                  placeholder="Markdown is supported. Use tables, lists, links, etc."
+                  placeholder="Paragraphs, **bold**, *italic*, and bulleted lists are supported."
                   aria-invalid={bodyMissing}
                 />
                 {bodyMissing && (

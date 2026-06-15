@@ -15,9 +15,19 @@ jest.mock("next/navigation", () => ({
 // Capture the Sheet's onOpenChange so the test can drive close events without
 // mounting Radix's portal/animation machinery.
 let lastOnOpenChange: ((open: boolean) => void) | null = null;
+let lastOpen: boolean | null = null;
 jest.mock("@/components/ui/sheet", () => ({
-  Sheet: ({ onOpenChange, children }: { onOpenChange: (o: boolean) => void; children: ReactNode }) => {
+  Sheet: ({
+    open,
+    onOpenChange,
+    children
+  }: {
+    open: boolean;
+    onOpenChange: (o: boolean) => void;
+    children: ReactNode;
+  }) => {
     lastOnOpenChange = onOpenChange;
+    lastOpen = open;
     return <div data-testid="sheet">{children}</div>;
   },
   SheetTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -27,8 +37,14 @@ jest.mock("@/components/ui/sheet", () => ({
 }));
 
 // CohortBuilder pulls in the dataset + query layers we don't need here; stub it.
+// Expose onApplied so tests can simulate the user hitting Apply without rendering
+// the real builder.
+let lastOnApplied: (() => void) | null = null;
 jest.mock("@/components/analytics/insights/cohort/cohort-builder", () => ({
-  CohortBuilder: () => <div data-testid="cohort-builder" />
+  CohortBuilder: ({ onApplied }: { onApplied?: () => void }) => {
+    lastOnApplied = onApplied ?? null;
+    return <div data-testid="cohort-builder" />;
+  }
 }));
 
 beforeEach(() => {
@@ -36,6 +52,8 @@ beforeEach(() => {
   routerReplace.mockClear();
   mockSearchParams = new URLSearchParams();
   lastOnOpenChange = null;
+  lastOnApplied = null;
+  lastOpen = null;
 });
 
 describe("CohortEditSheet", () => {
@@ -71,5 +89,23 @@ describe("CohortEditSheet", () => {
     expect(captured.current?.draft.fact_filters).toEqual([]);
     expect(captured.current?.hasUnsavedChanges).toBe(false);
     expect(routerReplace).not.toHaveBeenCalled();
+  });
+
+  test("applying from inside the drawer closes it", () => {
+    render(
+      <CohortProvider>
+        <CohortEditSheet />
+      </CohortProvider>
+    );
+
+    act(() => {
+      lastOnOpenChange?.(true);
+    });
+    expect(lastOpen).toBe(true);
+
+    act(() => {
+      lastOnApplied?.();
+    });
+    expect(lastOpen).toBe(false);
   });
 });
