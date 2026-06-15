@@ -89,10 +89,22 @@ These aren't blockers, just things we noticed while writing the e2e:
   where a new field becomes writable but isn't read back, which the admin
   UI relies on for `initialFormState`.
 
+## 5. Deferred review follow-ups (2026-06-15)
+
+Items surfaced during code review that are real but not currently breaking. Left as TODOs so we can batch them; none change observable behaviour today.
+
+- **`ManagedCompany.analytics_tags` typed as optional** (`lib/manage/api.ts:20`). The Rails column is `null: false, default: []` and `SerializeAdminCompany` always emits it, so the type should be `analytics_tags: string[]` (non-optional) and the `?? []` guard in `components/manage/org-tags-panel.tsx` should go. Harmless today because `?? []` matches the empty-array default; tightening is purely a cleanup.
+
+- **`SignupLink.created_at` typed as optional, but the serializer never returns it** (`lib/signup-links/types.ts:20`, `components/signup-links/signup-links-table.tsx:52`). The list table renders a "Created" column that always falls back to `formatShortDateTime(null)` because `SerializeSignupLink` doesn't include `created_at`. Fix is on the Rails side: add `created_at: signup_link.created_at.iso8601` to the serializer (and refresh `e2e/fixtures/signup-link/canonical.json`), then make the TS type required. Until then the column shows the empty fallback.
+
+- **Mock delete gate is looser than Rails** (`e2e/mock-api/routes.ts:181`). Rails raises `SignupLinkInUseError` if `uses_count.positive? || companies.exists?` (`api/app/commands/signup_link/destroy.rb:7`); the mock only checks `consumed_count > 0`. Missing the case where a user started signup but never completed (`uses_count > 0`, `consumed_count == 0`). Update the mock to mirror both conditions. Naming nit while we're there: `uses_count` (any attempt) vs `consumed_count` (completed signup) is genuinely confusing — worth a comment in the canonical fixture or the type.
+
+- **`useCompanyTagUniverse` / `useFeatureFlagCatalogue` caches never invalidate** (`components/signup-links/form/use-form-data.ts`). `buildLoader` does expose `.invalidate()` (line 62), but nothing calls it. Adding a tag via `OrgTagsPanel` invalidates the *other* tag cache (`invalidateTagsCache` in `lib/tags/use-tags.ts`) — the signup-link form's universe is a separate loader that stays stale until page reload. Fix: call `useCompanyTagUniverse.invalidate()` alongside `invalidateTagsCache()` in `org-tags-panel.tsx`, or consolidate the two caches behind react-query so there's one source of truth.
+
 ## How the admin e2e suite is structured (for reference)
 
 - `e2e/mock-api/store.ts` — in-memory `Map<uuid, SignupLink>` per test,
-  with referrers / feature flags / cohorts / companies seeded per spec.
+  with feature flags / companies seeded per spec.
 - `e2e/mock-api/routes.ts` — Playwright `page.route` handler that pattern-
   matches by path (any host) on `/admin/*` and `/auth/*`.
 - `e2e/specs/*.spec.ts` — one file per logical scenario. Each spec asserts
