@@ -1,9 +1,7 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { SignupLink, SignupLinkPayload } from "@/lib/signup-links/types";
 import { AnalyticsSection } from "./analytics-section";
 import { BasicFields } from "./basic-fields";
@@ -20,7 +18,6 @@ type Props = {
 
 export function SignupLinkForm({ initial, submitLabel, onSubmit }: Props) {
   const { state, update } = useSignupLinkForm(initial);
-  const [advancedOpen, setAdvancedOpen] = useState(initial !== null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -55,44 +52,34 @@ export function SignupLinkForm({ initial, submitLabel, onSubmit }: Props) {
         onEnabledChange={(v) => update("enabled", v)}
       />
 
-      <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-        <CollapsibleTrigger asChild>
-          <Button type="button" variant="ghost" size="sm" className="gap-1 px-2">
-            <ChevronDown className={`size-3 transition-transform ${advancedOpen ? "rotate-180" : ""}`} />
-            Advanced options
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4 space-y-4">
-          <LimitsSection
-            expiresOn={state.expires_on}
-            maxUses={state.max_uses}
-            skipEmailConfirmation={state.skip_email_confirmation}
-            skipWelcomeEmail={state.skip_welcome_email}
-            onExpiresOnChange={(v) => update("expires_on", v)}
-            onMaxUsesChange={(v) => update("max_uses", v)}
-            onSkipEmailConfirmationChange={(v) => update("skip_email_confirmation", v)}
-            onSkipWelcomeEmailChange={(v) => update("skip_welcome_email", v)}
-          />
-          <PerksSection
-            premiumUntil={state.premium_until}
-            featureFlags={state.feature_flags}
-            onPremiumUntilChange={(v) => update("premium_until", v)}
-            onFeatureFlagsChange={(v) => update("feature_flags", v)}
-          />
-          <AnalyticsSection
-            analyticsTags={state.analytics_tags}
-            onAnalyticsTagsChange={(v) => update("analytics_tags", v)}
-          />
-          <WelcomePageSection
-            enabled={state.welcome_page_enabled}
-            title={state.welcome_page_title}
-            body={state.welcome_page_body}
-            onEnabledChange={(v) => update("welcome_page_enabled", v)}
-            onTitleChange={(v) => update("welcome_page_title", v)}
-            onBodyChange={(v) => update("welcome_page_body", v)}
-          />
-        </CollapsibleContent>
-      </Collapsible>
+      <LimitsSection
+        expiresOn={state.expires_on}
+        maxUses={state.max_uses}
+        skipEmailConfirmation={state.skip_email_confirmation}
+        skipWelcomeEmail={state.skip_welcome_email}
+        onExpiresOnChange={(v) => update("expires_on", v)}
+        onMaxUsesChange={(v) => update("max_uses", v)}
+        onSkipEmailConfirmationChange={(v) => update("skip_email_confirmation", v)}
+        onSkipWelcomeEmailChange={(v) => update("skip_welcome_email", v)}
+      />
+      <PerksSection
+        premiumUntil={state.premium_until}
+        featureFlags={state.feature_flags}
+        onPremiumUntilChange={(v) => update("premium_until", v)}
+        onFeatureFlagsChange={(v) => update("feature_flags", v)}
+      />
+      <AnalyticsSection
+        analyticsTags={state.analytics_tags}
+        onAnalyticsTagsChange={(v) => update("analytics_tags", v)}
+      />
+      <WelcomePageSection
+        enabled={state.welcome_page_enabled}
+        title={state.welcome_page_title}
+        body={state.welcome_page_body}
+        onEnabledChange={(v) => update("welcome_page_enabled", v)}
+        onTitleChange={(v) => update("welcome_page_title", v)}
+        onBodyChange={(v) => update("welcome_page_body", v)}
+      />
 
       {error && <p className="text-destructive text-sm">{error}</p>}
       {welcomePageIncomplete && (
