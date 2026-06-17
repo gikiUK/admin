@@ -53,4 +53,23 @@ describe("TrackedActionsSection", () => {
 
     expect(screen.getByText("Rejected one")).not.toBeNull();
   });
+
+  test("renders rejection reason badge and reveals details popover when expanded", () => {
+    const rejected = makeAction({
+      id: 10,
+      title: "Rejected with reason",
+      status: "rejected",
+      rejection_details: { reason: "cost", details: "Too expensive" }
+    });
+    render(<TrackedActionsSection actions={[rejected]} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /rejected/i }));
+
+    expect(screen.getByText("Cost")).not.toBeNull();
+
+    const detailsTrigger = screen.getByRole("button", { name: "Show rejection details" });
+    fireEvent.click(detailsTrigger);
+
+    expect(screen.getByText("Too expensive")).not.toBeNull();
+  });
 });
