@@ -2,7 +2,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { OrgTrackedAction } from "@/lib/analytics/api";
 import { TrackedActionRow } from "./tracked-action-row";
 
-export function TrackedActionsTable({ actions, emptyLabel }: { actions: OrgTrackedAction[]; emptyLabel: string }) {
+type Variant = "active" | "rejected";
+
+export function TrackedActionsTable({
+  actions,
+  emptyLabel,
+  variant = "active"
+}: {
+  actions: OrgTrackedAction[];
+  emptyLabel: string;
+  variant?: Variant;
+}) {
   return (
     <Table>
       <TableHeader>
@@ -10,7 +20,11 @@ export function TrackedActionsTable({ actions, emptyLabel }: { actions: OrgTrack
           <TableHead>Action</TableHead>
           <TableHead className="w-[120px]">Status</TableHead>
           <TableHead className="w-[140px]">Assignee</TableHead>
-          <TableHead className="w-[120px]">Due</TableHead>
+          {variant === "rejected" ? (
+            <TableHead className="w-[180px]">Reason</TableHead>
+          ) : (
+            <TableHead className="w-[120px]">Due</TableHead>
+          )}
           <TableHead className="w-[160px]">Updated</TableHead>
         </TableRow>
       </TableHeader>
@@ -22,7 +36,7 @@ export function TrackedActionsTable({ actions, emptyLabel }: { actions: OrgTrack
             </TableCell>
           </TableRow>
         ) : (
-          actions.map((action) => <TrackedActionRow key={action.id} action={action} />)
+          actions.map((action) => <TrackedActionRow key={action.id} action={action} variant={variant} />)
         )}
       </TableBody>
     </Table>

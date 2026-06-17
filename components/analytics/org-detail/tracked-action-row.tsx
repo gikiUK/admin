@@ -3,6 +3,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import type { OrgTrackedAction } from "@/lib/analytics/api";
 import { cn } from "@/lib/utils";
 import { formatDate, formatDateTime } from "./format";
+import { RejectionReasonCell } from "./rejection-reason-cell";
 
 const TRACKED_STATUS_STYLES: Record<string, string> = {
   not_started: "border-muted-foreground/30 bg-muted text-muted-foreground",
@@ -12,7 +13,13 @@ const TRACKED_STATUS_STYLES: Record<string, string> = {
   rejected: "border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-400"
 };
 
-export function TrackedActionRow({ action }: { action: OrgTrackedAction }) {
+export function TrackedActionRow({
+  action,
+  variant = "active"
+}: {
+  action: OrgTrackedAction;
+  variant?: "active" | "rejected";
+}) {
   return (
     <TableRow>
       <TableCell>
@@ -36,7 +43,13 @@ export function TrackedActionRow({ action }: { action: OrgTrackedAction }) {
       <TableCell className="text-xs">
         {action.assignee_name || <span className="text-muted-foreground">—</span>}
       </TableCell>
-      <TableCell className="text-xs text-muted-foreground">{formatDate(action.due_date)}</TableCell>
+      {variant === "rejected" ? (
+        <TableCell>
+          <RejectionReasonCell rejection={action.rejection_details} />
+        </TableCell>
+      ) : (
+        <TableCell className="text-xs text-muted-foreground">{formatDate(action.due_date)}</TableCell>
+      )}
       <TableCell className="text-xs text-muted-foreground">{formatDateTime(action.updated_at)}</TableCell>
     </TableRow>
   );

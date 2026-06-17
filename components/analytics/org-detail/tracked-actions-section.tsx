@@ -35,7 +35,7 @@ export function TrackedActionsSection({ actions }: { actions: OrgTrackedAction[]
           </CollapsibleTrigger>
           <CollapsibleContent>
             <CardContent className="px-4 pt-0">
-              <TrackedActionsTable actions={rejected} emptyLabel="No rejected actions." />
+              <TrackedActionsTable actions={rejected} emptyLabel="No rejected actions." variant="rejected" />
             </CardContent>
           </CollapsibleContent>
         </Collapsible>
