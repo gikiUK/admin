@@ -37,7 +37,7 @@ export function TrackedActionRow({
             TRACKED_STATUS_STYLES[action.status] ?? TRACKED_STATUS_STYLES.not_started
           )}
         >
-          {action.status.replace("_", " ")}
+          {action.status.replaceAll("_", " ")}
         </Badge>
       </TableCell>
       <TableCell className="text-xs">
