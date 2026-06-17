@@ -33,6 +33,7 @@ describe("TrackedActionsSection", () => {
     expect(screen.getByText("Tracked actions (2)")).not.toBeNull();
     expect(screen.getByText("Active one")).not.toBeNull();
     expect(screen.getByText("Active two")).not.toBeNull();
+    expect(screen.queryByText("Rejected one")).toBeNull();
   });
 
   test("shows an empty-state label and no count badge when there are no rejected actions", () => {
