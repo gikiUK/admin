@@ -233,15 +233,25 @@ export type OrgMember = {
   last_active_at: string | null;
 };
 
+export const REJECTION_REASONS = ["cost", "time", "irrelevant", "other"] as const;
+export type RejectionReason = (typeof REJECTION_REASONS)[number];
+
+export type RejectionDetails = {
+  reason: RejectionReason;
+  details: string | null;
+};
+
 export type OrgTrackedAction = {
   id: number;
   action_type: string;
   action_id: number;
+  action_uuid: string | null;
   title: string;
   status: string;
   pre_giki_status: string | null;
   due_date: string | null;
   assignee_name: string | null;
+  rejection_details: RejectionDetails | null;
   created_at: string;
   updated_at: string;
 };
