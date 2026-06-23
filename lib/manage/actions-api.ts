@@ -14,6 +14,10 @@ export function fetchActions(): Promise<{ actions: ManagedAction[] }> {
   return apiFetch<{ actions: ManagedAction[] }>("/admin/actions");
 }
 
+export function actionPath(action: ManagedAction): string {
+  return `/actions/system/${action.uuid}`;
+}
+
 export function actionUrl(action: ManagedAction): string {
-  return getFrontendUrl(`/actions/system/${action.uuid}`);
+  return getFrontendUrl(actionPath(action));
 }
