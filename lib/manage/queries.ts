@@ -1,4 +1,5 @@
 import { fetchUsers, type UsersFilter } from "@/lib/analytics/api";
+import { fetchActions } from "@/lib/manage/actions-api";
 import {
   type CompaniesFilter,
   fetchCompanies,
@@ -10,6 +11,7 @@ import {
 
 export const manageKeys = {
   all: ["manage"] as const,
+  actions: () => ["manage", "actions"] as const,
   companies: (filter: CompaniesFilter) => ["manage", "companies", filter] as const,
   company: (slug: string) => ["manage", "company", slug] as const,
   memberships: (slug: string, filter: MembershipsFilter) => ["manage", "memberships", slug, filter] as const,
@@ -19,6 +21,10 @@ export const manageKeys = {
   // to leak into the manage member-add dialog.
   userSearch: (query: string) => ["manage", "user-search", query] as const
 };
+
+export function actionsQuery() {
+  return { queryKey: manageKeys.actions(), queryFn: () => fetchActions() };
+}
 
 export function companiesQuery(filter: CompaniesFilter) {
   return { queryKey: manageKeys.companies(filter), queryFn: () => fetchCompanies(filter) };

@@ -128,6 +128,12 @@ export const SIDEBAR_MENU: MenuSection[] = [
             label: "Users",
             icon: Users,
             matchPaths: ["/manage/users"]
+          },
+          {
+            href: "/manage/actions",
+            label: "Actions",
+            icon: Sparkles,
+            matchPaths: ["/manage/actions"]
           }
         ]
       },
