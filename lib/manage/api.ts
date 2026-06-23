@@ -37,7 +37,6 @@ export function fetchCompany(slug: string): Promise<{ company: ManagedCompany }>
 }
 
 export type UpdateCompanyPayload = {
-  trial_ends_at?: string | null;
   gifted_premium_until?: string | null;
   name?: string;
 };
@@ -46,12 +45,6 @@ export function updateCompany(slug: string, payload: UpdateCompanyPayload): Prom
   return apiFetch<{ company: ManagedCompany }>(`/admin/companies/${encodeURIComponent(slug)}`, {
     method: "PATCH",
     body: JSON.stringify(payload)
-  });
-}
-
-export function resetTrialEndsAt(slug: string): Promise<{ company: ManagedCompany }> {
-  return apiFetch<{ company: ManagedCompany }>(`/admin/companies/${encodeURIComponent(slug)}/reset_trial_ends_at`, {
-    method: "DELETE"
   });
 }
 
