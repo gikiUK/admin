@@ -29,7 +29,7 @@ export function CopyActionUrlButton({ url, title }: Props) {
     <button
       type="button"
       onClick={copy}
-      className="inline-flex shrink-0 items-center gap-1 text-sm text-primary hover:underline"
+      className="inline-flex shrink-0 cursor-pointer items-center gap-1 text-sm text-primary hover:underline"
       aria-label={`Copy URL for ${title}`}
     >
       Copy

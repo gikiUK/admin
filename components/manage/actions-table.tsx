@@ -17,7 +17,7 @@ export function ActionsTable({ actions }: ActionsTableProps) {
             <TableRow>
               <TableHead className="w-[40%]">Title</TableHead>
               <TableHead>URL</TableHead>
-              <TableHead className="w-[160px]">Airtable Record ID</TableHead>
+              <TableHead className="w-[200px]">Airtable Record ID</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -54,7 +54,7 @@ export function ActionsTable({ actions }: ActionsTableProps) {
                       <CopyActionUrlButton url={actionUrl(action)} title={action.title} />
                     </div>
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground truncate">
+                  <TableCell className="font-mono text-xs text-muted-foreground whitespace-nowrap">
                     {action.airtable_id ?? "—"}
                   </TableCell>
                 </TableRow>
