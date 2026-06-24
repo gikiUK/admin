@@ -9,20 +9,25 @@ type Props = {
 };
 
 export function CopyActionUrlButton({ url, title }: Props) {
-  function copy() {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(url);
-    } else {
-      const el = document.createElement("textarea");
-      el.value = url;
-      el.style.position = "fixed";
-      el.style.opacity = "0";
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
+  async function copy() {
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const el = document.createElement("textarea");
+        el.value = url;
+        el.style.position = "fixed";
+        el.style.opacity = "0";
+        document.body.appendChild(el);
+        el.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(el);
+        if (!ok) throw new Error("execCommand copy failed");
+      }
+      toast.success("Action URL copied to clipboard.");
+    } catch {
+      toast.error("Couldn't copy the action URL.");
     }
-    toast.success("Action URL copied to clipboard.");
   }
 
   return (

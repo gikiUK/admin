@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
 import { ActionsTable } from "@/components/manage/actions-table";
 import { DebouncedInput } from "@/components/ui/debounced-input";
 import type { ManagedAction } from "@/lib/manage/actions-api";
@@ -25,18 +24,12 @@ export function ActionsExplorer() {
       : "Failed to load actions"
     : "";
 
-  const filtered = useMemo(() => {
-    const trimmed = query.trim();
-    if (!trimmed) return actions;
-    return actions.filter((action) => matchesQuery(action, trimmed));
-  }, [actions, query]);
+  const trimmed = query.trim();
+  const filtered = trimmed ? actions.filter((action) => matchesQuery(action, trimmed)) : actions;
 
-  const handleQueryChange = useCallback(
-    (value: string) => {
-      set({ q: value || undefined });
-    },
-    [set]
-  );
+  function handleQueryChange(value: string) {
+    set({ q: value || undefined });
+  }
 
   return (
     <div className="space-y-4">
