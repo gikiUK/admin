@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
 import { OrgsTable } from "@/components/manage/orgs-table";
 import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Pager } from "@/components/ui/pager";
@@ -21,7 +20,7 @@ function readFilter(searchParams: URLSearchParams): CompaniesFilter {
 
 export function OrgsExplorer() {
   const { searchParams, set } = useUrlState();
-  const filter = useMemo(() => readFilter(searchParams), [searchParams]);
+  const filter = readFilter(searchParams);
 
   const query = useQuery(companiesQuery(filter));
   const companies = query.data?.results ?? [];
@@ -32,19 +31,13 @@ export function OrgsExplorer() {
       : "Failed to load organisations"
     : "";
 
-  const handleNameChange = useCallback(
-    (value: string) => {
-      set({ name: value || undefined, page: 1 });
-    },
-    [set]
-  );
+  function handleNameChange(value: string) {
+    set({ name: value || undefined, page: 1 });
+  }
 
-  const handlePageChange = useCallback(
-    (page: number) => {
-      set({ page });
-    },
-    [set]
-  );
+  function handlePageChange(page: number) {
+    set({ page });
+  }
 
   return (
     <div className="space-y-4">
