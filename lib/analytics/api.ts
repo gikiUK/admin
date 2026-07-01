@@ -14,6 +14,7 @@ export const ACTION_TYPES = [
   "company_deleted",
   "onboarding_question_answered",
   "onboarding_reset",
+  "downloaded_plan",
   "tracked_action_created",
   "tracked_action_deleted",
   "tracked_action_status_changed",

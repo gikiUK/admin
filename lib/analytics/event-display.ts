@@ -3,6 +3,7 @@ import {
   Check,
   CheckCircle2,
   Edit3,
+  FileDown,
   FileText,
   HelpCircle,
   KeyRound,
@@ -25,7 +26,7 @@ import type { AnalyticsEvent } from "@/lib/analytics/api";
 
 export type EventTone = "neutral" | "success" | "warning" | "destructive" | "info";
 
-export type EventCategory = "user" | "org" | "action" | "invitation" | "membership" | "onboarding";
+export type EventCategory = "user" | "org" | "action" | "invitation" | "membership" | "onboarding" | "document";
 
 export type EventDisplay = {
   label: string;
@@ -135,6 +136,17 @@ const REGISTRY: Record<string, EventDisplay> = {
     tone: "warning",
     category: "onboarding",
     summarize: (event) => `${nameOrThe(event.about_company, "an org")} reset onboarding`
+  },
+  downloaded_plan: {
+    label: "Plan downloaded",
+    icon: FileDown,
+    tone: "info",
+    category: "document",
+    summarize: (event) => {
+      const location = stringDetail(event, "download_location");
+      const where = location ? ` from ${humanize(location)}` : "";
+      return `${nameOrThe(event.about_company, "An org")} downloaded their plan${where}`;
+    }
   },
   tracked_action_created: {
     label: "Action added",

@@ -19,7 +19,7 @@ function toKey(id: SeriesId): string {
   return id.replace(/:/g, "_");
 }
 
-const CATEGORY_ORDER: EventCategory[] = ["user", "org", "action", "invitation", "membership", "onboarding"];
+const CATEGORY_ORDER: EventCategory[] = ["user", "org", "action", "invitation", "membership", "onboarding", "document"];
 
 const CATEGORY_LABEL: Record<EventCategory, string> = {
   user: "Users",
@@ -27,7 +27,8 @@ const CATEGORY_LABEL: Record<EventCategory, string> = {
   action: "Actions",
   invitation: "Invitations",
   membership: "Memberships",
-  onboarding: "Onboarding"
+  onboarding: "Onboarding",
+  document: "Documents"
 };
 
 const CATEGORY_COLOR: Record<EventCategory, string> = {
@@ -36,7 +37,8 @@ const CATEGORY_COLOR: Record<EventCategory, string> = {
   action: "oklch(0.66 0.21 41)",
   invitation: "oklch(0.7 0.18 70)",
   membership: "oklch(0.62 0.24 305)",
-  onboarding: "oklch(0.65 0.22 22)"
+  onboarding: "oklch(0.65 0.22 22)",
+  document: "oklch(0.64 0.13 195)"
 };
 
 const ALL_COLOR = "oklch(0.541 0.281 293.009)";
