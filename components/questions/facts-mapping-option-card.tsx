@@ -28,12 +28,20 @@ export function FactsMappingOptionCard({
 
   return (
     <div className="space-y-2 rounded-md border p-3">
-      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs">
-        <span className="text-muted-foreground">When</span>
-        <span className="font-medium">“{option.label}”</span>
-        <code className="rounded-md border bg-muted px-1.5 py-0.5 font-mono text-muted-foreground">{option.value}</code>
-        <span className="text-muted-foreground">is selected, set:</span>
-        {option.exclusive && <Badge variant="outline">exclusive</Badge>}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs">
+          <span className="text-muted-foreground">When</span>
+          <span className="font-medium">“{option.label}”</span>
+          <code className="rounded-md border bg-muted px-1.5 py-0.5 font-mono text-muted-foreground">
+            {option.value}
+          </code>
+          <span className="text-muted-foreground">is selected, set:</span>
+        </div>
+        {option.exclusive && (
+          <Badge variant="outline" className="shrink-0">
+            exclusive
+          </Badge>
+        )}
       </div>
       {overriddenIds.length === 0 ? (
         <p className="text-xs text-muted-foreground">Nothing — every fact keeps its default.</p>
