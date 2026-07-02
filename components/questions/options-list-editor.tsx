@@ -33,7 +33,7 @@ export function OptionsListEditor({ options, onChange }: OptionsListEditorProps)
 
       {options.length > 0 && (
         <div className="space-y-2">
-          <div className="grid grid-cols-[1fr_120px_70px_32px] items-center gap-2 text-xs font-medium text-muted-foreground">
+          <div className="grid grid-cols-[1fr_220px_70px_32px] items-center gap-2 text-xs font-medium text-muted-foreground">
             <span>Label</span>
             <span>Value</span>
             <span>Exclusive</span>
@@ -42,18 +42,18 @@ export function OptionsListEditor({ options, onChange }: OptionsListEditorProps)
 
           {options.map((opt, i) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: editable list with no stable ID
-            <div key={i} className="grid grid-cols-[1fr_120px_70px_32px] items-center gap-2">
+            <div key={i} className="grid grid-cols-[1fr_220px_70px_32px] items-center gap-2">
               <DebouncedInput
                 value={opt.label}
                 onCommit={(v) => handleUpdate(i, { label: v })}
                 placeholder="Label"
-                className="h-8 text-xs"
+                className="h-8 text-xs md:text-xs"
               />
               <DebouncedInput
                 value={opt.value}
                 onCommit={(v) => handleUpdate(i, { value: v })}
                 placeholder="value"
-                className="h-8 font-mono text-xs"
+                className="h-8 font-mono text-xs md:text-xs"
               />
               <div className="flex justify-center">
                 <Checkbox

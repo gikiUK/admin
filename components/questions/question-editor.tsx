@@ -58,6 +58,9 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
       patch.fact = undefined;
       patch.options_ref = undefined;
     }
+    if (newType !== "multi-select") {
+      patch.max_selections = undefined;
+    }
     dispatchUpdate(patch);
   }
 
@@ -164,12 +167,14 @@ function ExistingQuestionEditor({ questionIndex }: { questionIndex: number }) {
             optionsRef={question.options_ref ?? ""}
             options={question.options ?? []}
             factsMapping={question.facts ?? {}}
-            allFactIds={allFactIds}
+            facts={blob.facts}
             constantGroupNames={constantGroupNames}
+            maxSelections={question.max_selections}
             onFactChange={(fact) => dispatchUpdate({ fact: fact || undefined })}
             onOptionsRefChange={(ref) => dispatchUpdate({ options_ref: ref || undefined })}
             onOptionsChange={(options) => dispatchUpdate({ options })}
             onFactsMappingChange={(facts) => dispatchUpdate({ facts })}
+            onMaxSelectionsChange={(max) => dispatchUpdate({ max_selections: max })}
           />
         </CardContent>
       </Card>
@@ -212,6 +217,7 @@ function NewQuestionEditor() {
   const [optionsRef, setOptionsRef] = useState("");
   const [options, setOptions] = useState<BlobOption[]>([]);
   const [factsMapping, setFactsMapping] = useState<FactsMap>({});
+  const [maxSelections, setMaxSelections] = useState<number | undefined>(undefined);
   const [showWhen, setShowWhen] = useState<BlobCondition | undefined>(undefined);
   const [hideWhen, setHideWhen] = useState<BlobCondition | undefined>(undefined);
   const [unknowable, setUnknowable] = useState(false);
@@ -229,6 +235,9 @@ function NewQuestionEditor() {
     } else {
       setFact("");
       setOptionsRef("");
+    }
+    if (newType !== "multi-select") {
+      setMaxSelections(undefined);
     }
   }
 
@@ -250,6 +259,7 @@ function NewQuestionEditor() {
     } else if (type === "single-select" || type === "multi-select") {
       payload.fact = fact || undefined;
       payload.options_ref = optionsRef || undefined;
+      if (type === "multi-select") payload.max_selections = maxSelections;
     } else {
       payload.options = options;
       payload.facts = factsMapping;
@@ -335,12 +345,14 @@ function NewQuestionEditor() {
             optionsRef={optionsRef}
             options={options}
             factsMapping={factsMapping}
-            allFactIds={allFactIds}
+            facts={blob?.facts ?? {}}
             constantGroupNames={constantGroupNames}
+            maxSelections={maxSelections}
             onFactChange={setFact}
             onOptionsRefChange={setOptionsRef}
             onOptionsChange={setOptions}
             onFactsMappingChange={setFactsMapping}
+            onMaxSelectionsChange={setMaxSelections}
           />
         </CardContent>
       </Card>
