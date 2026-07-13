@@ -54,8 +54,14 @@ export function ungiftPremium(slug: string): Promise<{ company: ManagedCompany }
   });
 }
 
-export function deleteCompany(slug: string): Promise<Record<string, never>> {
-  return apiFetch<Record<string, never>>(`/admin/companies/${encodeURIComponent(slug)}`, {
+export function softDeleteCompany(slug: string): Promise<Record<string, never>> {
+  return apiFetch<Record<string, never>>(`/admin/companies/${encodeURIComponent(slug)}/soft_destroy`, {
+    method: "DELETE"
+  });
+}
+
+export function hardDeleteCompany(slug: string): Promise<Record<string, never>> {
+  return apiFetch<Record<string, never>>(`/admin/companies/${encodeURIComponent(slug)}/hard_destroy`, {
     method: "DELETE"
   });
 }
