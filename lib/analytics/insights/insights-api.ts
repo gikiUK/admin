@@ -2,6 +2,12 @@ import type { ActionLeaderboardRow } from "@/lib/analytics/actions-api";
 import type { CohortSpec } from "@/lib/analytics/insights/cohort-spec";
 import { apiFetch } from "@/lib/api/client";
 
+export type CohortMember = {
+  org_id: number;
+  org_name: string;
+  slug: string;
+};
+
 export type CohortSummary = {
   cohort_size: number;
   total_orgs_in_db: number;
@@ -9,6 +15,8 @@ export type CohortSummary = {
   tracked_actions: { total: number; avg_per_org: number; median_per_org: number };
   with_any_actions: number;
   with_completed_actions: number;
+  // Populated by the backend only when cohort_size <= 6; omitted/null otherwise.
+  members?: CohortMember[] | null;
 };
 
 export type FactBreakdownValue = {
