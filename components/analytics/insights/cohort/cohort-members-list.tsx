@@ -11,8 +11,6 @@ type Props = {
 export function CohortMembersList({ members }: Props) {
   const router = useRouter();
 
-  if (members.length === 0) return null;
-
   return (
     <div className="space-y-2">
       <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

@@ -11,7 +11,7 @@ export type CohortSummary = {
   with_any_actions: number;
   with_completed_actions: number;
   // Full enriched org rows, populated by the backend only when cohort_size <= 6; omitted otherwise.
-  members?: AnalyticsOrganization[] | null;
+  members?: AnalyticsOrganization[];
 };
 
 export type FactBreakdownValue = {
