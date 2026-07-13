@@ -64,6 +64,7 @@ export type EventsFilter = {
 export type AnalyticsSummary = {
   range: { from: string; to: string };
   active_users: { dau: number; wau: number; mau: number };
+  active_companies: { dac: number; wac: number; mac: number };
   active_orgs: number;
   new_signups: number;
   new_companies: number;

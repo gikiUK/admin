@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { OrgKpis } from "@/components/analytics/org-kpis";
+import { OrgsActiveKpis } from "@/components/analytics/orgs-active-kpis";
 import { OrgsExplorer } from "@/components/analytics/orgs-explorer";
 import type { AnalyticsSummary } from "@/lib/analytics/api";
 
@@ -20,6 +21,7 @@ export function OrgsTab({ summary, isLoading }: OrgsTabProps) {
 
   return (
     <div className="space-y-6">
+      <OrgsActiveKpis data={summary} isLoading={isLoading} />
       <OrgKpis data={summary} isLoading={isLoading} />
       <OrgsExplorer onSelect={handleSelect} />
     </div>
