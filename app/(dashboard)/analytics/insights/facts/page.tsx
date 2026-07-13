@@ -40,7 +40,7 @@ export default function FactsInsightsPage() {
 
       <AsyncSection
         state={summary}
-        endpoint="GET /admin/analytics/insights/facts/summary"
+        endpoint="POST /admin/analytics/insights/cohort_summary"
         loadingFallback={<KpiStripSkeleton />}
       >
         {(data) => <InsightsKpiStrip data={data} />}
