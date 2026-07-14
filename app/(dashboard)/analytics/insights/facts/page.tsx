@@ -1,6 +1,7 @@
 "use client";
 
 import { AsyncSection } from "@/components/analytics/async-section";
+import { CohortMembersList } from "@/components/analytics/insights/cohort/cohort-members-list";
 import { CohortSummaryPill } from "@/components/analytics/insights/cohort/cohort-summary-pill";
 import { FactsBreakdownGrid } from "@/components/analytics/insights/facts/facts-breakdown-grid";
 import { InsightsKpiStrip } from "@/components/analytics/insights/facts/insights-kpi-strip";
@@ -16,6 +17,7 @@ export default function FactsInsightsPage() {
 
   const cohortSize = summary.status === "ready" ? summary.data.cohort_size : undefined;
   const totalOrgs = summary.status === "ready" ? summary.data.total_orgs_in_db : undefined;
+  const members = summary.status === "ready" ? summary.data.members : undefined;
 
   return (
     <div className="space-y-6">
@@ -34,9 +36,11 @@ export default function FactsInsightsPage() {
 
       <CohortSummaryPill cohortSize={cohortSize} totalOrgs={totalOrgs} />
 
+      {members && members.length > 0 && <CohortMembersList members={members} />}
+
       <AsyncSection
         state={summary}
-        endpoint="GET /admin/analytics/insights/facts/summary"
+        endpoint="POST /admin/analytics/insights/cohort_summary"
         loadingFallback={<KpiStripSkeleton />}
       >
         {(data) => <InsightsKpiStrip data={data} />}

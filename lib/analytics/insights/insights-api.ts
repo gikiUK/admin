@@ -1,4 +1,5 @@
 import type { ActionLeaderboardRow } from "@/lib/analytics/actions-api";
+import type { AnalyticsOrganization } from "@/lib/analytics/api";
 import type { CohortSpec } from "@/lib/analytics/insights/cohort-spec";
 import { apiFetch } from "@/lib/api/client";
 
@@ -9,6 +10,8 @@ export type CohortSummary = {
   tracked_actions: { total: number; avg_per_org: number; median_per_org: number };
   with_any_actions: number;
   with_completed_actions: number;
+  // Full enriched org rows, populated by the backend only when cohort_size <= 6; omitted otherwise.
+  members?: AnalyticsOrganization[];
 };
 
 export type FactBreakdownValue = {
