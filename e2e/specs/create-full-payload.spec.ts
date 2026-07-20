@@ -26,8 +26,9 @@ test.describe("Signup link — full-payload create round-trip", () => {
     await page.locator("input#max_uses").fill("5");
     await page.locator("input#premium_until").fill("2027-01-01T00:00");
 
-    // Skip flags
+    // Skip flags & workshop onboarding
     await page.getByRole("switch", { name: /skip email confirmation/i }).click();
+    await page.getByRole("switch", { name: /workshop onboarding/i }).click();
 
     // Feature flag pick
     await page.getByRole("button", { name: /pick flags/i }).click();
@@ -58,6 +59,7 @@ test.describe("Signup link — full-payload create round-trip", () => {
         max_uses: 5,
         skip_email_confirmation: true,
         skip_welcome_email: false,
+        workshop_onboarding: true,
         feature_flags: ["energy_price_shock"],
         analytics_tags: ["partner-x"],
         welcome_page_title: "Welcome!",

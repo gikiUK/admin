@@ -12,6 +12,7 @@ export type SignupLink = {
   analytics_tags: string[];
   skip_email_confirmation: boolean;
   skip_welcome_email: boolean;
+  workshop_onboarding: boolean;
   welcome_page_title: string | null;
   welcome_page_body: string | null;
   expired: boolean;
@@ -29,6 +30,7 @@ export type SignupLinkPayload = {
   premium_until?: string | null;
   skip_email_confirmation?: boolean;
   skip_welcome_email?: boolean;
+  workshop_onboarding?: boolean;
   welcome_page_title?: string | null;
   welcome_page_body?: string | null;
   feature_flags?: string[];

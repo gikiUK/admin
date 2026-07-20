@@ -16,6 +16,7 @@ function makeLink(overrides: Partial<SignupLink> = {}): SignupLink {
     analytics_tags: [],
     skip_email_confirmation: false,
     skip_welcome_email: false,
+    workshop_onboarding: false,
     welcome_page_title: null,
     welcome_page_body: null,
     expired: false,
@@ -161,5 +162,13 @@ describe("formStateToPayload", () => {
     const payload = formStateToPayload(state, true);
     expect(payload.skip_email_confirmation).toBe(true);
     expect(payload.skip_welcome_email).toBe(true);
+  });
+
+  test("workshop_onboarding is passed through", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.workshop_onboarding = true;
+    const payload = formStateToPayload(state, true);
+    expect(payload.workshop_onboarding).toBe(true);
   });
 });

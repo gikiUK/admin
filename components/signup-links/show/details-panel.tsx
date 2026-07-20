@@ -24,6 +24,7 @@ export function DetailsPanel({ link }: Props) {
         <DetailRow label="Premium until">{formatShortDateTime(link.premium_until)}</DetailRow>
         <DetailRow label="Skip email confirmation">{link.skip_email_confirmation ? "Yes" : "No"}</DetailRow>
         <DetailRow label="Skip welcome email">{link.skip_welcome_email ? "Yes" : "No"}</DetailRow>
+        <DetailRow label="Workshop onboarding">{link.workshop_onboarding ? "Yes" : "No"}</DetailRow>
         <DetailRow label="Welcome page">
           {link.welcome_page_title && link.welcome_page_body ? "Enabled" : "Disabled"}
         </DetailRow>
