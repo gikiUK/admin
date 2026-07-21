@@ -57,10 +57,12 @@ export function SignupLinkForm({ initial, submitLabel, onSubmit }: Props) {
         maxUses={state.max_uses}
         skipEmailConfirmation={state.skip_email_confirmation}
         skipWelcomeEmail={state.skip_welcome_email}
+        workshopOnboarding={state.workshop_onboarding}
         onExpiresOnChange={(v) => update("expires_on", v)}
         onMaxUsesChange={(v) => update("max_uses", v)}
         onSkipEmailConfirmationChange={(v) => update("skip_email_confirmation", v)}
         onSkipWelcomeEmailChange={(v) => update("skip_welcome_email", v)}
+        onWorkshopOnboardingChange={(v) => update("workshop_onboarding", v)}
       />
       <PerksSection
         premiumUntil={state.premium_until}

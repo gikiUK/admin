@@ -1,5 +1,11 @@
+import type { Page } from "@playwright/test";
 import { fillCode, fillTitle } from "@/e2e/helpers/selectors";
 import { expect, test } from "@/e2e/mock-api/test-fixtures";
+
+/** The value span of a details-panel row, located by its label span's sibling. */
+function detailRowValue(page: Page, label: string) {
+  return page.getByText(label, { exact: true }).locator("xpath=following-sibling::span[1]");
+}
 
 /**
  * One spec, one round-trip: fill every field on the form and assert that the
@@ -26,8 +32,9 @@ test.describe("Signup link — full-payload create round-trip", () => {
     await page.locator("input#max_uses").fill("5");
     await page.locator("input#premium_until").fill("2027-01-01T00:00");
 
-    // Skip flags
+    // Skip flags & workshop onboarding
     await page.getByRole("switch", { name: /skip email confirmation/i }).click();
+    await page.getByRole("switch", { name: /workshop onboarding/i }).click();
 
     // Feature flag pick
     await page.getByRole("button", { name: /pick flags/i }).click();
@@ -58,6 +65,7 @@ test.describe("Signup link — full-payload create round-trip", () => {
         max_uses: 5,
         skip_email_confirmation: true,
         skip_welcome_email: false,
+        workshop_onboarding: true,
         feature_flags: ["energy_price_shock"],
         analytics_tags: ["partner-x"],
         welcome_page_title: "Welcome!",
@@ -75,7 +83,9 @@ test.describe("Signup link — full-payload create round-trip", () => {
     await expect(page.getByText(/Code: PARTNERX/)).toBeVisible();
     await expect(page.getByText("energy_price_shock", { exact: true })).toBeVisible();
     await expect(page.getByText("partner-x", { exact: true })).toBeVisible();
-    await expect(page.getByText("Yes", { exact: true })).toBeVisible(); // skip email confirmation
+    // Scope to the detail row so we don't collide with other "Yes" values (e.g. workshop onboarding).
+    await expect(detailRowValue(page, "Skip email confirmation")).toHaveText("Yes");
+    await expect(detailRowValue(page, "Workshop onboarding")).toHaveText("Yes");
     await expect(page.getByRole("heading", { name: "Welcome!" })).toBeVisible(); // welcome preview
   });
 });

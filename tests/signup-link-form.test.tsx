@@ -33,6 +33,7 @@ function makeLink(overrides: Partial<SignupLink> = {}): SignupLink {
     analytics_tags: [],
     skip_email_confirmation: false,
     skip_welcome_email: false,
+    workshop_onboarding: false,
     welcome_page_title: null,
     welcome_page_body: null,
     expired: false,

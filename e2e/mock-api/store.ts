@@ -66,6 +66,7 @@ export class MockStore {
       analytics_tags: payload.analytics_tags ?? [],
       skip_email_confirmation: payload.skip_email_confirmation ?? false,
       skip_welcome_email: payload.skip_welcome_email ?? false,
+      workshop_onboarding: payload.workshop_onboarding ?? false,
       welcome_page_title: payload.welcome_page_title ?? null,
       welcome_page_body: payload.welcome_page_body ?? null,
       expired: false,
@@ -94,6 +95,7 @@ export class MockStore {
         ? { skip_email_confirmation: payload.skip_email_confirmation ?? false }
         : {}),
       ...("skip_welcome_email" in payload ? { skip_welcome_email: payload.skip_welcome_email ?? false } : {}),
+      ...("workshop_onboarding" in payload ? { workshop_onboarding: payload.workshop_onboarding ?? false } : {}),
       ...("welcome_page_title" in payload ? { welcome_page_title: payload.welcome_page_title ?? null } : {}),
       ...("welcome_page_body" in payload ? { welcome_page_body: payload.welcome_page_body ?? null } : {})
     };

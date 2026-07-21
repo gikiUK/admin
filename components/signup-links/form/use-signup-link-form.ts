@@ -12,6 +12,7 @@ export type SignupLinkFormState = {
   analytics_tags: string[];
   skip_email_confirmation: boolean;
   skip_welcome_email: boolean;
+  workshop_onboarding: boolean;
   welcome_page_enabled: boolean;
   welcome_page_title: string;
   welcome_page_body: string;
@@ -43,6 +44,7 @@ export function initialFormState(link: SignupLink | null): SignupLinkFormState {
       analytics_tags: [],
       skip_email_confirmation: false,
       skip_welcome_email: false,
+      workshop_onboarding: false,
       welcome_page_enabled: false,
       welcome_page_title: "",
       welcome_page_body: ""
@@ -59,6 +61,7 @@ export function initialFormState(link: SignupLink | null): SignupLinkFormState {
     analytics_tags: link.analytics_tags ?? [],
     skip_email_confirmation: link.skip_email_confirmation,
     skip_welcome_email: link.skip_welcome_email,
+    workshop_onboarding: link.workshop_onboarding,
     welcome_page_enabled: !!(link.welcome_page_title && link.welcome_page_body),
     welcome_page_title: link.welcome_page_title ?? "",
     welcome_page_body: link.welcome_page_body ?? ""
@@ -76,6 +79,7 @@ export function formStateToPayload(state: SignupLinkFormState, includeCode: bool
     analytics_tags: state.analytics_tags,
     skip_email_confirmation: state.skip_email_confirmation,
     skip_welcome_email: state.skip_welcome_email,
+    workshop_onboarding: state.workshop_onboarding,
     welcome_page_title: state.welcome_page_enabled ? state.welcome_page_title.trim() || null : null,
     welcome_page_body: state.welcome_page_enabled ? state.welcome_page_body.trim() || null : null
   };

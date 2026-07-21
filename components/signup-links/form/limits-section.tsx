@@ -9,10 +9,12 @@ type Props = {
   maxUses: string;
   skipEmailConfirmation: boolean;
   skipWelcomeEmail: boolean;
+  workshopOnboarding: boolean;
   onExpiresOnChange: (next: string) => void;
   onMaxUsesChange: (next: string) => void;
   onSkipEmailConfirmationChange: (next: boolean) => void;
   onSkipWelcomeEmailChange: (next: boolean) => void;
+  onWorkshopOnboardingChange: (next: boolean) => void;
 };
 
 export function LimitsSection({
@@ -20,10 +22,12 @@ export function LimitsSection({
   maxUses,
   skipEmailConfirmation,
   skipWelcomeEmail,
+  workshopOnboarding,
   onExpiresOnChange,
   onMaxUsesChange,
   onSkipEmailConfirmationChange,
-  onSkipWelcomeEmailChange
+  onSkipWelcomeEmailChange,
+  onWorkshopOnboardingChange
 }: Props) {
   return (
     <section className="space-y-4 rounded-md border p-4">
@@ -57,6 +61,12 @@ export function LimitsSection({
           description="Don't send the standard welcome email after signup."
           checked={skipWelcomeEmail}
           onChange={onSkipWelcomeEmailChange}
+        />
+        <ToggleRow
+          label="Workshop onboarding"
+          description="Force companies from this link straight into onboarding (e.g. a live workshop) instead of the dashboard."
+          checked={workshopOnboarding}
+          onChange={onWorkshopOnboardingChange}
         />
       </div>
     </section>

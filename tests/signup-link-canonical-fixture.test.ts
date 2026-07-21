@@ -23,6 +23,7 @@ describe("canonical signup-link fixture", () => {
     expect(Array.isArray(link.analytics_tags)).toBe(true);
     expect(typeof link.skip_email_confirmation).toBe("boolean");
     expect(typeof link.skip_welcome_email).toBe("boolean");
+    expect(typeof link.workshop_onboarding).toBe("boolean");
     expect(typeof link.expired).toBe("boolean");
     expect(typeof link.exhausted).toBe("boolean");
     expect(typeof link.usable).toBe("boolean");
@@ -48,6 +49,7 @@ describe("canonical signup-link fixture", () => {
       "analytics_tags",
       "skip_email_confirmation",
       "skip_welcome_email",
+      "workshop_onboarding",
       "welcome_page_title",
       "welcome_page_body",
       "expired",
