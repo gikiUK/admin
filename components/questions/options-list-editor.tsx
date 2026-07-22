@@ -1,11 +1,27 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors
+} from "@dnd-kit/core";
+import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy
+} from "@dnd-kit/sortable";
+import { Plus } from "lucide-react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Label } from "@/components/ui/label";
 import type { BlobOption } from "@/lib/blob/types";
+import { SortableOptionRow } from "./sortable-option-row";
 
 type OptionsListEditorProps = {
   options: BlobOption[];
@@ -13,6 +29,25 @@ type OptionsListEditorProps = {
 };
 
 export function OptionsListEditor({ options, onChange }: OptionsListEditorProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  // Options have no stable ID. Assign one per option object so React (and dnd-kit) follow the
+  // moved element across a reorder instead of re-animating a positional slot — which caused the
+  // dropped row to snap back before animating into place.
+  const idMap = useRef(new WeakMap<BlobOption, string>());
+  const nextId = useRef(0);
+  const ids = options.map((opt) => {
+    let id = idMap.current.get(opt);
+    if (!id) {
+      id = `option-${nextId.current++}`;
+      idMap.current.set(opt, id);
+    }
+    return id;
+  });
+
   function handleAdd() {
     onChange([...options, { label: "", value: "" }]);
   }
@@ -27,45 +62,49 @@ export function OptionsListEditor({ options, onChange }: OptionsListEditorProps)
     onChange(options.filter((_, i) => i !== index));
   }
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = ids.indexOf(String(active.id));
+    const to = ids.indexOf(String(over.id));
+    if (from === -1 || to === -1) return;
+    onChange(arrayMove(options, from, to));
+  }
+
   return (
     <div className="space-y-3">
       <Label className="text-xs font-medium">Options</Label>
 
       {options.length > 0 && (
         <div className="space-y-2">
-          <div className="grid grid-cols-[1fr_220px_70px_32px] items-center gap-2 text-xs font-medium text-muted-foreground">
+          <div className="grid grid-cols-[20px_1fr_220px_70px_32px] items-center gap-2 text-xs font-medium text-muted-foreground">
+            <span />
             <span>Label</span>
             <span>Value</span>
             <span>Exclusive</span>
             <span />
           </div>
 
-          {options.map((opt, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: editable list with no stable ID
-            <div key={i} className="grid grid-cols-[1fr_220px_70px_32px] items-center gap-2">
-              <DebouncedInput
-                value={opt.label}
-                onCommit={(v) => handleUpdate(i, { label: v })}
-                placeholder="Label"
-                className="h-8 text-xs md:text-xs"
-              />
-              <DebouncedInput
-                value={opt.value}
-                onCommit={(v) => handleUpdate(i, { value: v })}
-                placeholder="value"
-                className="h-8 font-mono text-xs md:text-xs"
-              />
-              <div className="flex justify-center">
-                <Checkbox
-                  checked={opt.exclusive ?? false}
-                  onCheckedChange={(checked) => handleUpdate(i, { exclusive: checked === true ? true : undefined })}
-                />
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {options.map((opt, i) => (
+                  <SortableOptionRow
+                    key={ids[i]}
+                    id={ids[i]}
+                    option={opt}
+                    onUpdate={(updates) => handleUpdate(i, updates)}
+                    onRemove={() => handleRemove(i)}
+                  />
+                ))}
               </div>
-              <Button variant="ghost" size="icon-xs" onClick={() => handleRemove(i)}>
-                <X className="size-3" />
-              </Button>
-            </div>
-          ))}
+            </SortableContext>
+          </DndContext>
         </div>
       )}
 
