@@ -37,7 +37,7 @@ export function UsersExportButton({ filter }: { filter: UsersFilter }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline">
           <Download className="size-4" />
           Export CSV
         </Button>
