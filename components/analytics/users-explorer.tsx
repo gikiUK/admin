@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { UserFilters } from "@/components/analytics/user-filters";
-import { UsersCsvDownloadButton } from "@/components/analytics/users-csv-download-button";
+import { UsersExportButton } from "@/components/analytics/users-export-button";
 import { UsersTable } from "@/components/analytics/users-table";
 import { Pager } from "@/components/ui/pager";
 import { USER_STATUSES, type UserStatus, type UsersFilter } from "@/lib/analytics/api";
@@ -63,11 +63,11 @@ export function UsersExplorer() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-end justify-between gap-4">
         <div className="flex-1">
           <UserFilters filter={filter} onChange={handleFilterChange} onReset={handleReset} />
         </div>
-        <UsersCsvDownloadButton filter={filter} />
+        <UsersExportButton filter={filter} />
       </div>
       {errorMessage && <div className="text-sm text-destructive">{errorMessage}</div>}
       {query.isPending ? (

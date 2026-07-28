@@ -172,9 +172,24 @@ export function fetchUsers(filter: UsersFilter): Promise<Paginated<AnalyticsUser
 
 export const USERS_EXPORT_ENDPOINT = "/admin/analytics/users/export";
 
+// Selectable CSV columns, in canonical order (mirrors the backend Export::COLUMNS).
+export const USER_EXPORT_FIELDS = [
+  { value: "id", label: "ID" },
+  { value: "name", label: "Name" },
+  { value: "email", label: "Email" },
+  { value: "status", label: "Status" },
+  { value: "signed_up_at", label: "Signed up" },
+  { value: "confirmed_at", label: "Confirmed" },
+  { value: "last_active_at", label: "Last active" },
+  { value: "event_count", label: "Events" },
+  { value: "companies", label: "Companies" }
+] as const;
+
+export type UserExportField = (typeof USER_EXPORT_FIELDS)[number]["value"];
+
 // The export honours the active filters/order but ignores pagination.
-export function usersExportBody({ query, company_id, status, order }: UsersFilter) {
-  return { query, company_id, status, order };
+export function usersExportBody({ query, company_id, status, order }: UsersFilter, fields: UserExportField[]) {
+  return { query, company_id, status, order, fields };
 }
 
 export const ORG_STATUSES = ["active", "dormant", "churned", "trial", "onboarding"] as const;
