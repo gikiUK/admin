@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
+import { UsersCsvDownloadButton } from "@/components/analytics/users-csv-download-button";
 import { UsersTable } from "@/components/manage/users-table";
 import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Pager } from "@/components/ui/pager";
@@ -131,6 +132,9 @@ export function UsersExplorer() {
             ))}
           </SelectContent>
         </Select>
+        <div className="ml-auto">
+          <UsersCsvDownloadButton filter={filter} />
+        </div>
       </div>
       {errorMessage && <div className="text-sm text-destructive">{errorMessage}</div>}
       {query.isPending ? (

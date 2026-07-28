@@ -170,6 +170,13 @@ export function fetchUsers(filter: UsersFilter): Promise<Paginated<AnalyticsUser
   return apiFetch<Paginated<AnalyticsUser>>(`/admin/analytics/users${buildQuery(filter)}`);
 }
 
+export const USERS_EXPORT_ENDPOINT = "/admin/analytics/users/export";
+
+// The export honours the active filters/order but ignores pagination.
+export function usersExportBody({ query, company_id, status, order }: UsersFilter) {
+  return { query, company_id, status, order };
+}
+
 export const ORG_STATUSES = ["active", "dormant", "churned", "trial", "onboarding"] as const;
 export type OrgStatus = (typeof ORG_STATUSES)[number];
 
