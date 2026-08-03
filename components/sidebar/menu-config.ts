@@ -135,6 +135,12 @@ export const SIDEBAR_MENU: MenuSection[] = [
             label: "Actions",
             icon: Sparkles,
             matchPaths: ["/manage/actions"]
+          },
+          {
+            href: "/manage/sendgrid",
+            label: "SendGrid",
+            icon: Mail,
+            matchPaths: ["/manage/sendgrid"]
           }
         ]
       },
@@ -148,12 +154,6 @@ export const SIDEBAR_MENU: MenuSection[] = [
             label: "Airtable",
             icon: Table2,
             matchPaths: ["/airtable"]
-          },
-          {
-            href: "/sendgrid",
-            label: "SendGrid",
-            icon: Mail,
-            matchPaths: ["/sendgrid"]
           },
           {
             href: "/downloads",
