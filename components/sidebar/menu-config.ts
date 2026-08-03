@@ -11,6 +11,7 @@ import {
   LinkIcon,
   ListOrdered,
   type LucideIcon,
+  Mail,
   Settings,
   Sparkles,
   Table2,
@@ -147,6 +148,12 @@ export const SIDEBAR_MENU: MenuSection[] = [
             label: "Airtable",
             icon: Table2,
             matchPaths: ["/airtable"]
+          },
+          {
+            href: "/sendgrid",
+            label: "SendGrid",
+            icon: Mail,
+            matchPaths: ["/sendgrid"]
           },
           {
             href: "/downloads",
