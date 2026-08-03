@@ -11,6 +11,7 @@ import {
   LinkIcon,
   ListOrdered,
   type LucideIcon,
+  Mail,
   Settings,
   Sparkles,
   Table2,
@@ -134,6 +135,12 @@ export const SIDEBAR_MENU: MenuSection[] = [
             label: "Actions",
             icon: Sparkles,
             matchPaths: ["/manage/actions"]
+          },
+          {
+            href: "/manage/sendgrid",
+            label: "SendGrid",
+            icon: Mail,
+            matchPaths: ["/manage/sendgrid"]
           }
         ]
       },
