@@ -34,18 +34,12 @@ export function ServerPreview({ emailKey, payload }: Props) {
   }
 
   return (
-    <div className="relative">
-      {stale && (
-        <div className="bg-background text-muted-foreground absolute top-2 right-2 z-10 rounded border px-2 py-1 text-xs shadow-sm">
-          Rendering…
-        </div>
-      )}
-      <iframe
-        title="Email preview"
-        srcDoc={query.data?.html ?? ""}
-        sandbox=""
-        className="h-[700px] w-full rounded-md border bg-white"
-      />
+    <div className="overflow-hidden rounded-md border">
+      <div className="bg-muted text-muted-foreground relative flex items-center border-b px-3 py-1.5">
+        <span className="w-full text-center text-xs font-bold uppercase">Preview</span>
+        {stale && <span className="absolute right-3 text-xs">Rendering…</span>}
+      </div>
+      <iframe title="Email preview" srcDoc={query.data?.html ?? ""} sandbox="" className="h-[700px] w-full bg-white" />
     </div>
   );
 }

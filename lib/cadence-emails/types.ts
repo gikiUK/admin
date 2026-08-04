@@ -8,15 +8,16 @@ export type MinimumRoleRule = {
   value: RoleKey;
 };
 
-/** Any rule we don't have special handling for — rendered from its key alone. */
-export type SimpleRule = {
+/** Any other rule: it applies when present, and carries `value: true`. */
+export type FlagRule = {
   key: string;
+  value?: boolean;
 };
 
-export type CadenceRule = MinimumRoleRule | SimpleRule;
+export type CadenceRule = MinimumRoleRule | FlagRule;
 
 export function isMinimumRoleRule(rule: CadenceRule): rule is MinimumRoleRule {
-  return rule.key === "minimum_role" && "value" in rule;
+  return rule.key === "minimum_role";
 }
 
 export type CadenceEmail = {
@@ -26,8 +27,6 @@ export type CadenceEmail = {
   subject: string;
   preview_text: string;
   body_markdown: string;
-  cta_text: string;
-  cta_path: string;
   enabled: boolean;
   /**
    * The *effective* set — everything that applies to this email, including what
@@ -53,6 +52,4 @@ export type CadencesResponse = {
 };
 
 /** Every editable field. PATCH and preview take the same shape, all fields optional. */
-export type CadenceEmailPayload = Partial<
-  Pick<CadenceEmail, "subject" | "preview_text" | "body_markdown" | "cta_text" | "cta_path" | "enabled">
->;
+export type CadenceEmailPayload = Partial<Pick<CadenceEmail, "subject" | "preview_text" | "body_markdown" | "enabled">>;

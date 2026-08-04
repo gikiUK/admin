@@ -5,8 +5,8 @@ import type { MinimumRoleRule } from "@/lib/cadence-emails/types";
 
 const STANDARD_AND_ABOVE: MinimumRoleRule = { key: "minimum_role", value: "standard" };
 const OWNERS_ONLY: MinimumRoleRule = { key: "minimum_role", value: "owner" };
-const NON_PREMIUM_ONLY = { key: "non_premium_only" };
-const PREMIUM_ONLY = { key: "premium_only" };
+const NON_PREMIUM_ONLY = { key: "non_premium_only", value: true };
+const PREMIUM_ONLY = { key: "premium_only", value: true };
 
 describe("humanize", () => {
   it("turns a key into a sentence-cased label", () => {

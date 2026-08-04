@@ -63,14 +63,12 @@ No create or delete — the set of emails is seeded by the API. Rows are edit-on
 |---|---|---|
 | `subject` | string, required | Email subject line |
 | `preview_text` | string | Inbox preview snippet |
-| `body_markdown` | markdown textarea | The body. Markdown only — no HTML, no MJML |
-| `cta_text` | string | Button label. The button is omitted if this or `cta_path` is blank |
-| `cta_path` | string | **Path only**, e.g. `/actions/recommendations`. The API prepends the frontend base URL |
+| `body_markdown` | markdown textarea | The body. Markdown only — no HTML, no MJML. Links go in here as ordinary markdown; there is no separate call-to-action field |
 | `enabled` | boolean | Disabled emails are skipped in the sequence |
 
 `key`, `cadence_key`, `position` and `rules` are read-only — display them, don't let them be edited. `key` is what guarantees an email is never sent to the same person twice, so it must never change.
 
-Validate client-side that `cta_path` starts with `/`. It's a path, not a URL.
+Links belong in `body_markdown` as ordinary markdown — `[Explore more actions](https://…/actions)` — and are rendered as links in the HTML part and flattened to `text (url)` in the plaintext part. There's no button and no separate CTA field.
 
 ### 3. Live preview
 
@@ -120,16 +118,20 @@ POST   /admin/cadence_emails/:key/send_test
   "subject": "Give your Climate Action Plan a boost",
   "preview_text": "Templates, implementation plans and business cases",
   "body_markdown": "Do you need an implementation plan for each of your actions...",
-  "cta_text": "Explore Premium",
-  "cta_path": "/settings/subscription",
   "enabled": true,
-  "rules": [{ "key": "minimum_role", "value": "owner" }, { "key": "non_premium_only" }]
+  "rules": [{ "key": "minimum_role", "value": "standard" }, { "key": "non_premium_only", "value": true }]
 }
 ```
 
-**Rules** describe who receives something and when it's skipped. They appear on both cadences and emails in the same shape. Every rule has a `key`; `minimum_role` also carries `value`. Treat them as a discriminated union on `key` — render anything unrecognised from its key alone. New rule types will appear without the shape changing.
+**Rules** describe who receives something and when it's skipped. They appear on both cadences and emails in the same shape: `{ "key": …, "value": … }`. Treat them as a discriminated union on `key` — render anything unrecognised from its key alone. New rule types will appear without the shape changing. The full set today:
 
-An email's `rules` is the *effective* set, including what it inherits from its cadence. Never merge the two; the email already tells you the answer. An email may be more restrictive than its cadence (owners-only within a standard cadence) but never less.
+| `key` | `value` | Meaning |
+|---|---|---|
+| `minimum_role` | `"owner"` \| `"admin"` \| `"standard"` \| `"readonly"` | Floor on seniority. `"standard"` means everyone but read-only members |
+| `non_premium_only` | `true` | Skipped for companies with full premium access. Companies on a premium *trial* still receive it |
+| `premium_only` | `true` | The inverse — only companies with full premium access |
+
+An email's `rules` is the *effective* set, including what it inherits from its cadence. Never merge the two; the email already tells you the answer. An email may be more restrictive than its cadence (admins-only within a standard cadence) but never less.
 
 `rules` is `[]` when nothing applies, and is read-only — `PATCH` ignores it, as it does `key`, `cadence_key` and `position`.
 
@@ -142,7 +144,7 @@ An email's `rules` is the *effective* set, including what it inherits from its c
 `PATCH` body — all fields optional, send only what changed:
 
 ```json
-{ "cadence_email": { "subject": "...", "preview_text": "...", "body_markdown": "...", "cta_text": "...", "cta_path": "...", "enabled": true } }
+{ "cadence_email": { "subject": "...", "preview_text": "...", "body_markdown": "...", "enabled": true } }
 ```
 
 Validation failures return `422` with the standard error envelope:

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ContentFields } from "@/components/cadence-emails/form/content-fields";
-import { CtaFields } from "@/components/cadence-emails/form/cta-fields";
 import { EnabledField } from "@/components/cadence-emails/form/enabled-field";
 import { ServerPreview } from "@/components/cadence-emails/form/server-preview";
 import {
@@ -11,6 +10,7 @@ import {
   useCadenceEmailForm,
   validate
 } from "@/components/cadence-emails/form/use-cadence-email-form";
+import { useUnsavedChangesWarning } from "@/components/cadence-emails/form/use-unsaved-changes-warning";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CadenceEmailError } from "@/lib/cadence-emails/api";
@@ -29,7 +29,9 @@ export function CadenceEmailForm({ email, onSubmit }: Props) {
 
   const issues = validate(state);
   const dirty = Object.keys(changedFields(state, email)).length > 0;
-  const blocked = Boolean(issues.subject || issues.cta_path || issues.cta);
+  const blocked = Boolean(issues.subject);
+
+  useUnsavedChangesWarning(dirty && !saving, "You have unsaved changes to this email. Leave without saving?");
 
   function fieldError(field: string, local?: string): string | undefined {
     return local ?? serverErrors[field]?.join(", ");
@@ -70,20 +72,6 @@ export function CadenceEmailForm({ email, onSubmit }: Props) {
 
         <Separator />
 
-        <CtaFields
-          ctaText={state.cta_text}
-          ctaPath={state.cta_path}
-          errors={{
-            cta_text: fieldError("cta_text"),
-            cta_path: fieldError("cta_path", issues.cta_path),
-            cta: issues.cta
-          }}
-          onCtaTextChange={(v) => update("cta_text", v)}
-          onCtaPathChange={(v) => update("cta_path", v)}
-        />
-
-        <Separator />
-
         <EnabledField enabled={state.enabled} onChange={(v) => update("enabled", v)} />
 
         {formError && <p className="text-destructive text-sm">{formError}</p>}
@@ -93,10 +81,7 @@ export function CadenceEmailForm({ email, onSubmit }: Props) {
         </Button>
       </div>
 
-      <div className="space-y-2 lg:sticky lg:top-16">
-        <p className="text-muted-foreground text-xs">
-          Live preview of the unsaved email, rendered by the real mailer. Nothing here is saved until you do.
-        </p>
+      <div className="lg:sticky lg:top-16">
         <ServerPreview emailKey={email.key} payload={formStateToPayload(state)} />
       </div>
     </form>
