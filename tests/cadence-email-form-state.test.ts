@@ -39,19 +39,4 @@ describe("validate", () => {
     const issues = validate({ ...initialFormState(EMAIL), subject: "   " });
     expect(issues.subject).toBeDefined();
   });
-
-  it("rejects a full URL in cta_path", () => {
-    const issues = validate({ ...initialFormState(EMAIL), cta_path: "https://giki.earth/settings" });
-    expect(issues.cta_path).toBeDefined();
-  });
-
-  it("flags a half-filled button", () => {
-    const issues = validate({ ...initialFormState(EMAIL), cta_path: "" });
-    expect(issues.cta).toBeDefined();
-  });
-
-  it("allows both button fields blank", () => {
-    const issues = validate({ ...initialFormState(EMAIL), cta_text: "", cta_path: "" });
-    expect(issues).toEqual({});
-  });
 });

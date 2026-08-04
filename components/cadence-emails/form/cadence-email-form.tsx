@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ContentFields } from "@/components/cadence-emails/form/content-fields";
-import { CtaFields } from "@/components/cadence-emails/form/cta-fields";
 import { EnabledField } from "@/components/cadence-emails/form/enabled-field";
 import { ServerPreview } from "@/components/cadence-emails/form/server-preview";
 import {
@@ -29,7 +28,7 @@ export function CadenceEmailForm({ email, onSubmit }: Props) {
 
   const issues = validate(state);
   const dirty = Object.keys(changedFields(state, email)).length > 0;
-  const blocked = Boolean(issues.subject || issues.cta_path || issues.cta);
+  const blocked = Boolean(issues.subject);
 
   function fieldError(field: string, local?: string): string | undefined {
     return local ?? serverErrors[field]?.join(", ");
@@ -66,20 +65,6 @@ export function CadenceEmailForm({ email, onSubmit }: Props) {
           onSubjectChange={(v) => update("subject", v)}
           onPreviewTextChange={(v) => update("preview_text", v)}
           onBodyMarkdownChange={(v) => update("body_markdown", v)}
-        />
-
-        <Separator />
-
-        <CtaFields
-          ctaText={state.cta_text}
-          ctaPath={state.cta_path}
-          errors={{
-            cta_text: fieldError("cta_text"),
-            cta_path: fieldError("cta_path", issues.cta_path),
-            cta: issues.cta
-          }}
-          onCtaTextChange={(v) => update("cta_text", v)}
-          onCtaPathChange={(v) => update("cta_path", v)}
         />
 
         <Separator />

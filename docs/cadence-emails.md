@@ -123,13 +123,19 @@ POST   /admin/cadence_emails/:key/send_test
   "cta_text": "Explore Premium",
   "cta_path": "/settings/subscription",
   "enabled": true,
-  "rules": [{ "key": "minimum_role", "value": "owner" }, { "key": "non_premium_only" }]
+  "rules": [{ "key": "minimum_role", "value": "standard" }, { "key": "non_premium_only", "value": true }]
 }
 ```
 
-**Rules** describe who receives something and when it's skipped. They appear on both cadences and emails in the same shape. Every rule has a `key`; `minimum_role` also carries `value`. Treat them as a discriminated union on `key` — render anything unrecognised from its key alone. New rule types will appear without the shape changing.
+**Rules** describe who receives something and when it's skipped. They appear on both cadences and emails in the same shape: `{ "key": …, "value": … }`. Treat them as a discriminated union on `key` — render anything unrecognised from its key alone. New rule types will appear without the shape changing. The full set today:
 
-An email's `rules` is the *effective* set, including what it inherits from its cadence. Never merge the two; the email already tells you the answer. An email may be more restrictive than its cadence (owners-only within a standard cadence) but never less.
+| `key` | `value` | Meaning |
+|---|---|---|
+| `minimum_role` | `"owner"` \| `"admin"` \| `"standard"` \| `"readonly"` | Floor on seniority. `"standard"` means everyone but read-only members |
+| `non_premium_only` | `true` | Skipped for companies with full premium access. Companies on a premium *trial* still receive it |
+| `premium_only` | `true` | The inverse — only companies with full premium access |
+
+An email's `rules` is the *effective* set, including what it inherits from its cadence. Never merge the two; the email already tells you the answer. An email may be more restrictive than its cadence (admins-only within a standard cadence) but never less.
 
 `rules` is `[]` when nothing applies, and is read-only — `PATCH` ignores it, as it does `key`, `cadence_key` and `position`.
 

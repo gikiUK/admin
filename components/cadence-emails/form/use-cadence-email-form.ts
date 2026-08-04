@@ -21,7 +21,11 @@ export function initialFormState(email: CadenceEmail): CadenceEmailFormState {
   };
 }
 
-/** The full set of values, for the preview endpoint — it renders what's on screen, changed or not. */
+/**
+ * The full set of values, for the preview endpoint — it renders what's on
+ * screen, changed or not. cta_text and cta_path aren't editable here, but are
+ * carried through so the preview renders the button the email actually has.
+ */
 export function formStateToPayload(state: CadenceEmailFormState): CadenceEmailPayload {
   return {
     subject: state.subject.trim(),
@@ -48,22 +52,11 @@ export function changedFields(state: CadenceEmailFormState, email: CadenceEmail)
 
 export type FormIssues = {
   subject?: string;
-  cta_path?: string;
-  cta?: string;
 };
 
 export function validate(state: CadenceEmailFormState): FormIssues {
   const issues: FormIssues = {};
-  const ctaText = state.cta_text.trim();
-  const ctaPath = state.cta_path.trim();
-
   if (!state.subject.trim()) issues.subject = "Subject can't be blank.";
-  if (ctaPath && !ctaPath.startsWith("/")) {
-    issues.cta_path = "Must be a path starting with “/”, not a full URL. The API prepends the frontend base URL.";
-  }
-  if (Boolean(ctaText) !== Boolean(ctaPath)) {
-    issues.cta = "The button needs both a label and a path — with only one filled, no button is rendered.";
-  }
   return issues;
 }
 
