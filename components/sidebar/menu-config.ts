@@ -12,6 +12,7 @@ import {
   ListOrdered,
   type LucideIcon,
   Mail,
+  MailPlus,
   Settings,
   Sparkles,
   Table2,
@@ -135,6 +136,12 @@ export const SIDEBAR_MENU: MenuSection[] = [
             label: "Actions",
             icon: Sparkles,
             matchPaths: ["/manage/actions"]
+          },
+          {
+            href: "/manage/cadence-emails",
+            label: "Cadence Emails",
+            icon: MailPlus,
+            matchPaths: ["/manage/cadence-emails"]
           },
           {
             href: "/manage/sendgrid",
