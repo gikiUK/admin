@@ -10,6 +10,7 @@ import {
   useCadenceEmailForm,
   validate
 } from "@/components/cadence-emails/form/use-cadence-email-form";
+import { useUnsavedChangesWarning } from "@/components/cadence-emails/form/use-unsaved-changes-warning";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CadenceEmailError } from "@/lib/cadence-emails/api";
@@ -29,6 +30,8 @@ export function CadenceEmailForm({ email, onSubmit }: Props) {
   const issues = validate(state);
   const dirty = Object.keys(changedFields(state, email)).length > 0;
   const blocked = Boolean(issues.subject);
+
+  useUnsavedChangesWarning(dirty && !saving, "You have unsaved changes to this email. Leave without saving?");
 
   function fieldError(field: string, local?: string): string | undefined {
     return local ?? serverErrors[field]?.join(", ");
@@ -78,10 +81,7 @@ export function CadenceEmailForm({ email, onSubmit }: Props) {
         </Button>
       </div>
 
-      <div className="space-y-2 lg:sticky lg:top-16">
-        <p className="text-muted-foreground text-xs">
-          Live preview of the unsaved email, rendered by the real mailer. Nothing here is saved until you do.
-        </p>
+      <div className="lg:sticky lg:top-16">
         <ServerPreview emailKey={email.key} payload={formStateToPayload(state)} />
       </div>
     </form>
