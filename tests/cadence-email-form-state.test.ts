@@ -8,8 +8,6 @@ const EMAIL: CadenceEmail = {
   subject: "Give your Climate Action Plan a boost",
   preview_text: "Templates, implementation plans and business cases",
   body_markdown: "Do you need an implementation plan?",
-  cta_text: "Explore Premium",
-  cta_path: "/settings/subscription",
   enabled: true,
   rules: []
 };
@@ -38,20 +36,5 @@ describe("validate", () => {
   it("requires a subject", () => {
     const issues = validate({ ...initialFormState(EMAIL), subject: "   " });
     expect(issues.subject).toBeDefined();
-  });
-
-  it("rejects a full URL in cta_path", () => {
-    const issues = validate({ ...initialFormState(EMAIL), cta_path: "https://giki.earth/settings" });
-    expect(issues.cta_path).toBeDefined();
-  });
-
-  it("flags a half-filled button", () => {
-    const issues = validate({ ...initialFormState(EMAIL), cta_path: "" });
-    expect(issues.cta).toBeDefined();
-  });
-
-  it("allows both button fields blank", () => {
-    const issues = validate({ ...initialFormState(EMAIL), cta_text: "", cta_path: "" });
-    expect(issues).toEqual({});
   });
 });
