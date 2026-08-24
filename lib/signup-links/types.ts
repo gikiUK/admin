@@ -15,6 +15,7 @@ export type SignupLink = {
   workshop_onboarding: boolean;
   welcome_page_title: string | null;
   welcome_page_body: string | null;
+  image_url: string | null;
   expired: boolean;
   exhausted: boolean;
   usable: boolean;

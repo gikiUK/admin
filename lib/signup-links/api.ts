@@ -1,4 +1,4 @@
-import { apiFetch, buildQuery, type Paginated } from "@/lib/api/client";
+import { apiFetch, apiUpload, buildQuery, type Paginated } from "@/lib/api/client";
 import type { SignupLink, SignupLinkCompany, SignupLinkPayload } from "@/lib/signup-links/types";
 
 export type SignupLinksFilter = {
@@ -30,6 +30,18 @@ export function updateSignupLink(uuid: string, payload: SignupLinkPayload): Prom
 
 export function deleteSignupLink(uuid: string): Promise<Record<string, never>> {
   return apiFetch<Record<string, never>>(`/admin/signup_links/${encodeURIComponent(uuid)}`, {
+    method: "DELETE"
+  });
+}
+
+export function uploadSignupLinkImage(uuid: string, file: File): Promise<{ signup_link: SignupLink }> {
+  const form = new FormData();
+  form.append("image", file);
+  return apiUpload<{ signup_link: SignupLink }>(`/admin/signup_links/${encodeURIComponent(uuid)}/image`, form);
+}
+
+export function deleteSignupLinkImage(uuid: string): Promise<{ signup_link: SignupLink }> {
+  return apiFetch<{ signup_link: SignupLink }>(`/admin/signup_links/${encodeURIComponent(uuid)}/image`, {
     method: "DELETE"
   });
 }

@@ -31,6 +31,24 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
   return res.json() as Promise<T>;
 }
 
+/**
+ * Sends a multipart/form-data request (file uploads). Deliberately does NOT
+ * set Content-Type — the browser adds it along with the multipart boundary.
+ */
+export async function apiUpload<T>(path: string, form: FormData, method = "PATCH"): Promise<T> {
+  const res = await fetch(getApiUrl(path), {
+    method,
+    credentials: "include",
+    headers: { Accept: "application/json" },
+    body: form
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
+    throw new ApiError(res.status, body.error?.message);
+  }
+  return res.json() as Promise<T>;
+}
+
 export function buildQuery(params: Record<string, string | number | undefined | null>): string {
   const usp = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {

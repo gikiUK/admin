@@ -15,6 +15,7 @@
   "workshop_onboarding": true,
   "welcome_page_title": "Welcome!",
   "welcome_page_body": "## Body",
+  "image_url": null,
   "expired": false,
   "exhausted": false,
   "usable": true

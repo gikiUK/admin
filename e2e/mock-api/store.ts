@@ -69,6 +69,7 @@ export class MockStore {
       workshop_onboarding: payload.workshop_onboarding ?? false,
       welcome_page_title: payload.welcome_page_title ?? null,
       welcome_page_body: payload.welcome_page_body ?? null,
+      image_url: null,
       expired: false,
       exhausted: false,
       usable: true
@@ -101,6 +102,14 @@ export class MockStore {
     };
     this.links[idx] = merged;
     return merged;
+  }
+
+  setImage(uuid: string, imageUrl: string | null): SignupLink | undefined {
+    const idx = this.links.findIndex((l) => l.uuid === uuid);
+    if (idx === -1) return undefined;
+    const updated: SignupLink = { ...this.links[idx], image_url: imageUrl };
+    this.links[idx] = updated;
+    return updated;
   }
 
   destroy(uuid: string): boolean {

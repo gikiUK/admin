@@ -89,6 +89,8 @@ async function inUseError(route: Route) {
   });
 }
 
+export const MOCK_IMAGE_URL = "https://example.test/signup-link-image.png";
+
 async function ok(route: Route, body: unknown, status = 200) {
   await route.fulfill({
     status,
@@ -140,6 +142,15 @@ export async function installMockApi(page: Page, store: MockStore): Promise<Mock
         const page = Number(url.searchParams.get("page") ?? "1");
         const per = Number(url.searchParams.get("per") ?? "25");
         return ok(route, paginate(store.companiesFor(uuid), page, per));
+      }
+
+      // ── Image on a link ──────────────────────────────────────
+      const imageMatch = url.pathname.match(/^\/admin\/signup_links\/([^/]+)\/image$/);
+      if (imageMatch && (method === "PATCH" || method === "DELETE")) {
+        const uuid = decodeURIComponent(imageMatch[1]);
+        if (!store.find(uuid)) return notFound(route, "signup_link_not_found");
+        const updated = store.setImage(uuid, method === "DELETE" ? null : MOCK_IMAGE_URL);
+        return ok(route, { signup_link: updated });
       }
 
       // ── Signup links collection ──────────────────────────────
