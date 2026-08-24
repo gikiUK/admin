@@ -13,11 +13,12 @@ import { WelcomePageSection } from "./welcome-page-section";
 type Props = {
   initial: SignupLink | null;
   submitLabel: string;
-  onSubmit: (payload: SignupLinkPayload) => Promise<void>;
+  onSubmit: (payload: SignupLinkPayload, image: File | null) => Promise<void>;
 };
 
 export function SignupLinkForm({ initial, submitLabel, onSubmit }: Props) {
   const { state, update } = useSignupLinkForm(initial);
+  const [pendingImage, setPendingImage] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -32,7 +33,7 @@ export function SignupLinkForm({ initial, submitLabel, onSubmit }: Props) {
     setError("");
     try {
       const payload = formStateToPayload(state, !isEdit || codeChanged);
-      await onSubmit(payload);
+      await onSubmit(payload, state.welcome_page_enabled ? pendingImage : null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -75,6 +76,9 @@ export function SignupLinkForm({ initial, submitLabel, onSubmit }: Props) {
         onAnalyticsTagsChange={(v) => update("analytics_tags", v)}
       />
       <WelcomePageSection
+        link={initial}
+        pendingImage={pendingImage}
+        onPendingImageChange={setPendingImage}
         enabled={state.welcome_page_enabled}
         title={state.welcome_page_title}
         body={state.welcome_page_body}

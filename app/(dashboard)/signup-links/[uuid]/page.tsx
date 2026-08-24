@@ -10,7 +10,6 @@ import { SignupLinkDeleteDialog } from "@/components/signup-links/delete-dialog"
 import { CompaniesPanel } from "@/components/signup-links/show/companies-panel";
 import { CopyLinkRow } from "@/components/signup-links/show/copy-link-row";
 import { DetailsPanel } from "@/components/signup-links/show/details-panel";
-import { ImagePanel } from "@/components/signup-links/show/image-panel";
 import { WelcomePagePreview } from "@/components/signup-links/show/welcome-page-preview";
 import { Button } from "@/components/ui/button";
 import { signupLinkDetailQuery, signupLinksKeys } from "@/lib/signup-links/queries";
@@ -60,9 +59,8 @@ export default function SignupLinkShowPage() {
       />
       <CopyLinkRow code={link.code} />
       <DetailsPanel link={link} />
-      <ImagePanel link={link} />
       {link.welcome_page_title && link.welcome_page_body && (
-        <WelcomePagePreview title={link.welcome_page_title} body={link.welcome_page_body} />
+        <WelcomePagePreview title={link.welcome_page_title} body={link.welcome_page_body} imageUrl={link.image_url} />
       )}
       <CompaniesPanel uuid={uuid} />
       <SignupLinkDeleteDialog

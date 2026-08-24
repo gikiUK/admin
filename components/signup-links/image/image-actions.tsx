@@ -10,15 +10,15 @@ type Props = {
   onRemove: () => void;
 };
 
-export function ImagePanelActions({ hasImage, busy, onPick, onRemove }: Props) {
+export function ImageActions({ hasImage, busy, onPick, onRemove }: Props) {
   return (
     <div className="flex gap-2">
-      <Button type="button" variant="outline" onClick={onPick} disabled={busy}>
+      <Button type="button" size="sm" variant="outline" onClick={onPick} disabled={busy}>
         <Upload className="size-4" />
         {hasImage ? "Replace image" : "Upload image"}
       </Button>
       {hasImage && (
-        <Button type="button" variant="outline" onClick={onRemove} disabled={busy}>
+        <Button type="button" size="sm" variant="outline" onClick={onRemove} disabled={busy}>
           <Trash2 className="size-4" />
           Remove
         </Button>

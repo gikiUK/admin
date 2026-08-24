@@ -1,4 +1,4 @@
-import { MAX_IMAGE_BYTES, validateImageFile } from "@/components/signup-links/show/use-image-upload";
+import { MAX_IMAGE_BYTES, validateImageFile } from "@/components/signup-links/image/use-image-upload";
 
 function makeFile(type: string, size: number): File {
   const file = new File(["x"], "image", { type });
