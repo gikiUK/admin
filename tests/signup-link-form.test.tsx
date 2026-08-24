@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { fireEvent, render as rtlRender, screen } from "@testing-library/react";
 
 jest.mock("react-markdown", () => ({
   __esModule: true,
@@ -36,11 +37,21 @@ function makeLink(overrides: Partial<SignupLink> = {}): SignupLink {
     workshop_onboarding: false,
     welcome_page_title: null,
     welcome_page_body: null,
+    image_url: null,
     expired: false,
     exhausted: false,
     usable: true,
     ...overrides
   };
+}
+
+/**
+ * The welcome page section hosts the image field, which reads the query cache
+ * to refresh the link after an upload — so the form needs a QueryClient.
+ */
+function render(ui: React.ReactElement) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return rtlRender(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
 }
 
 function getCodeInput(): HTMLInputElement {

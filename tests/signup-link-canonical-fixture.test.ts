@@ -52,6 +52,7 @@ describe("canonical signup-link fixture", () => {
       "workshop_onboarding",
       "welcome_page_title",
       "welcome_page_body",
+      "image_url",
       "expired",
       "exhausted",
       "usable",

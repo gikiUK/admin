@@ -20,6 +20,7 @@ function makeLink(overrides: Partial<SignupLink> = {}): SignupLink {
     workshop_onboarding: false,
     welcome_page_title: null,
     welcome_page_body: null,
+    image_url: null,
     expired: false,
     exhausted: false,
     usable: true,

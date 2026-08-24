@@ -5,9 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import type { SignupLink } from "@/lib/signup-links/types";
+import { WelcomePageImageField } from "../image/welcome-page-image-field";
 import { MarkdownPreview } from "../markdown-preview";
 
 type Props = {
+  link: SignupLink | null;
+  pendingImage: File | null;
+  onPendingImageChange: (file: File | null) => void;
   enabled: boolean;
   title: string;
   body: string;
@@ -16,7 +21,17 @@ type Props = {
   onBodyChange: (next: string) => void;
 };
 
-export function WelcomePageSection({ enabled, title, body, onEnabledChange, onTitleChange, onBodyChange }: Props) {
+export function WelcomePageSection({
+  link,
+  pendingImage,
+  onPendingImageChange,
+  enabled,
+  title,
+  body,
+  onEnabledChange,
+  onTitleChange,
+  onBodyChange
+}: Props) {
   const titleMissing = enabled && !title.trim();
   const bodyMissing = enabled && !body.trim();
   return (
@@ -74,6 +89,7 @@ export function WelcomePageSection({ enabled, title, body, onEnabledChange, onTi
               </TabsContent>
             </Tabs>
           </div>
+          <WelcomePageImageField link={link} pendingFile={pendingImage} onPendingFileChange={onPendingImageChange} />
         </div>
       )}
     </section>

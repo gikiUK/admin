@@ -60,7 +60,7 @@ export default function SignupLinkShowPage() {
       <CopyLinkRow code={link.code} />
       <DetailsPanel link={link} />
       {link.welcome_page_title && link.welcome_page_body && (
-        <WelcomePagePreview title={link.welcome_page_title} body={link.welcome_page_body} />
+        <WelcomePagePreview title={link.welcome_page_title} body={link.welcome_page_body} imageUrl={link.image_url} />
       )}
       <CompaniesPanel uuid={uuid} />
       <SignupLinkDeleteDialog
