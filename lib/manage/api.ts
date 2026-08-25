@@ -82,17 +82,17 @@ export function removeOrgTag(slug: string, tag: string): Promise<{ company: Mana
 }
 
 export function addCompanyFeatureFlag(slug: string, flag: string): Promise<{ company: ManagedCompany }> {
-  return apiFetch<{ company: ManagedCompany }>(
-    `/admin/companies/${encodeURIComponent(slug)}/feature_flags/${encodeURIComponent(flag)}`,
-    { method: "POST" }
-  );
+  return apiFetch<{ company: ManagedCompany }>(`/admin/companies/${encodeURIComponent(slug)}/feature_flags`, {
+    method: "POST",
+    body: JSON.stringify({ flag })
+  });
 }
 
 export function removeCompanyFeatureFlag(slug: string, flag: string): Promise<{ company: ManagedCompany }> {
-  return apiFetch<{ company: ManagedCompany }>(
-    `/admin/companies/${encodeURIComponent(slug)}/feature_flags/${encodeURIComponent(flag)}`,
-    { method: "DELETE" }
-  );
+  return apiFetch<{ company: ManagedCompany }>(`/admin/companies/${encodeURIComponent(slug)}/feature_flags`, {
+    method: "DELETE",
+    body: JSON.stringify({ flag })
+  });
 }
 
 export function resetOnboarding(slug: string): Promise<{ company: ManagedCompany }> {
