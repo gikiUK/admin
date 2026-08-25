@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { OrgAccessPanel } from "@/components/manage/org-access-panel";
 import { OrgDangerZone } from "@/components/manage/org-danger-zone";
+import { OrgFeatureFlagsPanel } from "@/components/manage/org-feature-flags-panel";
 import { OrgMembersPanel } from "@/components/manage/org-members-panel";
 import { OrgNamePanel } from "@/components/manage/org-name-panel";
 import { OrgOnboardingPanel } from "@/components/manage/org-onboarding-panel";
@@ -64,6 +65,7 @@ export default function ManageOrganisationPage() {
           <OrgNamePanel company={company} onUpdate={handleUpdate} />
           <OrgTagsPanel company={company} onUpdate={handleUpdate} />
           <OrgAccessPanel company={company} onUpdate={handleUpdate} />
+          <OrgFeatureFlagsPanel company={company} onUpdate={handleUpdate} />
           <OrgMembersPanel slug={company.slug} onMembershipChange={refresh} />
           <OrgOnboardingPanel company={company} onUpdate={handleUpdate} />
           <OrgDangerZone company={company} />

@@ -18,6 +18,7 @@ export type ManagedCompany = {
   gifted_premium_until: string | null;
   access_status: OrgAccessStatus;
   analytics_tags?: string[];
+  feature_flags?: string[];
   created_at: string;
   deleted_at: string | null;
 };
@@ -78,6 +79,20 @@ export function removeOrgTag(slug: string, tag: string): Promise<{ company: Mana
     method: "DELETE",
     body: JSON.stringify({ tag })
   });
+}
+
+export function addCompanyFeatureFlag(slug: string, flag: string): Promise<{ company: ManagedCompany }> {
+  return apiFetch<{ company: ManagedCompany }>(
+    `/admin/companies/${encodeURIComponent(slug)}/feature_flags/${encodeURIComponent(flag)}`,
+    { method: "POST" }
+  );
+}
+
+export function removeCompanyFeatureFlag(slug: string, flag: string): Promise<{ company: ManagedCompany }> {
+  return apiFetch<{ company: ManagedCompany }>(
+    `/admin/companies/${encodeURIComponent(slug)}/feature_flags/${encodeURIComponent(flag)}`,
+    { method: "DELETE" }
+  );
 }
 
 export function resetOnboarding(slug: string): Promise<{ company: ManagedCompany }> {
