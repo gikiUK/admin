@@ -41,10 +41,10 @@ test.describe("Signup links — list & minimal create", () => {
         enabled: true,
         expires_on: null,
         max_uses: null,
-        premium_until: null,
         welcome_page_title: null,
         welcome_page_body: null,
         feature_flags: [],
+        feature_flags_enabled_until: null,
         analytics_tags: []
       }
     });

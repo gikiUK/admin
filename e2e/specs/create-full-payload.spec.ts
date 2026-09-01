@@ -30,7 +30,6 @@ test.describe("Signup link — full-payload create round-trip", () => {
 
     await page.locator("input#expires_on").fill("2027-01-01");
     await page.locator("input#max_uses").fill("5");
-    await page.locator("input#premium_until").fill("2027-01-01T00:00");
 
     // Skip flags & workshop onboarding
     await page.getByRole("switch", { name: /skip email confirmation/i }).click();
@@ -73,11 +72,9 @@ test.describe("Signup link — full-payload create round-trip", () => {
         welcome_page_body: "## Body"
       }
     });
-    // premium_until is datetime-local converted to ISO (browser-TZ dependent),
-    // so we assert it's a valid ISO string near our target rather than equal.
+    // Links grant features through flags, never a subscription.
     const payload = (created.body as { signup_link: Record<string, unknown> }).signup_link;
-    expect(typeof payload.premium_until).toBe("string");
-    expect(String(payload.premium_until)).toMatch(/^20(26|27)-(12|01)-/);
+    expect(payload).not.toHaveProperty("premium_until");
 
     // The UI should now render every value we sent.
     await expect(page.getByRole("heading", { name: "Partner X" })).toBeVisible();

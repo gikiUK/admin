@@ -16,7 +16,23 @@ export function OrgSummaryCard({ company }: { company: ManagedCompany }) {
     { label: "Tier", value: <span className="capitalize">{company.subscription_tier}</span> },
     { label: "Subscription", value: company.subscription_status.replace(/_/g, " ") },
     { label: "Trial ends", value: formatDate(company.trial_ends_at) },
-    { label: "Gifted premium until", value: formatDate(company.gifted_premium_until) },
+    {
+      label: "Feature flags",
+      value:
+        company.feature_flags.length === 0 ? (
+          <span className="text-muted-foreground">None</span>
+        ) : (
+          <span className="text-xs">{company.feature_flags.join(", ")}</span>
+        )
+    },
+    {
+      label: "Flags enabled until",
+      value: company.feature_flags_enabled_until ? (
+        formatDate(company.feature_flags_enabled_until)
+      ) : (
+        <span className="text-muted-foreground">Never expires</span>
+      )
+    },
     { label: "Members", value: company.members_count.toLocaleString() },
     { label: "Tracked actions", value: company.tracked_actions_count.toLocaleString() },
     { label: "Created", value: formatDate(company.created_at) }

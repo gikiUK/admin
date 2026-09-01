@@ -7,7 +7,6 @@ export type SignupLinkFormState = {
   enabled: boolean;
   expires_on: string;
   max_uses: string;
-  premium_until: string;
   feature_flags: string[];
   feature_flags_enabled_until: string;
   analytics_tags: string[];
@@ -40,7 +39,6 @@ export function initialFormState(link: SignupLink | null): SignupLinkFormState {
       enabled: true,
       expires_on: "",
       max_uses: "",
-      premium_until: "",
       feature_flags: [],
       feature_flags_enabled_until: "",
       analytics_tags: [],
@@ -58,7 +56,6 @@ export function initialFormState(link: SignupLink | null): SignupLinkFormState {
     enabled: link.enabled,
     expires_on: isoToDate(link.expires_on),
     max_uses: link.max_uses === null ? "" : String(link.max_uses),
-    premium_until: isoToDateTimeLocal(link.premium_until),
     feature_flags: link.feature_flags ?? [],
     feature_flags_enabled_until: isoToDate(link.feature_flags_enabled_until),
     analytics_tags: link.analytics_tags ?? [],
@@ -77,7 +74,6 @@ export function formStateToPayload(state: SignupLinkFormState, includeCode: bool
     enabled: state.enabled,
     expires_on: state.expires_on || null,
     max_uses: state.max_uses === "" ? null : Number(state.max_uses),
-    premium_until: state.premium_until ? new Date(state.premium_until).toISOString() : null,
     feature_flags: state.feature_flags,
     feature_flags_enabled_until: state.feature_flags_enabled_until || null,
     analytics_tags: state.analytics_tags,

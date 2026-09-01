@@ -25,7 +25,7 @@ export function OrgsTable({ companies }: OrgsTableProps) {
             <TableHead>Organisation</TableHead>
             <TableHead className="w-[120px]">Access</TableHead>
             <TableHead className="w-[140px]">Trial ends</TableHead>
-            <TableHead className="w-[160px]">Gifted premium until</TableHead>
+            <TableHead className="w-[160px]">Feature flags</TableHead>
             <TableHead className="w-[90px] text-right">Members</TableHead>
             <TableHead className="w-[90px] text-right">Actions</TableHead>
           </TableRow>
@@ -53,7 +53,7 @@ export function OrgsTable({ companies }: OrgsTableProps) {
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">{formatDate(company.trial_ends_at)}</TableCell>
                 <TableCell className="text-xs text-muted-foreground">
-                  {formatDate(company.gifted_premium_until)}
+                  {company.feature_flags.length === 0 ? "None" : `${company.feature_flags.length} enabled`}
                 </TableCell>
                 <TableCell className="text-right font-mono text-sm">{company.members_count}</TableCell>
                 <TableCell className="text-right font-mono text-sm">{company.tracked_actions_count}</TableCell>

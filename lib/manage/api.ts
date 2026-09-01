@@ -18,7 +18,8 @@ export type ManagedCompany = {
   gifted_premium_until: string | null;
   access_status: OrgAccessStatus;
   analytics_tags?: string[];
-  feature_flags?: string[];
+  feature_flags: string[];
+  feature_flags_enabled_until: string | null;
   created_at: string;
   deleted_at: string | null;
 };
