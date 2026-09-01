@@ -33,41 +33,51 @@ export function FeatureFlagPicker({ value, onChange }: Props) {
     return <p className="text-xs text-muted-foreground">No flags available.</p>;
   }
 
+  // Bulk controls only earn their place when there's more than one thing to
+  // toggle — on a single checkbox they just repeat it.
+  const showBulkControls = catalogue.length > 1;
+
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => onChange(catalogue)}>
-          Enable all
-        </Button>
-        <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => onChange([])}>
-          Disable all
-        </Button>
-        <span className="text-xs text-muted-foreground">
-          {value.length} of {catalogue.length} enabled
-        </span>
-      </div>
+      {showBulkControls && (
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => onChange(catalogue)}>
+            Enable all
+          </Button>
+          <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => onChange([])}>
+            Disable all
+          </Button>
+          <span className="text-xs text-muted-foreground">
+            {value.length} of {catalogue.length} enabled
+          </span>
+        </div>
+      )}
 
       {groups.map((group) => (
         <div key={group.heading} className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-muted-foreground">{group.heading}</span>
-            <button
-              type="button"
-              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
-              onClick={() => onChange([...new Set([...value, ...group.flags.map((f) => f.flag)])])}
-            >
-              all on
-            </button>
-            <button
-              type="button"
-              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
-              onClick={() => {
-                const inGroup = new Set(group.flags.map((f) => f.flag));
-                onChange(value.filter((f) => !inGroup.has(f)));
-              }}
-            >
-              all off
-            </button>
+            {group.flags.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                  onClick={() => onChange([...new Set([...value, ...group.flags.map((f) => f.flag)])])}
+                >
+                  all on
+                </button>
+                <button
+                  type="button"
+                  className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                  onClick={() => {
+                    const inGroup = new Set(group.flags.map((f) => f.flag));
+                    onChange(value.filter((f) => !inGroup.has(f)));
+                  }}
+                >
+                  all off
+                </button>
+              </>
+            )}
           </div>
           <div className="space-y-1.5 pl-1">
             {group.flags.map(({ flag, label }) => (
