@@ -68,8 +68,10 @@ export function SignupLinkForm({ initial, submitLabel, onSubmit }: Props) {
       <PerksSection
         premiumUntil={state.premium_until}
         featureFlags={state.feature_flags}
+        featureFlagsEnabledUntil={state.feature_flags_enabled_until}
         onPremiumUntilChange={(v) => update("premium_until", v)}
         onFeatureFlagsChange={(v) => update("feature_flags", v)}
+        onFeatureFlagsEnabledUntilChange={(v) => update("feature_flags_enabled_until", v)}
       />
       <AnalyticsSection
         analyticsTags={state.analytics_tags}

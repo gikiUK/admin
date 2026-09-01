@@ -21,7 +21,7 @@ export function DetailsPanel({ link }: Props) {
         </DetailRow>
         <DetailRow label="Uses">{formatUses(link.uses_count, link.max_uses)}</DetailRow>
         <DetailRow label="Expires on">{formatShortDate(link.expires_on)}</DetailRow>
-        <DetailRow label="Premium until">{formatShortDateTime(link.premium_until)}</DetailRow>
+        <DetailRow label="Gifted premium until (legacy)">{formatShortDateTime(link.premium_until)}</DetailRow>
         <DetailRow label="Skip email confirmation">{link.skip_email_confirmation ? "Yes" : "No"}</DetailRow>
         <DetailRow label="Skip welcome email">{link.skip_welcome_email ? "Yes" : "No"}</DetailRow>
         <DetailRow label="Workshop onboarding">{link.workshop_onboarding ? "Yes" : "No"}</DetailRow>
@@ -30,6 +30,9 @@ export function DetailsPanel({ link }: Props) {
         </DetailRow>
         <DetailRow label="Feature flags">
           {link.feature_flags.length === 0 ? "—" : link.feature_flags.join(", ")}
+        </DetailRow>
+        <DetailRow label="Feature flags enabled until">
+          {link.feature_flags_enabled_until ? formatShortDate(link.feature_flags_enabled_until) : "Never expires"}
         </DetailRow>
         <DetailRow label="Analytics tags">
           {link.analytics_tags.length === 0 ? "—" : link.analytics_tags.join(", ")}

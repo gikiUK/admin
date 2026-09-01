@@ -63,6 +63,7 @@ export class MockStore {
       consumed_count: 0,
       premium_until: payload.premium_until ?? null,
       feature_flags: payload.feature_flags ?? [],
+      feature_flags_enabled_until: payload.feature_flags_enabled_until ?? null,
       analytics_tags: payload.analytics_tags ?? [],
       skip_email_confirmation: payload.skip_email_confirmation ?? false,
       skip_welcome_email: payload.skip_welcome_email ?? false,
@@ -91,6 +92,9 @@ export class MockStore {
       ...("max_uses" in payload ? { max_uses: payload.max_uses ?? null } : {}),
       ...("premium_until" in payload ? { premium_until: payload.premium_until ?? null } : {}),
       ...("feature_flags" in payload ? { feature_flags: payload.feature_flags ?? [] } : {}),
+      ...("feature_flags_enabled_until" in payload
+        ? { feature_flags_enabled_until: payload.feature_flags_enabled_until ?? null }
+        : {}),
       ...("analytics_tags" in payload ? { analytics_tags: payload.analytics_tags ?? [] } : {}),
       ...("skip_email_confirmation" in payload
         ? { skip_email_confirmation: payload.skip_email_confirmation ?? false }

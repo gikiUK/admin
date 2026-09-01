@@ -14,6 +14,7 @@ function makeLink(overrides: Partial<SignupLink> = {}): SignupLink {
     consumed_count: 0,
     premium_until: null,
     feature_flags: [],
+    feature_flags_enabled_until: null,
     analytics_tags: [],
     skip_email_confirmation: false,
     skip_welcome_email: false,
