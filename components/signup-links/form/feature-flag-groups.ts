@@ -26,6 +26,10 @@ export const FEATURE_FLAG_GROUPS: FeatureFlagGroup[] = [
     flags: [{ flag: "bcorp", label: "B Corp certification" }]
   },
   {
+    heading: "Documents",
+    flags: [{ flag: "unbranded_documents", label: "Remove Giki branding from documents" }]
+  },
+  {
     heading: "Team",
     flags: [
       { flag: "invite_readonly_users", label: "Invite read-only colleagues" },
@@ -40,6 +44,27 @@ export const FEATURE_FLAG_GROUPS: FeatureFlagGroup[] = [
     ]
   }
 ];
+
+/**
+ * Flags that only make sense alongside another one. Inviting colleagues who can
+ * edit is a superset of inviting read-only ones, so ticking it ticks that too —
+ * and unticking the read-only flag unticks the one that depends on it.
+ */
+export const FEATURE_FLAG_REQUIRES: Record<string, string[]> = {
+  invite_full_users: ["invite_readonly_users"]
+};
+
+/** `flags` plus everything they require, in catalogue order where it matters. */
+export function withRequiredFlags(flags: string[]): string[] {
+  return [...new Set(flags.flatMap((flag) => [flag, ...(FEATURE_FLAG_REQUIRES[flag] ?? [])]))];
+}
+
+/** The flags that require `flag`, so removing it must remove them too. */
+export function flagsRequiring(flag: string): string[] {
+  return Object.entries(FEATURE_FLAG_REQUIRES)
+    .filter(([, required]) => required.includes(flag))
+    .map(([dependent]) => dependent);
+}
 
 const GROUPED = new Set(FEATURE_FLAG_GROUPS.flatMap((g) => g.flags.map((f) => f.flag)));
 

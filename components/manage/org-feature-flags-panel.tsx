@@ -88,7 +88,14 @@ export function OrgFeatureFlagsPanel({ company, onUpdate }: OrgFeatureFlagsPanel
         <CardTitle>Feature flags</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <FeatureFlagPicker value={draft} onChange={setDraft} />
+        <FeatureFlagPicker value={draft} onChange={setDraft} lockedFlags={company.premium_feature_flags} />
+
+        {company.premium_feature_flags.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            This organisation's subscription switches some flags on by itself. They're ticked and locked here — remove
+            the premium access to turn them off.
+          </p>
+        )}
 
         <div className="space-y-1.5">
           <Label htmlFor={`flags-until-${company.id}`}>Feature flags enabled until</Label>
@@ -107,8 +114,8 @@ export function OrgFeatureFlagsPanel({ company, onUpdate }: OrgFeatureFlagsPanel
           </p>
           {expired && (
             <p className="text-xs text-destructive">
-              These flags expired on {toDateInputValue(company.feature_flags_enabled_until)} — the organisation has no
-              flag-gated features.
+              These flags expired on {toDateInputValue(company.feature_flags_enabled_until)} — the organisation only has
+              the flag-gated features its subscription grants.
             </p>
           )}
         </div>

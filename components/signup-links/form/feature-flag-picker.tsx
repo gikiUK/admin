@@ -1,17 +1,22 @@
 "use client";
 
-import { groupCatalogue } from "@/components/signup-links/form/feature-flag-groups";
+import { FeatureFlagCheckbox } from "@/components/signup-links/form/feature-flag-checkbox";
+import { flagsRequiring, groupCatalogue, withRequiredFlags } from "@/components/signup-links/form/feature-flag-groups";
 import { useFeatureFlagCatalogue } from "@/components/signup-links/form/use-form-data";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 
 type Props = {
   value: string[];
   onChange: (next: string[]) => void;
+  /**
+   * Flags that are on regardless of `value` — a premium subscription grants
+   * some of them. They show ticked and read-only, and the bulk controls leave
+   * them alone, since storing them wouldn't change anything.
+   */
+  lockedFlags?: string[];
 };
 
-export function FeatureFlagPicker({ value, onChange }: Props) {
+export function FeatureFlagPicker({ value, onChange, lockedFlags = [] }: Props) {
   const state = useFeatureFlagCatalogue();
 
   if (state.status === "loading") {
@@ -24,9 +29,18 @@ export function FeatureFlagPicker({ value, onChange }: Props) {
   const catalogue = state.value;
   const groups = groupCatalogue(catalogue);
   const selected = new Set(value);
+  const locked = new Set(lockedFlags);
+  const editable = catalogue.filter((flag) => !locked.has(flag));
 
   function toggle(flag: string) {
-    onChange(selected.has(flag) ? value.filter((f) => f !== flag) : [...value, flag]);
+    if (!selected.has(flag)) {
+      onChange(withRequiredFlags([...value, flag]).filter((f) => !locked.has(f)));
+      return;
+    }
+    // Dropping a flag drops whatever depended on it, so the draft can't hold a
+    // combination the app doesn't allow.
+    const dropped = new Set([flag, ...flagsRequiring(flag)]);
+    onChange(value.filter((f) => !dropped.has(f)));
   }
 
   if (catalogue.length === 0) {
@@ -35,20 +49,20 @@ export function FeatureFlagPicker({ value, onChange }: Props) {
 
   // Bulk controls only earn their place when there's more than one thing to
   // toggle — on a single checkbox they just repeat it.
-  const showBulkControls = catalogue.length > 1;
+  const showBulkControls = editable.length > 1;
 
   return (
     <div className="space-y-3">
       {showBulkControls && (
         <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => onChange(catalogue)}>
+          <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => onChange(editable)}>
             Enable all
           </Button>
           <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => onChange([])}>
             Disable all
           </Button>
           <span className="text-xs text-muted-foreground">
-            {value.length} of {catalogue.length} enabled
+            {new Set([...value, ...lockedFlags]).size} of {catalogue.length} enabled
           </span>
         </div>
       )}
@@ -59,34 +73,42 @@ export function FeatureFlagPicker({ value, onChange }: Props) {
             <span className="text-xs font-semibold text-muted-foreground">{group.heading}</span>
             {group.flags.length > 1 && (
               <>
-                <button
+                <Button
                   type="button"
-                  className="text-xs text-muted-foreground underline-offset-2 hover:underline"
-                  onClick={() => onChange([...new Set([...value, ...group.flags.map((f) => f.flag)])])}
+                  variant="outline"
+                  size="sm"
+                  className="h-5 px-1.5 text-[10px]"
+                  onClick={() =>
+                    onChange([...new Set([...value, ...group.flags.map((f) => f.flag).filter((f) => !locked.has(f))])])
+                  }
                 >
                   all on
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                  variant="outline"
+                  size="sm"
+                  className="h-5 px-1.5 text-[10px]"
                   onClick={() => {
                     const inGroup = new Set(group.flags.map((f) => f.flag));
                     onChange(value.filter((f) => !inGroup.has(f)));
                   }}
                 >
                   all off
-                </button>
+                </Button>
               </>
             )}
           </div>
           <div className="space-y-1.5 pl-1">
             {group.flags.map(({ flag, label }) => (
-              <div key={flag} className="flex items-center gap-2">
-                <Checkbox id={`flag-${flag}`} checked={selected.has(flag)} onCheckedChange={() => toggle(flag)} />
-                <Label htmlFor={`flag-${flag}`} className="text-sm font-normal">
-                  {label}
-                </Label>
-              </div>
+              <FeatureFlagCheckbox
+                key={flag}
+                flag={flag}
+                label={label}
+                checked={selected.has(flag)}
+                locked={locked.has(flag)}
+                onToggle={() => toggle(flag)}
+              />
             ))}
           </div>
         </div>

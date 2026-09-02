@@ -27,6 +27,7 @@ function buildCompany(overrides: Partial<ManagedCompany> = {}): ManagedCompany {
     slug: "acme",
     name: "Acme",
     feature_flags: [],
+    premium_feature_flags: [],
     feature_flags_enabled_until: null,
     ...overrides
   } as ManagedCompany;

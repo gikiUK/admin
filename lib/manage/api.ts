@@ -19,6 +19,8 @@ export type ManagedCompany = {
   access_status: OrgAccessStatus;
   analytics_tags?: string[];
   feature_flags: string[];
+  // Flags the subscription forces on, whatever the stored flags say.
+  premium_feature_flags: string[];
   feature_flags_enabled_until: string | null;
   created_at: string;
   deleted_at: string | null;

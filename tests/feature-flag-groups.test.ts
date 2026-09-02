@@ -7,13 +7,14 @@ const CATALOGUE = [
   "action_management",
   "invite_readonly_users",
   "invite_full_users",
-  "action_details"
+  "action_details",
+  "unbranded_documents"
 ];
 
 describe("groupCatalogue", () => {
   test("arranges the catalogue into the admin's groups", () => {
     const groups = groupCatalogue(CATALOGUE);
-    expect(groups.map((g) => g.heading)).toEqual(["Actions", "Certification", "Team", "Programmes"]);
+    expect(groups.map((g) => g.heading)).toEqual(["Actions", "Certification", "Documents", "Team", "Programmes"]);
   });
 
   test("covers every catalogue flag exactly once", () => {
