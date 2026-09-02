@@ -41,6 +41,7 @@ export function fetchCompany(slug: string): Promise<{ company: ManagedCompany }>
 export type UpdateCompanyPayload = {
   gifted_premium_until?: string | null;
   name?: string;
+  feature_flags_enabled_until?: string | null;
 };
 
 export function updateCompany(slug: string, payload: UpdateCompanyPayload): Promise<{ company: ManagedCompany }> {
