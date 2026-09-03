@@ -46,6 +46,7 @@ describe("canonical signup-link fixture", () => {
       "consumed_count",
       "premium_until",
       "feature_flags",
+      "feature_flags_enabled_until",
       "analytics_tags",
       "skip_email_confirmation",
       "skip_welcome_email",

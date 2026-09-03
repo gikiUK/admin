@@ -66,10 +66,10 @@ export function SignupLinkForm({ initial, submitLabel, onSubmit }: Props) {
         onWorkshopOnboardingChange={(v) => update("workshop_onboarding", v)}
       />
       <PerksSection
-        premiumUntil={state.premium_until}
         featureFlags={state.feature_flags}
-        onPremiumUntilChange={(v) => update("premium_until", v)}
+        featureFlagsEnabledUntil={state.feature_flags_enabled_until}
         onFeatureFlagsChange={(v) => update("feature_flags", v)}
+        onFeatureFlagsEnabledUntilChange={(v) => update("feature_flags_enabled_until", v)}
       />
       <AnalyticsSection
         analyticsTags={state.analytics_tags}

@@ -9,6 +9,7 @@ export type SignupLink = {
   consumed_count: number;
   premium_until: string | null;
   feature_flags: string[];
+  feature_flags_enabled_until: string | null;
   analytics_tags: string[];
   skip_email_confirmation: boolean;
   skip_welcome_email: boolean;
@@ -29,6 +30,7 @@ export type SignupLinkPayload = {
   expires_on?: string | null;
   max_uses?: number | null;
   premium_until?: string | null;
+  feature_flags_enabled_until?: string | null;
   skip_email_confirmation?: boolean;
   skip_welcome_email?: boolean;
   workshop_onboarding?: boolean;

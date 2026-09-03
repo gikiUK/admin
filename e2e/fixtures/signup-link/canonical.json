@@ -9,6 +9,7 @@
   "consumed_count": 0,
   "premium_until": "2027-01-01T00:00:00Z",
   "feature_flags": ["energy_price_shock"],
+  "feature_flags_enabled_until": null,
   "analytics_tags": ["partner-x"],
   "skip_email_confirmation": true,
   "skip_welcome_email": false,

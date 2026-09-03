@@ -18,7 +18,10 @@ export type ManagedCompany = {
   gifted_premium_until: string | null;
   access_status: OrgAccessStatus;
   analytics_tags?: string[];
-  feature_flags?: string[];
+  feature_flags: string[];
+  // Flags the subscription forces on, whatever the stored flags say.
+  premium_feature_flags: string[];
+  feature_flags_enabled_until: string | null;
   created_at: string;
   deleted_at: string | null;
 };
@@ -40,6 +43,7 @@ export function fetchCompany(slug: string): Promise<{ company: ManagedCompany }>
 export type UpdateCompanyPayload = {
   gifted_premium_until?: string | null;
   name?: string;
+  feature_flags_enabled_until?: string | null;
 };
 
 export function updateCompany(slug: string, payload: UpdateCompanyPayload): Promise<{ company: ManagedCompany }> {

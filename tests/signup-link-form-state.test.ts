@@ -13,6 +13,7 @@ function makeLink(overrides: Partial<SignupLink> = {}): SignupLink {
     consumed_count: 0,
     premium_until: null,
     feature_flags: [],
+    feature_flags_enabled_until: null,
     analytics_tags: [],
     skip_email_confirmation: false,
     skip_welcome_email: false,
@@ -139,20 +140,26 @@ describe("formStateToPayload", () => {
     expect(formStateToPayload(state, true).expires_on).toBe("2027-06-15");
   });
 
-  test("empty premium_until becomes null", () => {
+  // Links grant features through flags, never a subscription, so the form
+  // doesn't send premium_until at all any more.
+  test("premium_until is not part of the payload", () => {
     const state = initialFormState(null);
     state.title = "T";
-    state.premium_until = "";
-    expect(formStateToPayload(state, true).premium_until).toBeNull();
+    expect(formStateToPayload(state, true)).not.toHaveProperty("premium_until");
   });
 
-  test("non-empty premium_until is converted to an ISO timestamp", () => {
+  test("empty feature_flags_enabled_until becomes null", () => {
     const state = initialFormState(null);
     state.title = "T";
-    state.premium_until = "2027-01-01T00:00";
-    const payload = formStateToPayload(state, true);
-    expect(typeof payload.premium_until).toBe("string");
-    expect(payload.premium_until).toMatch(/T\d{2}:\d{2}:\d{2}/);
+    state.feature_flags_enabled_until = "";
+    expect(formStateToPayload(state, true).feature_flags_enabled_until).toBeNull();
+  });
+
+  test("a set feature_flags_enabled_until is passed through as a date", () => {
+    const state = initialFormState(null);
+    state.title = "T";
+    state.feature_flags_enabled_until = "2027-06-01";
+    expect(formStateToPayload(state, true).feature_flags_enabled_until).toBe("2027-06-01");
   });
 
   test("skip_email_confirmation and skip_welcome_email are passed through", () => {

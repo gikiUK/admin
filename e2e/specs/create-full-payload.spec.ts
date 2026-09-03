@@ -30,16 +30,15 @@ test.describe("Signup link — full-payload create round-trip", () => {
 
     await page.locator("input#expires_on").fill("2027-01-01");
     await page.locator("input#max_uses").fill("5");
-    await page.locator("input#premium_until").fill("2027-01-01T00:00");
 
     // Skip flags & workshop onboarding
     await page.getByRole("switch", { name: /skip email confirmation/i }).click();
     await page.getByRole("switch", { name: /workshop onboarding/i }).click();
 
-    // Feature flag pick
-    await page.getByRole("button", { name: /pick flags/i }).click();
-    await page.getByRole("option", { name: "energy_price_shock" }).click();
-    await page.keyboard.press("Escape");
+    // Feature flags are grouped checkboxes. energy_price_shock is a known flag
+    // (labelled), carbon_lite is not, so it lands under "Other" as its raw name.
+    await page.getByLabel("Energy price shock").check();
+    await page.locator("input#feature_flags_enabled_until").fill("2027-06-01");
 
     // Analytics tag (free-create)
     await page.getByRole("button", { name: /add tag/i }).click();
@@ -67,16 +66,15 @@ test.describe("Signup link — full-payload create round-trip", () => {
         skip_welcome_email: false,
         workshop_onboarding: true,
         feature_flags: ["energy_price_shock"],
+        feature_flags_enabled_until: "2027-06-01",
         analytics_tags: ["partner-x"],
         welcome_page_title: "Welcome!",
         welcome_page_body: "## Body"
       }
     });
-    // premium_until is datetime-local converted to ISO (browser-TZ dependent),
-    // so we assert it's a valid ISO string near our target rather than equal.
+    // Links grant features through flags, never a subscription.
     const payload = (created.body as { signup_link: Record<string, unknown> }).signup_link;
-    expect(typeof payload.premium_until).toBe("string");
-    expect(String(payload.premium_until)).toMatch(/^20(26|27)-(12|01)-/);
+    expect(payload).not.toHaveProperty("premium_until");
 
     // The UI should now render every value we sent.
     await expect(page.getByRole("heading", { name: "Partner X" })).toBeVisible();
