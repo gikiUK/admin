@@ -22,7 +22,7 @@ type OrgFeatureFlagsPanelProps = {
  */
 const EXPIRY_EDITABLE = false;
 
-function toDateInputValue(date: string | null): string {
+function toDateInputValue(date: string | null | undefined): string {
   return date ? date.slice(0, 10) : "";
 }
 
@@ -79,8 +79,9 @@ export function OrgFeatureFlagsPanel({ company, onUpdate }: OrgFeatureFlagsPanel
     setExpiry(toDateInputValue(company.feature_flags_enabled_until));
   }
 
-  const expired =
-    company.feature_flags_enabled_until !== null && company.feature_flags_enabled_until.slice(0, 10) < today();
+  const premiumFlags = company.premium_feature_flags ?? [];
+  const expiryDate = toDateInputValue(company.feature_flags_enabled_until);
+  const expired = expiryDate !== "" && expiryDate < today();
 
   return (
     <Card>
@@ -88,9 +89,9 @@ export function OrgFeatureFlagsPanel({ company, onUpdate }: OrgFeatureFlagsPanel
         <CardTitle>Feature flags</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <FeatureFlagPicker value={draft} onChange={setDraft} lockedFlags={company.premium_feature_flags} />
+        <FeatureFlagPicker value={draft} onChange={setDraft} lockedFlags={premiumFlags} />
 
-        {company.premium_feature_flags.length > 0 && (
+        {premiumFlags.length > 0 && (
           <p className="text-xs text-muted-foreground">
             This organisation's subscription switches some flags on by itself. They're ticked and locked here — remove
             the premium access to turn them off.
@@ -114,8 +115,8 @@ export function OrgFeatureFlagsPanel({ company, onUpdate }: OrgFeatureFlagsPanel
           </p>
           {expired && (
             <p className="text-xs text-destructive">
-              These flags expired on {toDateInputValue(company.feature_flags_enabled_until)} — the organisation only has
-              the flag-gated features its subscription grants.
+              These flags expired on {expiryDate} — the organisation only has the flag-gated features its subscription
+              grants.
             </p>
           )}
         </div>
