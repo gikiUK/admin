@@ -14,14 +14,6 @@ type OrgFeatureFlagsPanelProps = {
   onUpdate: (company: ManagedCompany) => void;
 };
 
-/**
- * Setting the expiry needs `feature_flags_enabled_until` on the API's
- * Company::Update, which doesn't accept it yet — it currently only takes name,
- * trial_ends_at and gifted_premium_until. The field below is built and wired,
- * but stays disabled until that lands so it can't silently no-op.
- */
-const EXPIRY_EDITABLE = false;
-
 function toDateInputValue(date: string | null | undefined): string {
   return date ? date.slice(0, 10) : "";
 }
@@ -43,7 +35,7 @@ export function OrgFeatureFlagsPanel({ company, onUpdate }: OrgFeatureFlagsPanel
 
   const added = draft.filter((flag) => !company.feature_flags.includes(flag));
   const removed = company.feature_flags.filter((flag) => !draft.includes(flag));
-  const expiryDirty = EXPIRY_EDITABLE && expiry !== toDateInputValue(company.feature_flags_enabled_until);
+  const expiryDirty = expiry !== toDateInputValue(company.feature_flags_enabled_until);
   const dirty = added.length > 0 || removed.length > 0 || expiryDirty;
 
   // The API adds and removes one flag at a time, so a batch of edits becomes a
@@ -105,13 +97,11 @@ export function OrgFeatureFlagsPanel({ company, onUpdate }: OrgFeatureFlagsPanel
             type="date"
             value={expiry}
             onChange={(e) => setExpiry(e.target.value)}
-            disabled={saving || !EXPIRY_EDITABLE}
+            disabled={saving}
             className="w-fit"
           />
           <p className="text-xs text-muted-foreground">
-            {EXPIRY_EDITABLE
-              ? "The flags above switch off after this date. Leave blank to never expire."
-              : "Read-only: the API can't yet set this on an existing organisation. Set it via a signup link."}
+            The flags above switch off after this date. Leave blank to never expire.
           </p>
           {expired && (
             <p className="text-xs text-destructive">

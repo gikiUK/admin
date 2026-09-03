@@ -103,16 +103,52 @@ describe("OrgFeatureFlagsPanel", () => {
     expect(addCompanyFeatureFlag).not.toHaveBeenCalled();
   });
 
-  test("expiry is read-only until the API accepts it, so no update is sent", async () => {
+  test("saves a changed expiry", async () => {
+    renderPanel(buildCompany({ feature_flags: ["bcorp"] }));
+
+    fireEvent.change(screen.getByLabelText("Feature flags enabled until"), { target: { value: "2027-01-01" } });
+    fireEvent.click(saveButton());
+
+    await waitFor(() =>
+      expect(updateCompany).toHaveBeenCalledWith("acme", {
+        feature_flags_enabled_until: "2027-01-01"
+      })
+    );
+    expect(addCompanyFeatureFlag).not.toHaveBeenCalled();
+  });
+
+  // Clearing the field means "never expires", so it has to send an explicit
+  // null rather than being treated as an untouched field.
+  test("clearing the expiry sends null", async () => {
     renderPanel(buildCompany({ feature_flags: ["bcorp"], feature_flags_enabled_until: "2027-01-01" }));
 
-    expect((screen.getByLabelText("Feature flags enabled until") as HTMLInputElement).disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText("Feature flags enabled until"), { target: { value: "" } });
+    fireEvent.click(saveButton());
 
-    fireEvent.click(screen.getByLabelText("Implementation details and downloads"));
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() =>
+      expect(updateCompany).toHaveBeenCalledWith("acme", {
+        feature_flags_enabled_until: null
+      })
+    );
+  });
 
-    await waitFor(() => expect(addCompanyFeatureFlag).toHaveBeenCalled());
-    expect(updateCompany).not.toHaveBeenCalled();
+  test("expiry changes save after the flag add and remove calls", async () => {
+    const calls: string[] = [];
+    addCompanyFeatureFlag.mockImplementation(() => {
+      calls.push("add");
+      return Promise.resolve({ company: buildCompany() });
+    });
+    updateCompany.mockImplementation(() => {
+      calls.push("update");
+      return Promise.resolve({ company: buildCompany() });
+    });
+    renderPanel(buildCompany({ feature_flags: [] }));
+
+    fireEvent.click(screen.getByLabelText("B Corp certification"));
+    fireEvent.change(screen.getByLabelText("Feature flags enabled until"), { target: { value: "2027-01-01" } });
+    fireEvent.click(saveButton());
+
+    await waitFor(() => expect(calls).toEqual(["add", "update"]));
   });
 
   test("warns when the stored expiry has already passed", () => {
@@ -127,9 +163,8 @@ describe("OrgFeatureFlagsPanel", () => {
     expect(screen.queryByText(/expired on/)).toBeNull();
   });
 
-  // SerializeAdminCompany doesn't emit premium_feature_flags or
-  // feature_flags_enabled_until, so a real response has neither key. The panel
-  // has to render that rather than blowing up reading .slice of undefined.
+  // SerializeAdminCompany emits both fields, but the panel still has to survive a
+  // response that predates them rather than blowing up reading .slice of undefined.
   test("renders when the API omits the premium and expiry fields entirely", () => {
     const company = buildCompany({ feature_flags: ["bcorp"] });
     delete (company as Partial<ManagedCompany>).premium_feature_flags;

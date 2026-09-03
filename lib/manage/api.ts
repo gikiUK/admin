@@ -19,11 +19,10 @@ export type ManagedCompany = {
   access_status: OrgAccessStatus;
   analytics_tags?: string[];
   feature_flags: string[];
-  // Neither of these is serialized by the API yet — the admin UI is built ahead
-  // of the backend, so both are optional until SerializeAdminCompany emits them.
   // Flags the subscription forces on, whatever the stored flags say.
-  premium_feature_flags?: string[];
-  feature_flags_enabled_until?: string | null;
+  premium_feature_flags: string[];
+  // null means the flags never expire.
+  feature_flags_enabled_until: string | null;
   created_at: string;
   deleted_at: string | null;
 };
