@@ -127,6 +127,21 @@ describe("OrgFeatureFlagsPanel", () => {
     expect(screen.queryByText(/expired on/)).toBeNull();
   });
 
+  // SerializeAdminCompany doesn't emit premium_feature_flags or
+  // feature_flags_enabled_until, so a real response has neither key. The panel
+  // has to render that rather than blowing up reading .slice of undefined.
+  test("renders when the API omits the premium and expiry fields entirely", () => {
+    const company = buildCompany({ feature_flags: ["bcorp"] });
+    delete (company as Partial<ManagedCompany>).premium_feature_flags;
+    delete (company as Partial<ManagedCompany>).feature_flags_enabled_until;
+
+    renderPanel(company);
+
+    expect(screen.getByText("Feature flags")).toBeDefined();
+    expect(screen.queryByText(/expired on/)).toBeNull();
+    expect((screen.getByLabelText("Feature flags enabled until") as HTMLInputElement).value).toBe("");
+  });
+
   test("a failed call still pushes the last good company up", async () => {
     addCompanyFeatureFlag.mockRejectedValueOnce(new Error("boom"));
     const onUpdate = renderPanel(buildCompany({ feature_flags: [] }));
