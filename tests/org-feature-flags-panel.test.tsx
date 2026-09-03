@@ -163,9 +163,8 @@ describe("OrgFeatureFlagsPanel", () => {
     expect(screen.queryByText(/expired on/)).toBeNull();
   });
 
-  // SerializeAdminCompany doesn't emit premium_feature_flags or
-  // feature_flags_enabled_until, so a real response has neither key. The panel
-  // has to render that rather than blowing up reading .slice of undefined.
+  // SerializeAdminCompany emits both fields, but the panel still has to survive a
+  // response that predates them rather than blowing up reading .slice of undefined.
   test("renders when the API omits the premium and expiry fields entirely", () => {
     const company = buildCompany({ feature_flags: ["bcorp"] });
     delete (company as Partial<ManagedCompany>).premium_feature_flags;
