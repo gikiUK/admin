@@ -1,4 +1,5 @@
 export type OrgFilters = {
+  company_slugs?: string[];
   tier?: ("standard" | "premium")[];
   subscription_status?: string[];
   tags_include?: string[];
@@ -64,6 +65,7 @@ export function decodeCohortSpec(encoded: string | null): CohortSpec {
 
 function trimOrgFilters(filters: OrgFilters): OrgFilters {
   const result: OrgFilters = {};
+  if (filters.company_slugs?.length) result.company_slugs = filters.company_slugs;
   if (filters.tier?.length) result.tier = filters.tier;
   if (filters.subscription_status?.length) result.subscription_status = filters.subscription_status;
   if (filters.tags_include?.length) result.tags_include = filters.tags_include;

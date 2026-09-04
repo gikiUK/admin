@@ -4,6 +4,7 @@ import { CohortFactFilters } from "@/components/analytics/insights/cohort/cohort
 import { CohortOrgExtras } from "@/components/analytics/insights/cohort/cohort-org-extras";
 import { CohortTagsRow } from "@/components/analytics/insights/cohort/cohort-tags-row";
 import { CohortTierStatusRow } from "@/components/analytics/insights/cohort/cohort-tier-status-row";
+import { OrganisationPicker } from "@/components/analytics/insights/cohort/organisation-picker";
 import { SignupLinkPicker } from "@/components/analytics/insights/cohort/signup-link-picker";
 import { useCohort } from "@/lib/analytics/insights/cohort-context";
 import type { OrgFilters } from "@/lib/analytics/insights/cohort-spec";
@@ -17,6 +18,10 @@ export function CohortBuilderBody() {
 
   return (
     <>
+      <OrganisationPicker
+        selectedSlug={draft.org_filters.company_slugs?.[0]}
+        onChange={(slug) => updateOrg({ company_slugs: slug ? [slug] : [] })}
+      />
       <CohortTierStatusRow orgFilters={draft.org_filters} onChange={updateOrg} />
       <CohortTagsRow orgFilters={draft.org_filters} onChange={updateOrg} />
       <SignupLinkPicker

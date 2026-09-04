@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { INPUT_COMMIT_DELAY_MS } from "@/lib/debounce";
 
 export type EntityResult = {
-  id: number;
+  id: number | string;
   /** Primary text shown in the result list and in the filled chip. */
   label: string;
   /** Optional secondary text (e.g. email or slug). */
