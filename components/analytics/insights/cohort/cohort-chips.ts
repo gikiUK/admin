@@ -23,6 +23,9 @@ export function buildCohortChips(spec: CohortSpec, dataset: Dataset | null): Coh
   const chips: CohortChip[] = [];
   const o = spec.org_filters;
 
+  if (o.company_slugs?.length) {
+    chips.push({ id: "orgs", label: "Organisation", value: o.company_slugs.join(", ") });
+  }
   if (o.tier?.length) {
     chips.push({ id: "tier", label: "Tier", value: o.tier.map((t) => TIER_LABELS[t] ?? t).join(", ") });
   }

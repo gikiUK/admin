@@ -32,6 +32,7 @@ describe("encodeCohortSpec / decodeCohortSpec", () => {
   test("roundtrip preserves org_filters and fact_filters", () => {
     const spec: CohortSpec = {
       org_filters: {
+        company_slugs: ["acme-corp"],
         tier: ["premium"],
         subscription_status: ["active"],
         tags_include: ["climate"],
@@ -84,7 +85,9 @@ describe("encodeCohortSpec / decodeCohortSpec", () => {
   test("isEmptySpec ignores empty arrays/objects but flags any non-default", () => {
     expect(isEmptySpec({ org_filters: {}, fact_filters: [] })).toBe(true);
     expect(isEmptySpec({ org_filters: { tier: [] }, fact_filters: [] })).toBe(true);
+    expect(isEmptySpec({ org_filters: { company_slugs: [] }, fact_filters: [] })).toBe(true);
     expect(isEmptySpec({ org_filters: { tier: ["premium"] }, fact_filters: [] })).toBe(false);
+    expect(isEmptySpec({ org_filters: { company_slugs: ["acme-corp"] }, fact_filters: [] })).toBe(false);
     expect(
       isEmptySpec({
         org_filters: {},
